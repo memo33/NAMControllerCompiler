@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE iid_tree SYSTEM "RUL2_IID_structure.dtd">
+<!-- last edited by memo - 2013/07/16 -->
+<!-- if a node has a regex element, it replaces all regexes of its child nodes, when the node is selected -->
+<!-- regexes must match the lower case variant of the hexadecimal iids -->
+<iid_tree>
+	<node name="RHW">
+		<regex value="0x57\p{XDigit}{6}" />
+		<node name="L0 networks">
+			<regex value="0x570\p{XDigit}{5}" />
+		</node>
+		<node name="L1 networks">
+			<regex value="0x571\p{XDigit}{5}" />
+		</node>
+		<node name="L2 networks">
+			<regex value="0x572\p{XDigit}{5}" />
+		</node>
+		<node name="L3 networks">
+			<regex value="0x573\p{XDigit}{5}" />
+		</node>
+		<node name="L4 networks">
+			<regex value="0x574\p{XDigit}{5}" />
+		</node>
+		<node name="FARHW">
+			<regex value="0x57b\p{XDigit}{5}" />
+		</node>
+		<node name="3L-Crossings">
+			<regex value="0x57a\p{XDigit}{5}" />
+		</node>
+	</node>
+	<node name="SAM">
+		<regex value="0x5e5\p{XDigit}{5}" />
+		<node name="Set 1">
+			<regex value="0x5e5\p{XDigit}{2}1\p{XDigit}{2}" />
+		</node>
+		<node name="Set 2">
+			<regex value="0x5e5\p{XDigit}{2}2\p{XDigit}{2}" />
+		</node>
+		<node name="Set 3">
+			<regex value="0x5e5\p{XDigit}{2}3\p{XDigit}{2}" />
+		</node>
+		<node name="Set 4">
+			<regex value="0x5e5\p{XDigit}{2}4\p{XDigit}{2}" />
+		</node>
+		<node name="Set 5">
+			<regex value="0x5e5\p{XDigit}{2}5\p{XDigit}{2}" />
+		</node>
+		<node name="Set 6">
+			<regex value="0x5e5\p{XDigit}{2}6\p{XDigit}{2}" />
+		</node>
+		<node name="Set 7">
+			<regex value="0x5e5\p{XDigit}{2}7\p{XDigit}{2}" />
+		</node>
+		<node name="Set 8">
+			<regex value="0x5e5\p{XDigit}{2}8\p{XDigit}{2}" />
+		</node>
+		<node name="Set 9">
+			<regex value="0x5e5\p{XDigit}{2}9\p{XDigit}{2}" />
+		</node>
+		<node name="Set 10">
+			<regex value="0x5e5\p{XDigit}{2}a\p{XDigit}{2}" />
+		</node>
+	</node>
+	<node name="NWM">
+		<regex value="0x51[0-2]\p{XDigit}{5}" />
+		<!-- crosslinks between RHW and NWM -->
+		<regex value="0x57[0-4][0-9a]([258b][7-9a-f]|[369c][0-5])\p{XDigit}{2}" />
+	</node>
+	<node name="GLR">
+		<regex value="0x5f88\p{XDigit}{4}" />
+		<!-- crosslinks between RHW and GLR -->
+		<regex value="0x57[0-4][0-9a][147a][78]0\p{XDigit}" />
+		<node name="Set 1">
+			<regex value="0x5f88[0-3]\p{XDigit}{3}" />
+		</node>
+		<node name="Set 2">
+			<regex value="0x5f88[4-7]\p{XDigit}{3}" />
+		</node>
+		<node name="Set 3">
+			<regex value="0x5f88[89ab]\p{XDigit}{3}" />
+		</node>
+		<node name="Set 4">
+			<regex value="0x5f88[c-f]\p{XDigit}{3}" />
+		</node>
+	</node>
+	<node name="HSR">
+		<regex value="0x5dd\p{XDigit}{5}" />
+		<!-- crosslinks between RHW and HSR -->
+		<regex value="0x57[0-4][0-9a][147a]9\p{XDigit}5" />
+	</node>
+	<node name="RAM">
+		<regex value="0x5d3\p{XDigit}{5}" />
+		<!-- crosslinks between RHW and TTR or QTR -->
+		<regex value="0x57[0-4][0-9a][147a]6\p{XDigit}{2}" />
+	</node>
+	<node name="El-Rail-over-Avenue">
+		<regex value="0x5f85\p{XDigit}{4}" />
+	</node>
+</iid_tree>
