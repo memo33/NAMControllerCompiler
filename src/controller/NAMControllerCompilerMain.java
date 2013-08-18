@@ -29,12 +29,11 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
 import model.RULBuilder;
 import model.dbpf.DBPFTGI;
 import model.dbpf.DBPFUncompressedOutputStream;
-
-import org.xml.sax.SAXException;
-
 import view.DevelopersFrame;
 import view.checkboxtree.CheckTreeManager;
 import controller.XMLParsing.MyNode;
@@ -183,25 +182,38 @@ public class NAMControllerCompilerMain {
 			devFrame.pack();
 			devFrame.setLocationRelativeTo(null);
 			devFrame.setVisible(true);
-		} catch (PatternSyntaxException | ParserConfigurationException
-				| SAXException | IOException e1) {
-			// TODO diversify exceptions and causes
-			JOptionPane.showMessageDialog(null, "An Exception was thrown:\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-			e1.printStackTrace();
-		}
+		} catch (PatternSyntaxException e1) { // TODO differentiate between exceptions, currently all catches are the same
+		    JOptionPane.showMessageDialog(null, "An Exception was thrown:\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e1.printStackTrace();
+        } catch (ParserConfigurationException e1) {
+            JOptionPane.showMessageDialog(null, "An Exception was thrown:\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e1.printStackTrace();
+        } catch (SAXException e1) {
+            JOptionPane.showMessageDialog(null, "An Exception was thrown:\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            JOptionPane.showMessageDialog(null, "An Exception was thrown:\n" + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e1.printStackTrace();
+        }
 	}
 	
 	/**
 	 * Writes the settings into the dataFile.
 	 */
 	private static void writeSettings() {
-		try (PrintWriter printer = new PrintWriter(dataFile)) {
+	    PrintWriter printer = null;
+	    try {
+	        printer = new PrintWriter(dataFile);
 			printer.println(inputDir.getAbsolutePath());
 			printer.println(outputDir.getAbsolutePath());
 			printer.println(isLHD ? "lhd=true" : "lhd=false");
 			printer.println(isESeries ? "eseries=true" : "eseries=false");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+		    if (printer != null) {
+		        printer.close();
+		    }
 		}
 	}
 
@@ -210,7 +222,9 @@ public class NAMControllerCompilerMain {
 	 * @throws IOException
 	 */
 	public static void writeControllerFile() throws IOException {
-		try (DBPFUncompressedOutputStream out = new DBPFUncompressedOutputStream(outputFile)) {
+	    DBPFUncompressedOutputStream out = null;
+		try {
+		    out = new DBPFUncompressedOutputStream(outputFile);
 
 			RULBuilder[] rulBuilders = new RULBuilder[3];
 			long lastModf = 0;
@@ -239,6 +253,9 @@ public class NAMControllerCompilerMain {
 			log("Compiler finished with errors.");
 			throw e;
 		} finally {
+		    if (out != null) {
+		        out.close();
+		    }
 			log("Done. Total time consumed: " +
 					(System.currentTimeMillis() - starttime) + " milliseconds.");
 		}
@@ -298,7 +315,7 @@ public class NAMControllerCompilerMain {
 	 * @return Queue of subfiles.
 	 */
 	private static Queue<File> collectRULInputFilesRecursion(File parent) {
-		Queue<File> returnFiles = new LinkedList<>();
+		Queue<File> returnFiles = new LinkedList<File>();
 		File[] subFiles = parent.listFiles(fileFilter);
 		Arrays.sort(subFiles);					// sort files alphabetically
 
@@ -316,7 +333,7 @@ public class NAMControllerCompilerMain {
 	 * directory is not a directory.
 	 */
 	private static void testIfFilesExist() throws FileNotFoundException {
-		List<File> files = new ArrayList<>();
+		List<File> files = new ArrayList<File>();
 		files.add(inputDir);
 		files.add(outputDir);
 		for (File file : rulDirs) {
@@ -336,7 +353,7 @@ public class NAMControllerCompilerMain {
 	 * @return a queue containing the patterns.
 	 */
 	private static Queue<Pattern> collectPatterns(CheckTreeManager checkTreeManager){
-		Queue<Pattern> patterns = new ArrayDeque<>();
+		Queue<Pattern> patterns = new ArrayDeque<Pattern>();
 		TreePath[] checkedPaths = checkTreeManager.getSelectionModel().getSelectionPaths();
 		for (int i = 0; i < checkedPaths.length; i++) {
 			log("Selected Node: " + checkedPaths[i].toString());

@@ -26,7 +26,7 @@ public class RUL0Builder extends RULBuilder {
 		super(files, out, isESeries);
 		this.isLHD = isLHD;
 		this.isESeries = isESeries;
-		bufReaders = new LinkedList<>();
+		bufReaders = new LinkedList<BufferedReader>();
 		printer = new PrintWriter(out);
 	}
 
@@ -34,7 +34,7 @@ public class RUL0Builder extends RULBuilder {
 	public void processFiles() throws IOException {
 		super.calculateLastModified();
 		super.printHeader();
-		Collection<FileReader> fReaders = new LinkedList<>();
+		Collection<FileReader> fReaders = new LinkedList<FileReader>();
 
 		/* print the orderings */
 		for (File file : inputFiles) {

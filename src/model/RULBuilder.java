@@ -90,13 +90,23 @@ public class RULBuilder {
 		printHeader();
 		for (File file : inputFiles) {
 			if (mustSkip(file)) continue;
-			try (FileReader fReader = new FileReader(file);
-					BufferedReader buffer = new BufferedReader(fReader)) {
+			FileReader fReader = null;
+			BufferedReader buffer = null;
+			try {
+			    fReader = new FileReader(file);
+				buffer = new BufferedReader(fReader);
 				printSubFileHeader(file);
 				out.writeFile(file);
 				out.write("\r\n\r\n".getBytes());
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+			    if (buffer != null) {
+			        buffer.close();
+			    }
+			    if (fReader != null) {
+			        fReader.close();
+			    }
 			}
 		}
 	}

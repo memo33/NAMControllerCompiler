@@ -54,7 +54,7 @@ public class DBPFUncompressedOutputStream extends FileOutputStream {
 
 		this.file = file;
 		super.write(new byte[0x60]);
-		indexList = new ArrayList<>();
+		indexList = new ArrayList<Integer>();
 		outChannel = this.getChannel();
 	}
 
@@ -63,18 +63,24 @@ public class DBPFUncompressedOutputStream extends FileOutputStream {
 	 * @throws IOException
 	 */
 	private void writeHeader() throws IOException {
-		try (RandomAccessFile raFile = new RandomAccessFile(file, "rwd")) {
-			raFile.writeBytes("DBPF");
-			raFile.writeInt(Integer.reverseBytes(1));
-			raFile.writeInt(Integer.reverseBytes(0));
-			raFile.write(new byte[12]);
-			raFile.writeInt(Integer.reverseBytes((int) (System.currentTimeMillis()/1000)));
-			raFile.writeInt(Integer.reverseBytes((int) (System.currentTimeMillis()/1000)));
-			raFile.writeInt(Integer.reverseBytes(7));
-			raFile.writeInt(Integer.reverseBytes(numberOfFiles));
-			raFile.writeInt(Integer.reverseBytes((int) outChannel.position()));
-			raFile.writeInt(Integer.reverseBytes(20 * numberOfFiles));
-			raFile.write(new byte[0x30]);
+	    RandomAccessFile raf = null;
+	    try {
+		    raf = new RandomAccessFile(file, "rwd");
+			raf.writeBytes("DBPF");
+			raf.writeInt(Integer.reverseBytes(1));
+			raf.writeInt(Integer.reverseBytes(0));
+			raf.write(new byte[12]);
+			raf.writeInt(Integer.reverseBytes((int) (System.currentTimeMillis()/1000)));
+			raf.writeInt(Integer.reverseBytes((int) (System.currentTimeMillis()/1000)));
+			raf.writeInt(Integer.reverseBytes(7));
+			raf.writeInt(Integer.reverseBytes(numberOfFiles));
+			raf.writeInt(Integer.reverseBytes((int) outChannel.position()));
+			raf.writeInt(Integer.reverseBytes(20 * numberOfFiles));
+			raf.write(new byte[0x30]);
+		} finally {
+		    if (raf != null) {
+		        raf.close();
+		    }
 		}
 	}
 
@@ -101,13 +107,32 @@ public class DBPFUncompressedOutputStream extends FileOutputStream {
 	 * @param file
 	 */
 	public void writeFile(File file) {
-		try (FileChannel source = new FileInputStream(file).getChannel()) {
+	    FileInputStream fis = null;
+	    FileChannel source = null;
+		try {
+		    fis = new FileInputStream(file);
+		    source = fis.getChannel();
 			long len = outChannel.transferFrom(source, outChannel.position(), source.size());
 			outChannel.position(outChannel.position() + len);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+		    if (source != null) {
+		        try {
+                    source.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+		    }
+		    if (fis != null) {
+		        try {
+		            fis.close();
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+		    }
 		}
 	}
 
@@ -132,13 +157,19 @@ public class DBPFUncompressedOutputStream extends FileOutputStream {
 			if (numberOfFiles > 0) appendLatestSubFileLength();
 			this.writeHeader();
 
-			try (BufferedOutputStream bufOut = new BufferedOutputStream(this)) {
+			BufferedOutputStream bos = null;
+			try {
+			    bos = new BufferedOutputStream(this);
 				for (Integer entry : indexList) {
 					ByteBuffer bb = ByteBuffer.allocate(4);
 					bb.putInt(Integer.reverseBytes(entry));
-					bufOut.write(bb.array());
+					bos.write(bb.array());
 				}
-				bufOut.flush();
+				bos.flush();
+			} finally {
+			    if (bos != null) {
+			        bos.close();
+			    }
 			}
 			outChannel.close();
 		}

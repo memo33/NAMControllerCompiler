@@ -41,7 +41,7 @@ public class XMLParsing {
 
 		public MyNode(String name) {
 			super(name);
-			patterns = new ArrayDeque<>();
+			patterns = new ArrayDeque<Pattern>();
 		}
 		
 		public void addRegex(String regex) {
@@ -91,16 +91,17 @@ public class XMLParsing {
 	 * @throws SAXException if XML is not well-formed and possibly other cases.
 	 */
 	private static Queue<MyNode> getMyNodes(NodeList nodeList, MyNode parent) throws SAXException {
-		Queue<MyNode> queue = new ArrayDeque<>();
+		Queue<MyNode> queue = new ArrayDeque<MyNode>();
 		for (int count = 0; count < nodeList.getLength(); count++) {
 			Node tempNode = nodeList.item(count);
 			if (tempNode.getNodeType() == Node.ELEMENT_NODE) { // make sure it's element node.
 
 				String nodeName = "All Networks";
-				switch (tempNode.getNodeName()) {
-				case "node":
+				String s = tempNode.getNodeName();
+				if (s.equals("node")) {
 					nodeName = tempNode.getAttributes().getNamedItem("name").getNodeValue();
-				case "iid_tree":
+				}
+				if (s.equals("node") || s.equals("iid_tree")) {
 					MyNode myNode = new MyNode(nodeName);
 					if (tempNode.hasChildNodes()) {
 						Queue<MyNode> children = getMyNodes(tempNode.getChildNodes(), myNode);
@@ -108,12 +109,10 @@ public class XMLParsing {
 							myNode.add(child);
 					}
 					queue.add(myNode);
-					break;
-				case "regex":
+				} else if (s.equals("regex")) {
 					String regexValue = tempNode.getAttributes().getNamedItem("value").getNodeValue();
 					parent.addRegex(regexValue);
-					break;
-				default:
+				} else {
 					throw new SAXException("Invalid node name in XML file: " + tempNode.getNodeName());
 				}
 			}

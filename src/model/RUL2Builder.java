@@ -34,8 +34,11 @@ public class RUL2Builder extends RULBuilder {
 		super.printHeader();
 		for (File file : inputFiles) {
 			if (mustSkip(file)) continue;
-			try (FileReader fReader = new FileReader(file);
-					BufferedReader buffer = new BufferedReader(fReader)) {
+			FileReader fReader = null;
+			BufferedReader buffer = null;
+			try {
+			    fReader = new FileReader(file);
+				buffer = new BufferedReader(fReader);
 				super.printSubFileHeader(file);
 				
 				for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
@@ -58,6 +61,13 @@ public class RUL2Builder extends RULBuilder {
 				bufferedOut.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+			    if (buffer != null) {
+			        buffer.close();
+			    }
+			    if (fReader != null) {
+			        fReader.close();
+			    }
 			}
 		}
 	}
