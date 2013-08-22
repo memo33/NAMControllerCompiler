@@ -29,11 +29,17 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
 
+import jdpbfx.DBPFEntry;
+import jdpbfx.DBPFFile;
+import jdpbfx.DBPFTGI;
+import jdpbfx.types.DBPFLText;
+import model.RUL0Entry;
+import model.RUL1Entry;
+import model.RUL2Entry;
+import model.RULEntry;
+
 import org.xml.sax.SAXException;
 
-import model.RULBuilder;
-import model.dbpf.DBPFTGI;
-import model.dbpf.DBPFUncompressedOutputStream;
 import view.DevelopersFrame;
 import view.checkboxtree.CheckTreeManager;
 import controller.XMLParsing.MyNode;
@@ -54,9 +60,12 @@ public class NAMControllerCompilerMain {
 	private static long starttime;
 	private static Queue<Pattern> patterns;		// regexes matching iids to exclude from rul2
 
-	private static int typeRUL = 0x0a5bcf4b, groupRUL = 0xaa5bcf57;
-	private static int[] instanceRULs = {0x10000000, 0x10000001, 0x10000002};
-
+	private static final DBPFTGI[] RUL_TGIS = {
+        DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
+        DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000001L),
+        DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000002L)};
+	private static final DBPFTGI LTEXT_TGI = new DBPFTGI(0x2026960bL, 0x123006aaL, 0x6a47ffffL);
+	
 	private static FileFilter fileFilter = new FileFilter() {
 		@Override
 		public boolean accept(File pathname) {
@@ -80,27 +89,27 @@ public class NAMControllerCompilerMain {
 			showGUI();
 			return;
 		}
-		if (args.length != 2 && args.length != 3)
+//		if (args.length != 2 && args.length != 3)
 			throw new RuntimeException(
 					"Wrong number of arguments. Specify the path to input" +
 							" folder, to output folder and, optionally, if you want to" +
 					" compile a LHD controller by \"lhd=true\".");
-		isLHD = args.length==3 && args[2].toLowerCase().equals("lhd=true");
-		isESeries = true; // TODO
-
-		inputDir = new File(args[0]);
-		outputDir = new File(args[1]);
-		try {
-			init();
-		} catch (FileNotFoundException e) {
-			System.out.println(e.getMessage());
-		}
-
-		try {
-			writeControllerFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		isLHD = args.length==3 && args[2].toLowerCase().equals("lhd=true");
+//		isESeries = true; // TODO
+//
+//		inputDir = new File(args[0]);
+//		outputDir = new File(args[1]);
+//		try {
+//			init();
+//		} catch (FileNotFoundException e) {
+//			System.out.println(e.getMessage());
+//		}
+//
+//		try {
+//			writeControllerFile();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	/**
@@ -201,6 +210,7 @@ public class NAMControllerCompilerMain {
 	 * Writes the settings into the dataFile.
 	 */
 	private static void writeSettings() {
+	    // TODO write XML settings
 	    PrintWriter printer = null;
 	    try {
 	        printer = new PrintWriter(dataFile);
@@ -222,63 +232,41 @@ public class NAMControllerCompilerMain {
 	 * @throws IOException
 	 */
 	public static void writeControllerFile() throws IOException {
-	    DBPFUncompressedOutputStream out = null;
-		try {
-		    out = new DBPFUncompressedOutputStream(outputFile);
-
-			RULBuilder[] rulBuilders = new RULBuilder[3];
-			long lastModf = 0;
-			// RUL files
-			for (int i = 0; i < rulBuilders.length; i++) {
-				log("Writing file RUL" + i);
-				out.writeTGI(new DBPFTGI(typeRUL, groupRUL, instanceRULs[i]));
-				if (i==0)
-					rulBuilders[i] = RULBuilder.getRUL0Builder(rulInputFiles[i], out, isLHD, isESeries);
-				else if (i==1)
-					rulBuilders[i] = RULBuilder.getRUL1Builder(rulInputFiles[i], out, isESeries);
-				else
-					rulBuilders[i] = RULBuilder.getRUL2Builder(rulInputFiles[i], out, isESeries, patterns);
-					
-				rulBuilders[i].processFiles();
-				
-				if(rulBuilders[i].getLastModified() > lastModf)
-					lastModf = rulBuilders[i].getLastModified();
+	    Queue<DBPFEntry> writeList = new ArrayDeque<DBPFEntry>(4);
+		long lastModf = 0;
+		
+		// RUL files
+		for (int i = 0; i < 3; i++) {
+			log("Writing file RUL" + i); // TODO move to right spot
+			RULEntry rulEntry;
+			if (i==0) {
+			    rulEntry = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], isLHD, isESeries);
+			} else if (i==1) {
+				rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], isESeries);
+			} else {
+				rulEntry = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], isESeries, patterns);
 			}
-			// LText (Controller marker)
-			log("Writing file LText");
-			out.writeTGI(new DBPFTGI(0x2026960b, 0x123006aa, 0x6a47ffff));
-			writeLText(getDateString(lastModf, isLHD), out);
-			
-		} catch (IOException e) {
+			if(rulEntry.getLastModified() > lastModf) {
+				lastModf = rulEntry.getLastModified();
+			}
+			writeList.add(rulEntry);
+		}
+		// LText (Controller marker)
+		log("Writing file LText");
+		DBPFLText ltext = new DBPFLText(new byte[0], LTEXT_TGI, false);
+		ltext.setString(getDateString(lastModf, isLHD));
+		writeList.add(ltext);
+		
+		// write to file
+		boolean success = DBPFFile.Writer.write(outputFile, writeList);
+		if (!success) {
 			log("Compiler finished with errors.");
-			throw e;
-		} finally {
-		    if (out != null) {
-		        out.close();
-		    }
+		} else {
 			log("Done. Total time consumed: " +
 					(System.currentTimeMillis() - starttime) + " milliseconds.");
 		}
 	}
-	
-	/**
-	 * Writing the LText file.
-	 * @param text
-	 * @param out
-	 * @throws IOException
-	 */
-	private static void writeLText(String text, DBPFUncompressedOutputStream out) throws IOException {
-		out.write(text.length());
-		byte[] b = {0,0,0x10};
-		out.write(b);
-		char[] c = text.toCharArray();
-		for (int i = 0; i < c.length; i++) {
-			out.write(c[i]);
-			out.write(0);
-		}
-		out.flush();
-	}
-	
+		
 	/**
 	 * Get content of the controller description LText.
 	 * @param date
