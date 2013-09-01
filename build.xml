@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="NAMControllerCompiler" default="dist" basedir=".">
+    <property name="targetversion" value="1.6" />
+    <property name="project.version" value="0.3.2" />
+    <property name="MyApp" value="${ant.project.name}_${project.version}" />
+    <property name="src.dir" value="${basedir}/src" />
+    <property name="bin.dir" value="${basedir}/bin" />
+    <property name="lib.dir" value="${basedir}/lib" />
+    <property name="doc.dir" value="${basedir}/doc" />
+    <property name="dist.dir" value="${basedir}/dist" />
+
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}" />
+        <pathelement path="${bin.dir}" />
+    </path>
+
+    <target name="compile" description="compile the sources">
+        <mkdir dir="${bin.dir}" />
+        <javac target="${targetversion}" srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
+            <classpath refid="compile.classpath" />
+        </javac>
+    </target>
+
+    <target name="doc" description="generate documentation">
+        <mkdir dir="${doc.dir}" />
+        <javadoc
+            sourcepath="${src.dir}"
+            destdir="${doc.dir}"
+            packagenames="*"
+            link="http://docs.oracle.com/javase/7/docs/api/"
+        />
+    </target>
+
+    <!-- Create binary distribution -->
+    <target name="dist" depends="compile,doc" description="create binary distribution with sources and documentation">
+        <delete file="${MyApp}.jar" />
+        <delete file="${dist.dir}/${MyApp}.zip" />
+        <mkdir dir="${dist.dir}" />
+        <jar jarfile="${MyApp}.jar" basedir="${bin.dir}" manifest="manifest.txt" />
+        <zip destfile="${dist.dir}/${MyApp}.zip">
+            <fileset dir="${basedir}" includes="lib/** src/** xml/**"/>
+            <fileset dir="${basedir}" includes="${MyApp}.jar build.xml manifest.txt" />
+        </zip>
+    </target>
+</project>
