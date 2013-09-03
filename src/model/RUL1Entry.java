@@ -6,23 +6,30 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Queue;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import controller.NAMControllerCompilerMain;
+
 import jdpbfx.DBPFTGI;
 
 public class RUL1Entry extends RULEntry {
     
-    private final boolean isESeries;
+//    private final boolean isESeries;
 
-    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isESeries) {
-        super(tgi, inputFiles);
-        this.isESeries = isESeries;
+    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
+        super(tgi, inputFiles, changeListener);
+//        this.isESeries = isESeries;
     }
 
     @Override
     protected void provideData() throws IOException {
+        NAMControllerCompilerMain.LOGGER.info("Writing file RUL1");
         for (File file : inputFiles) {
-            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
-                continue;
-            }
+            this.changeListener.stateChanged(new ChangeEvent(file));
+//            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
+//                continue;
+//            }
             FileInputStream fis = null;
             FileChannel fc = null;
             try {

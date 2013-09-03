@@ -9,6 +9,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import controller.NAMControllerCompilerMain;
+
 import jdpbfx.DBPFTGI;
 
 /**
@@ -17,24 +22,26 @@ import jdpbfx.DBPFTGI;
  */
 public class RUL0Entry extends RULEntry {
 
-	private final boolean isLHD, isESeries;
+	private final boolean isLHD;//, isESeries;
 
-	public RUL0Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, boolean isESeries) {
-	    super(tgi, inputFiles);
+	public RUL0Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener) {
+	    super(tgi, inputFiles, changeListener);
 		this.isLHD = isLHD;
-		this.isESeries = isESeries;
+//		this.isESeries = isESeries;
 	}
 
 	@Override
 	public void provideData() throws IOException {
+        NAMControllerCompilerMain.LOGGER.info("Writing file RUL0");
 		Collection<FileReader> fReaders = new ArrayDeque<FileReader>(inputFiles.size());
 		Queue<BufferedReader> bufReaders = new ArrayDeque<BufferedReader>(fReaders.size());
 		try {
     		/* print the orderings */
     		for (File file : inputFiles) {
-    			if (!RULEntry.fileMatchesSeries(file, isESeries)) {
-    			    continue;
-    			}
+    		    this.changeListener.stateChanged(new ChangeEvent(file));
+//    			if (!RULEntry.fileMatchesSeries(file, isESeries)) {
+//    			    continue;
+//    			}
     			FileReader fReader = new FileReader(file);
     			fReaders.add(fReader);
     			BufferedReader bufReader = new BufferedReader(fReader);
@@ -79,8 +86,8 @@ public class RUL0Entry extends RULEntry {
             writer.write(line.substring(10) + newline);
         else if (line.startsWith(";###LHD###") && isLHD)
             writer.write(line.substring(10) + newline);
-        else if (line.startsWith(";###E-Series###") && isESeries)
-            writer.write(line.substring(15) + newline);
+//        else if (line.startsWith(";###E-Series###") && isESeries)
+//            writer.write(line.substring(15) + newline);
         else
             writer.write(line + newline);
 	}

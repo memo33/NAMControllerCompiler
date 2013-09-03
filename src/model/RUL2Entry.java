@@ -11,17 +11,22 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.regex.Pattern;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import controller.NAMControllerCompilerMain;
+
 import jdpbfx.DBPFTGI;
 
 public class RUL2Entry extends RULEntry {
     
-    private final boolean isESeries;
+//    private final boolean isESeries;
     private final Deque<Pattern> patterns;
     
-    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isESeries, Collection<Pattern> patternsForExclusion) {
-        super(tgi, inputFiles);
+    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener) {
+        super(tgi, inputFiles, changeListener);
         this.patterns = new LinkedList<Pattern>(patternsForExclusion);
-        this.isESeries = isESeries;
+//        this.isESeries = isESeries;
     }
     
     /*
@@ -30,11 +35,12 @@ public class RUL2Entry extends RULEntry {
      */
     @Override
     public void provideData() throws IOException {
+        NAMControllerCompilerMain.LOGGER.info("Writing file RUL2");
         for (File file : inputFiles) {
-            System.out.println(file.getName());
-            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
-                continue;
-            }
+            this.changeListener.stateChanged(new ChangeEvent(file));
+//            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
+//                continue;
+//            }
             FileReader fReader = null;
             BufferedReader buffer = null;
             try {
@@ -55,10 +61,10 @@ public class RUL2Entry extends RULEntry {
                     boolean someIidsMatch = false;
                     Iterator<Pattern> iter = patterns.iterator();
                     
-                    LOOPENTRY:
-                    for (Pattern p = iter.next(); iter.hasNext(); p = iter.next()) {
+                    OUT: while (iter.hasNext()) {
+                        Pattern p = iter.next();
                         if (iidsStrings.length != 12) {
-                            System.err.println(line);
+                            NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
                             someIidsMatch = true;
                             break;
                         }
@@ -68,7 +74,7 @@ public class RUL2Entry extends RULEntry {
                                 // let's maintain LRU order
                                 iter.remove();
                                 patterns.addFirst(p);
-                                break LOOPENTRY;
+                                break OUT;
                             }
                         }
                     }

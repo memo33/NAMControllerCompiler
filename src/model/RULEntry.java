@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Queue;
 import java.util.TimeZone;
 
+import javax.swing.event.ChangeListener;
+
 import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFTGI;
 
@@ -23,25 +25,29 @@ public abstract class RULEntry extends DBPFEntry {
     
     private static final int BUFFER_SIZE = 8 * 1024;
     static final String newline = "\r\n"; // TODO
-    
+
     private final DateFormat dateFormat;
     private long lastModified;
+    
+    final ChangeListener changeListener;
     
     Queue<File> inputFiles;
     OutputStreamWriter writer = null;
     WritableByteChannel sink;
 
-    RULEntry(DBPFTGI tgi, Queue<File> inputFiles) {
+    RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
         super(tgi);
         this.inputFiles = inputFiles;
         dateFormat = new SimpleDateFormat("MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        this.changeListener = changeListener;
+        this.calculateLastModified();
     }
     
     /**
      * finds the date of latest modification of input files.
      */
-    void calculateLastModified() {
+    private void calculateLastModified() {
         lastModified = 0;
         for (File file : inputFiles) {
             if (file.lastModified() > lastModified)
@@ -54,7 +60,6 @@ public abstract class RULEntry extends DBPFEntry {
      * @throws IOException 
      */
     void printHeader() throws IOException {
-        this.calculateLastModified();
         writer.write(String.format(";### Date created: %s ###%s",
                 dateFormat.format(new Date(lastModified)),
                 newline));

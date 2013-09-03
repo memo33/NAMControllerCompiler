@@ -8,13 +8,21 @@
     <property name="lib.dir" value="${basedir}/lib" />
     <property name="doc.dir" value="${basedir}/doc" />
     <property name="dist.dir" value="${basedir}/dist" />
+    <property name="jdbpfx.dir" value="${basedir}/../jDBPFX" />
 
     <path id="compile.classpath">
         <fileset dir="${lib.dir}" />
         <pathelement path="${bin.dir}" />
     </path>
 
-    <target name="compile" description="compile the sources">
+    <target name="lib" description="build libraries">
+        <subant target="dist">
+            <filelist dir="${jdbpfx.dir}" files="build.xml" />
+        </subant>
+        <copy file="${jdbpfx.dir}/dist/jDBPFX-1.0.jar" todir="${lib.dir}" />
+    </target>
+    
+    <target name="compile" depends="lib" description="compile the sources">
         <mkdir dir="${bin.dir}" />
         <javac target="${targetversion}" srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
             <classpath refid="compile.classpath" />
@@ -38,7 +46,7 @@
         <mkdir dir="${dist.dir}" />
         <jar jarfile="${MyApp}.jar" basedir="${bin.dir}" manifest="manifest.txt" />
         <zip destfile="${dist.dir}/${MyApp}.zip">
-            <fileset dir="${basedir}" includes="lib/** src/** xml/**"/>
+            <fileset dir="${basedir}" includes="lib/** src/** resources/**"/>
             <fileset dir="${basedir}" includes="${MyApp}.jar build.xml manifest.txt" />
         </zip>
     </target>

@@ -32,33 +32,6 @@ import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
 public class XMLParsing {
 
 	/**
-	 * A Subclass of a TreeNode to include the queue of regex-patterns into the node.
-	 * @author memo
-	 */
-	@SuppressWarnings("serial")
-	public static class MyNode extends DefaultMutableTreeNode implements Iterable<Pattern> {
-		private Queue<Pattern> patterns = null;
-
-		public MyNode(String name) {
-			super(name);
-			patterns = new ArrayDeque<Pattern>();
-		}
-		
-		public void addRegex(String regex) {
-			patterns.add(Pattern.compile(regex));
-		}
-		
-		public boolean hasPatterns() {
-			return !patterns.isEmpty();
-		}
-		
-		@Override
-		public Iterator<Pattern> iterator() {
-			return patterns.iterator();
-		}
-	}
-
-	/**
 	 * Builds a JTree of MyNodes, parsed from the XML file of iid_tree structure.
 	 * @param xmlFile the XML file containing the iid_tree structure.
 	 * @return the JTree to be displayed in the GUI.
@@ -68,7 +41,6 @@ public class XMLParsing {
 	 * @throws PatternSyntaxException
 	 */
 	public static JTree buildJTreeFromXML(File xmlFile) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException {	
-//		File xmlFile = new File("xml/RUL2_IID_structure.xml");
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory.setValidating(true);
 
@@ -119,4 +91,31 @@ public class XMLParsing {
 		}
 		return queue;
 	}
+
+    /**
+     * A Subclass of a TreeNode to include the queue of regex-patterns into the node.
+     * @author memo
+     */
+    @SuppressWarnings("serial")
+    public static class MyNode extends DefaultMutableTreeNode implements Iterable<Pattern> {
+    	private Queue<Pattern> patterns = null;
+    
+    	public MyNode(String name) {
+    		super(name);
+    		patterns = new ArrayDeque<Pattern>();
+    	}
+    	
+    	public void addRegex(String regex) {
+    		patterns.add(Pattern.compile(regex));
+    	}
+    	
+    	public boolean hasPatterns() {
+    		return !patterns.isEmpty();
+    	}
+    	
+    	@Override
+    	public Iterator<Pattern> iterator() {
+    		return patterns.iterator();
+    	}
+    }
 }
