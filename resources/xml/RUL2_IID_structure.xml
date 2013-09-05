@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE iid_tree SYSTEM "RUL2_IID_structure.dtd">
-<!-- last edited by memo - 2013/09/05 -->
-<!-- if a node has a regex element, it replaces all regexes of its child nodes, when the node is selected -->
-<!-- regexes must match the lower case variant of the hexadecimal iids -->
+<!--
+    last edited by memo - 2013/09/05
+    
+    If a node has a regex element, it replaces all regexes of its child nodes,
+    when the node is selected.
+    
+    It is no longer necessary for a regex to match the lower case hex IIDs.
+ -->
 <iid_tree>
     <node name="GLR">
         <regex value="0x5f88\p{XDigit}{4}" />

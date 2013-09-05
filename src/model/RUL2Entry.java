@@ -61,7 +61,7 @@ public class RUL2Entry extends RULEntry {
                     if (splits.length == 0) {
                         continue;
                     }
-                    String[] iidsStrings = (line = (splits[0].trim().toLowerCase())).split(",|=");
+                    String[] iidsStrings = (line = (splits[0].trim())).split(",|=");
                     if (line.isEmpty()) {
                         continue;
                     }

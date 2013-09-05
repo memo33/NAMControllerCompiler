@@ -106,7 +106,7 @@ public class XMLParsing {
     	}
     	
     	public void addRegex(String regex) {
-    		patterns.add(Pattern.compile(regex));
+    		patterns.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
     	}
     	
     	public boolean hasPatterns() {
