@@ -32,8 +32,9 @@ import controller.XMLParsing.MyNode;
 
 public abstract class Compiler extends AbstractCompiler {
 
+    static final String RESOURCE_DIR = "resources"; 
+
     private final File
-            RESOURCE_DIR = new File("resources"),
             XML_DIR = new File(RESOURCE_DIR, "xml"),
             XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
             DATA_FILE = new File(RESOURCE_DIR, "NAMControllerCompilerData.txt");
@@ -206,8 +207,14 @@ public abstract class Compiler extends AbstractCompiler {
                     view.publishException(e.getLocalizedMessage(), e);
                     return false;
                 }
+                return true;
+            } else if (!this.mode.isDetailed()) {
+                // TODO
+                view.publishIssue("The settings file does not exist. It is necessary to reinstall the compiler.");
+                return false;
+            } else {
+                return true;
             }
-            return true;
         }
         
         @Override

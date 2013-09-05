@@ -42,12 +42,19 @@
     <!-- Create binary distribution -->
     <target name="dist" depends="compile,doc" description="create binary distribution with sources and documentation">
         <delete file="${MyApp}.jar" />
+        <delete file="${dist.dir}/${MyApp}_sources.zip" />
         <delete file="${dist.dir}/${MyApp}.zip" />
         <mkdir dir="${dist.dir}" />
         <jar jarfile="${MyApp}.jar" basedir="${bin.dir}" manifest="manifest.txt" />
+        <echo file="${MyApp}.bat">java -jar ${MyApp}.jar
+        </echo>
+        <zip destfile="${dist.dir}/${MyApp}_sources.zip">
+            <fileset dir="${basedir}" includes="lib/** src/** resources/xml/**"/>
+            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat build.xml manifest.txt" />
+        </zip>
         <zip destfile="${dist.dir}/${MyApp}.zip">
-            <fileset dir="${basedir}" includes="lib/** src/** resources/**"/>
-            <fileset dir="${basedir}" includes="${MyApp}.jar build.xml manifest.txt" />
+            <fileset dir="${basedir}" includes="lib/** resources/xml/**"/>
+            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat" />
         </zip>
     </target>
 </project>

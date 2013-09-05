@@ -36,6 +36,7 @@ public class RUL2Entry extends RULEntry {
     @Override
     public void provideData() throws IOException {
         NAMControllerCompilerMain.LOGGER.info("Writing file RUL2");
+        boolean headerFound = false;
         for (File file : inputFiles) {
             this.changeListener.stateChanged(new ChangeEvent(file));
 //            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
@@ -49,6 +50,13 @@ public class RUL2Entry extends RULEntry {
                 super.printSubFileHeader(file);
                 
                 for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
+                    // special treatment for RUL2 header
+                    if (!headerFound && line.trim().equalsIgnoreCase("[ruleoverrides]")) {
+                        writer.write(line + newline);
+                        headerFound = true;
+                        continue;
+                    }
+                    // else
                     String[] splits = line.split(";", 2);
                     if (splits.length == 0) {
                         continue;

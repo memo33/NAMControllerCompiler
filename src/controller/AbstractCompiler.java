@@ -40,7 +40,7 @@ public abstract class AbstractCompiler {
                 success = success && checkOutputFilesExist();
                 success = success && writeSettings();
                 if (!success) {
-                    AbstractCompiler.this.view.publishIssue("Compiling aborted.");
+                    AbstractCompiler.this.view.publishInfoMessage("Compiling aborted.");
                 } else {
                     writeControllerFile();
                 }
