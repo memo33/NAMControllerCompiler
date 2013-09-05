@@ -1,11 +1,13 @@
 package view;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+@SuppressWarnings("serial")
 public class ProgressPanel extends JPanel {
         
     private JLabel noteLabel;
@@ -19,6 +21,7 @@ public class ProgressPanel extends JPanel {
         this.progressBar = new JProgressBar(min, max);
         this.progressBar.setValue(0);
         this.add(this.progressBar);
+        this.setPreferredSize(new Dimension(400, 0));
     }
     
     public void setNote(String note) {

@@ -58,20 +58,20 @@ public class RUL2Entry extends RULEntry {
                         continue;
                     }
                     
-                    boolean someIidsMatch = false;
+                    boolean matchFound = false;
                     Iterator<Pattern> iter = patterns.iterator();
                     
                     OUT: while (iter.hasNext()) {
                         Pattern p = iter.next();
                         if (iidsStrings.length != 12) {
                             NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
-                            someIidsMatch = true;
+                            matchFound = true;
                             break;
                         }
                         for (int i = 9; i >= 0; i -= 3) {
-                            someIidsMatch |= p.matcher(iidsStrings[i]).matches();
-                            if (someIidsMatch) {
-                                // let's maintain LRU order
+                            matchFound |= p.matcher(iidsStrings[i]).matches();
+                            if (matchFound) {
+                                // let's maintain MRU order
                                 iter.remove();
                                 patterns.addFirst(p);
                                 break OUT;
@@ -79,7 +79,7 @@ public class RUL2Entry extends RULEntry {
                         }
                     }
                     
-                    if (!someIidsMatch) {
+                    if (!matchFound) {
                         writer.write(line + newline);
                     }
                 }

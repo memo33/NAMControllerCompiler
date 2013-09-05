@@ -8,6 +8,7 @@ import javax.swing.JToggleButton.ToggleButtonModel;
  * @author Dr. Heinz M. Kabutz
  * http://www.javaspecialists.co.za/archive/Issue145.html
  */
+@SuppressWarnings("serial")
 public class TristateButtonModel extends ToggleButtonModel {
 	private TristateState state = TristateState.DESELECTED;
 

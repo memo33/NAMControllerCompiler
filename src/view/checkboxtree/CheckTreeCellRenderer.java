@@ -14,6 +14,7 @@ import javax.swing.tree.TreePath;
  * 
  * modified by memo
  */
+@SuppressWarnings("serial")
 public class CheckTreeCellRenderer extends JPanel implements TreeCellRenderer{ 
     private CheckTreeSelectionModel selectionModel; 
     private TreeCellRenderer delegate; 

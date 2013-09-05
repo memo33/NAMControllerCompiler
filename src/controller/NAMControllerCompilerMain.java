@@ -5,7 +5,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import controller.Compiler.Mode;
+import jdpbfx.util.DBPFUtil;
+
+import controller.AbstractCompiler.Mode;
+import controller.Compiler.CommandLineCompiler;
+import controller.Compiler.GUICompiler;
 
 /**
  * Main class of NAMControllerCompiler.
@@ -20,31 +24,38 @@ public class NAMControllerCompilerMain {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-        LOGGER.setUseParentHandlers(false);
+	    LOGGER.setLevel(Level.ALL);
 	    Handler handler = new ConsoleHandler();
 	    handler.setLevel(Level.INFO);
-	    LOGGER.addHandler(handler);
-	    LOGGER.setLevel(Level.ALL);
 	    
+	    LOGGER.setUseParentHandlers(false);
+	    LOGGER.addHandler(handler);
+	    DBPFUtil.LOGGER.setUseParentHandlers(false);
+	    DBPFUtil.LOGGER.addHandler(handler);
+	    
+	    AbstractCompiler compiler = null;
 		if (args.length == 0) {
 		    // default user mode
 		    handler.setLevel(Level.SEVERE);
-		    new Compiler(Mode.DEFAULT);
+		    compiler = new GUICompiler(Mode.DEFAULT);
 		} else if (args.length == 1 && args[0].equals("dev")) {
 		    // developer mode
-		    new Compiler(Mode.DEVELOPER);
+	        handler.setLevel(Level.INFO);
+		    compiler = new GUICompiler(Mode.DEVELOPER);
 		} else if (args.length == 1 && args[0].equals("debug")) {
 		    // debug mode
 		    handler.setLevel(Level.ALL);
-		    new Compiler(Mode.DEBUG);
-		} else if (args.length == 3) { // TODO number of arguments 
+		    compiler = new GUICompiler(Mode.DEBUG);
+		} else if (args.length >= 3) { // TODO number of arguments 
 		    // command line mode
-		    handler.setLevel(Level.ALL);
-		    new Compiler(Mode.COMMAND_LINE, args[0], args[1], args[2].equals("lhd"));
+//	        handler.setLevel(Level.INFO);
+	        handler.setLevel(Level.ALL);
+		    compiler = new CommandLineCompiler(args[0], args[1], args[2].equals("lhd"));
 		} else {
 		    LOGGER.severe("Wrong number of arguments passed.");
 		    System.exit(-1);
 		    return;
 		}
+		compiler.execute();
 	}
 }

@@ -19,7 +19,7 @@ public class CompilerSettingsManager {
         Scanner scanner = new Scanner(dataFile);
         input = scanner.hasNextLine() ? scanner.nextLine() : "";
         output = scanner.hasNextLine() ? scanner.nextLine() : "";
-        lhdFlag = scanner.hasNextLine() ? scanner.nextLine().equals("lhd=true") : false;
+        lhdFlag = scanner.hasNextLine() ? scanner.nextLine().equals("lhd") : false;
 //        eseriesFlag = scanner.hasNextLine() ? scanner.nextLine().equals("eseries=true") : true;
         scanner.close();
     }
@@ -32,7 +32,7 @@ public class CompilerSettingsManager {
         PrintWriter printer = new PrintWriter(dataFile);
         printer.println(inputDir.getAbsolutePath());
         printer.println(outputDir.getAbsolutePath());
-        printer.println(isLHD ? "lhd=true" : "lhd=false");
+        printer.println(isLHD ? "lhd" : "rhd");
 //        printer.println(isESeries ? "eseries=true" : "eseries=false");
         printer.close();
     }

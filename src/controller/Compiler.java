@@ -8,15 +8,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Queue;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
@@ -25,247 +24,57 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import view.CompilerFrame;
+import view.ConsoleView;
+import view.GUIView;
+import view.View;
 import view.checkboxtree.CheckTreeManager;
 import controller.XMLParsing.MyNode;
 
-/**
- * Main class of NAMControllerCompiler.
- * @author memo
- */
-public class Compiler {
-    
+public abstract class Compiler extends AbstractCompiler {
+
     private final File
             RESOURCE_DIR = new File("resources"),
             XML_DIR = new File(RESOURCE_DIR, "xml"),
             XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
             DATA_FILE = new File(RESOURCE_DIR, "NAMControllerCompilerData.txt");
+    private final CompilerSettingsManager settingsManager ;
 
     private File inputDir, outputDir;
-    private File[] rulDirs;              // rul0, rul1, rul2
+    private File[] rulDirs;
     private boolean isLHD;
+
+    private JTree tree;
+    private CheckTreeManager checkTreeManager;
+    private Queue<Pattern> patterns;
     private CollectRULsTask collectRULsTask;
     
-    private final Mode mode;
-    private final ErrorHandler errorHandler;
-    private final CompilerSettingsManager settingsManager ;
+    private File outputFile;
     
-    public Compiler(Mode mode) {
-        this(mode, null, null, false);
-    }
-    public Compiler(Mode mode, String inputPath, String outputPath, boolean lhd) {
-        this.mode = mode;
-        if (inputPath != null) {
-            this.inputDir = new File(inputPath);
-        }
-        if (outputPath != null) {
-            this.outputDir = new File(outputPath);
-        }
-        this.isLHD = lhd;
-        this.errorHandler = new ErrorHandler();
+    public Compiler(Mode mode, View view) {
+        super(mode, view);
         this.settingsManager = new CompilerSettingsManager(DATA_FILE);
-        /*
-         * read settings
-         */
-        if (this.mode.isInteractive()) {
-            // TODO
-            if (DATA_FILE.exists()) {
-                try {
-                    settingsManager.readSettings();
-                    this.inputDir = new File(settingsManager.getInput());
-                    this.outputDir = new File(settingsManager.getOutput());
-                    this.isLHD = settingsManager.getLhdFlag();
-                } catch (FileNotFoundException e) {
-                    // cannot occur
-                    LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-                }
-            }
-        }
-        /*
-         * check if resource files exist
-         */
+    }
+
+    @Override
+    public boolean checkXMLExists() {
         if (!XML_FILE.exists()) {
-            errorHandler.handleMissingResourceFile("Resource file", XML_FILE);
-            System.exit(-1);
+            view.publishIssue("XML file \"{0}\" is missing", XML_FILE.toString());
+            return false;
         }
-        if (!this.mode.isDetailed()) {
-            this.checkInputFilesExist(true);
-        }
-        try {
-            /*
-             * read XML file
-             */
-            JTree tree = XMLParsing.buildJTreeFromXML(XML_FILE);
-            final CheckTreeManager checkTreeManager = new CheckTreeManager(tree);
-            /*
-             * write controller file
-             */
-            if (this.mode.isInteractive()) {
-                this.showGUI(tree, checkTreeManager); // calls writeControllerFile upon button action
-            } else {
-                this.writeControllerFile(checkTreeManager, null);
-            }
-        } catch (PatternSyntaxException e) {
-            errorHandler.handleException(e.getDescription(), e);
-            System.exit(-1);
-        } catch (ParserConfigurationException e) {
-            errorHandler.handleException(e.getLocalizedMessage(), e);
-            System.exit(-1);
-        } catch (SAXException e) {
-            errorHandler.handleException(e.getLocalizedMessage(), e);
-            System.exit(-1);
-        } catch (IOException e) {
-            errorHandler.handleException(e.getLocalizedMessage(), e);
-            System.exit(-1);
-        }
-    }
-    
-    private void writeControllerFile(CheckTreeManager checkTreeManager, JFrame parentFrame) {
-        Queue<Pattern> patterns = collectPatterns(checkTreeManager);
-
-        /*
-         * final configuration before writing the controller
-         */
-        if (this.mode.isDetailed()) {
-            boolean exist = this.checkInputFilesExist(false);
-            if (!exist) {
-                LOGGER.info("Writing cancelled");
-                return;
-            }
-        }
-        
-        collectRULsTask = new CollectRULsTask(rulDirs);
-        collectRULsTask.execute();
-        
-        if (!this.outputDir.exists()) {
-            if (this.mode.isInteractive()) {
-                String message = "The output directory " + outputDir + " does not exist.\n" +
-                		"Do you wish to create it?";
-                int result = JOptionPane.showConfirmDialog(null, message, null, JOptionPane.YES_NO_OPTION);
-                if (result != JOptionPane.YES_OPTION) {
-                    collectRULsTask.cancel(true);
-                    LOGGER.info("Writing cancelled");
-                    return;
-                }
-            }
-            this.outputDir.mkdirs();
-            LOGGER.info("Created output directory: " + this.outputDir);
-        }
-
-        File outputFile = new File(outputDir, String.format(
-                "NetworkAddonMod_Controller_%s_HAND_VERSION.dat", isLHD ? "LEFT" : "RIGHT"));
-
-        if (outputFile.exists() && this.mode.isInteractive()) {
-            String message = "The file " + outputFile.getName() + " already exists. Do you wish to overwrite it?";
-            int result = JOptionPane.showConfirmDialog(null, message, null, JOptionPane.YES_NO_OPTION);
-            if (result != JOptionPane.YES_OPTION) {
-                LOGGER.info("Writing cancelled");
-                return;
-            }
-        }
-        
-        try {
-            settingsManager.writeSettings(inputDir, outputDir, isLHD);
-        } catch (FileNotFoundException e) {
-            errorHandler.handleException("Could not write settings", e);
-        }
-
-        WriteControllerTask writeTask = new WriteControllerTask(this.mode, collectRULsTask, parentFrame, isLHD, patterns, outputFile);
-        if (this.mode.isInteractive()) {
-            writeTask.execute();
-        } else {
-            // run command line mode in the same thread
-            try {
-                boolean result = writeTask.doInBackground();
-                if (result) {
-                    LOGGER.log(Level.INFO,
-                            "Writing of Controller completed. Total time consumed: " +
-                            "{0} milliseconds.", writeTask.getTimeConsumed());
-                    System.exit(0);
-                } else {
-                    LOGGER.severe("Compiler finished with errors.");
-                    System.exit(-1);
-                }
-            } catch (FileNotFoundException e) {
-                errorHandler.handleException(e.getLocalizedMessage(), e);
-                System.exit(-1);
-            } catch (IOException e) {
-                errorHandler.handleException(e.getLocalizedMessage(), e);
-                System.exit(-1);
-            } catch (InterruptedException e) {
-                errorHandler.handleException(e.getLocalizedMessage(), e);
-                System.exit(-1);
-            } catch (ExecutionException e) {
-                errorHandler.handleException(e.getLocalizedMessage(), e);
-                System.exit(-1);
-            }
-        }
+        return true;
     }
 
-    /**
-     * Gets data from dataFile and displays Frame.
-     */
-    private void showGUI(final JTree tree, final CheckTreeManager checkTreeManager) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                final CompilerFrame frame = new CompilerFrame(Compiler.this.mode.isDetailed(),
-                        settingsManager.getInput(), settingsManager.getOutput(),
-                        settingsManager.getLhdFlag(), tree);
-                frame.addStartButtonListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent ae) {
-                        if (Compiler.this.mode.isDetailed()) {
-                            Compiler.this.inputDir = new File(frame.getInputPath());
-                            Compiler.this.outputDir = new File(frame.getOutputPath());
-                        }
-                        Compiler.this.isLHD = frame.isLHD();
-                        
-                        writeControllerFile(checkTreeManager, frame);
-                    }
-                });
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
-            }
-        });
-    }
-    
-//    /**
-//     * @throws FileNotFoundException if specified directories do not exist or specified
-//     * directory is not a directory.
-//     */
-//    private void testIfFilesExist() throws FileNotFoundException {
-//        List<File> files = new ArrayList<File>();
-//        files.add(inputDir);
-//        files.add(outputDir);
-//        for (File file : rulDirs) {
-//            files.add(file);
-//        }
-//        for (File file : files) {
-//            if (!file.exists())
-//                throw new FileNotFoundException("Directory does not exist: " + file.getPath());
-//            if (!file.isDirectory())
-//                throw new FileNotFoundException("File is not a directory: " + file.getPath());
-//        }
-//    }
-    
-    private boolean checkInputFilesExist(boolean exitOnError) {
+    @Override
+    public boolean checkInputFilesExist() {
         if (!inputDir.exists() || !inputDir.isDirectory()) {
-            errorHandler.handleMissingResourceFile("Input directory", inputDir);
-            if (exitOnError) {
-                System.exit(-1);
-            }
+            view.publishIssue("Input directory \"{0}\" does not exist", inputDir);
             return false;
         } else {
             rulDirs = new File[3];
             for (int i = 0; i < rulDirs.length; i++) {
                 rulDirs[i] = new File(inputDir, "RUL" + i);
                 if (!rulDirs[i].exists()) {
-                    errorHandler.handleMissingResourceFile("Input directory", rulDirs[i]);
-                    if (exitOnError) {
-                        System.exit(-1);
-                    }
+                    view.publishIssue("Input directory \"{0}\" does not exist", rulDirs[i]);
                     return false;
                 }
             }
@@ -273,22 +82,42 @@ public class Compiler {
         }
     }
 
-    /**
-     * Collects the Regex-patterns from the selected nodes, specified by the checkTreeManager.
-     * @param checkTreeManager from the checkBoxTree.
-     * @return a queue containing the patterns.
-     */
-    private Queue<Pattern> collectPatterns(CheckTreeManager checkTreeManager){
-        Queue<Pattern> patterns = new ArrayDeque<Pattern>();
+    @Override
+    public boolean readXML() {
+        try {
+            tree = XMLParsing.buildJTreeFromXML(XML_FILE);
+            checkTreeManager = new CheckTreeManager(tree);
+            return true;
+        } catch (PatternSyntaxException e) {
+            view.publishException("Syntax exception for Regular Expression in XML file", e);
+            return false;
+        } catch (ParserConfigurationException e) {
+            view.publishException(e.getLocalizedMessage(), e);
+            return false;
+        } catch (SAXException e) {
+            view.publishException(e.getLocalizedMessage(), e);
+            return false;
+        } catch (IOException e) {
+            view.publishException(e.getLocalizedMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean collectPatterns() {
+        patterns = new ArrayDeque<Pattern>();
         TreePath[] checkedPaths = checkTreeManager.getSelectionModel().getSelectionPaths();
         if (checkedPaths != null) {
+            String newline = System.getProperty("line.separator");
+            StringBuilder sb = new StringBuilder("Selected Nodes:");
             for (int i = 0; i < checkedPaths.length; i++) {
-                NAMControllerCompilerMain.LOGGER.config("Selected Node: " + checkedPaths[i].toString());
+                sb.append(newline + checkedPaths[i].toString());
                 MyNode node = (MyNode) checkedPaths[i].getLastPathComponent();
                 collectPatterns(patterns, node);
             }
+            LOGGER.config(sb.toString());
         }
-        return patterns;
+        return true;
     }
     
     /**
@@ -296,7 +125,7 @@ public class Compiler {
      * @param patterns an existing queue into which the patterns are to be inserted.
      * @param node of the sub-tree.
      */
-    private void collectPatterns(Queue<Pattern> patterns, MyNode node) {
+    private void collectPatterns(Collection<Pattern> patterns, MyNode node) {
         if (node.hasPatterns()) {
             for (Pattern p : node) {
                 patterns.add(p);
@@ -307,41 +136,155 @@ public class Compiler {
             while (children.hasMoreElements()) {
                 MyNode child = (MyNode) children.nextElement();
                 collectPatterns(patterns, child);
-            }   
+            }
         }
     }
-    
-    enum Mode {
-        DEBUG,
-        DEVELOPER,
-        DEFAULT,
-        COMMAND_LINE;
-        
-        public boolean isInteractive() {
-            return this != Mode.COMMAND_LINE;
-        }
-        
-        public boolean isDetailed() {
-            return this == DEVELOPER || this == DEBUG;
-        }
+
+    @Override
+    public boolean collectRULInputFiles() {
+        collectRULsTask = new CollectRULsTask(rulDirs);
+        collectRULsTask.execute();
+        return true;
     }
-    
-    private class ErrorHandler {
-        
-        private void handleException(String message, Throwable t) {
-            LOGGER.log(Level.SEVERE, message, t);
-            if (Compiler.this.mode.isInteractive()) {
-                JOptionPane.showMessageDialog(null, t.getMessage(), null, JOptionPane.ERROR_MESSAGE);
+
+    @Override
+    public boolean checkOutputFilesExist() {
+        if (!this.outputDir.exists()) {
+            if (!view.publishConfirmOption("The directory \"{0}\" does not exist. Do you wish to create it?", outputDir.toString())) {
+                LOGGER.log(Level.INFO, "Creating directory \"{0}\" denied", outputDir.toString());
+                return false;
+            } else {
+                this.outputDir.mkdirs();
+                LOGGER.info("Created output directory: " + outputDir);
             }
         }
         
-        private void handleMissingResourceFile(String name, File file) {
-            String message = name + " is missing: " + file.toString();
-            LOGGER.severe(message);
-            if (Compiler.this.mode.isInteractive()) {
-                message += "\nCannot compile controller. Check your installation!";
-                JOptionPane.showMessageDialog(null, message, null, JOptionPane.ERROR_MESSAGE);
+        outputFile = new File(outputDir, String.format(
+                "NetworkAddonMod_Controller_%s_HAND_VERSION.dat", isLHD ? "LEFT" : "RIGHT"));
+
+        if (outputFile.exists()) {
+            if (!view.publishConfirmOption("The file \"{0}\" already exists. Do you wish to overwrite it?", outputFile.toString())) {
+                LOGGER.log(Level.INFO, "Overwriting file \"{0}\" denied", outputFile.toString());
+                return false;
+            } else {
+                LOGGER.log(Level.INFO, "Overwriting existing file \"{0}\"", outputFile.toString());
             }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean writeSettings() {
+        try {
+            settingsManager.writeSettings(inputDir, outputDir, isLHD);
+            return true;
+        } catch (FileNotFoundException e) {
+            view.publishException("Could not write settings", e);
+            return false;
+        }
+    }
+
+    public static class GUICompiler extends Compiler {
+        
+        public GUICompiler(Mode mode) {
+            super(mode, new GUIView());
+            if (!mode.isInteractive()) {
+                throw new RuntimeException("GUICompiler must be executed in interactive mode.");
+            }
+        }
+        
+        @Override
+        public boolean readSettings() {
+            if (super.DATA_FILE.exists()) {
+                try {
+                    super.settingsManager.readSettings();
+                    super.inputDir = new File(super.settingsManager.getInput());
+                    super.outputDir = new File(super.settingsManager.getOutput());
+                    super.isLHD = super.settingsManager.getLhdFlag();
+                } catch (FileNotFoundException e) {
+                    // cannot occur
+                    view.publishException(e.getLocalizedMessage(), e);
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        @Override
+        public void writeControllerFile() {
+            WriteControllerTask writeTask = new WriteControllerTask(super.collectRULsTask, super.isLHD, super.patterns, super.inputDir.toURI(), super.outputFile, view);
+            writeTask.execute();
+            // result will be handled by done-method in writeTask
+        }
+
+        @Override
+        public void execute() {
+            runBefore.run();
+            showGUI();
+        }
+        
+        private void showGUI() {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    final CompilerFrame frame = new CompilerFrame(mode.isDetailed(),
+                            GUICompiler.super.settingsManager.getInput(), GUICompiler.super.settingsManager.getOutput(),
+                            GUICompiler.super.settingsManager.getLhdFlag(), GUICompiler.super.tree);
+                    ((GUIView) view).setFrame(frame);
+                    frame.addStartButtonListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            if (mode.isDetailed()) {
+                                GUICompiler.super.inputDir = new File(frame.getInputPath());
+                                GUICompiler.super.outputDir = new File(frame.getOutputPath());
+                            }
+                            GUICompiler.super.isLHD = frame.isLHD();
+
+                            runAfter.run();
+                        }
+                    });
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.pack();
+                    frame.setLocationRelativeTo(null);
+                    frame.setVisible(true);
+                }
+            });
+        }
+    }
+    
+    public static class CommandLineCompiler extends Compiler {
+        
+        public CommandLineCompiler(String inputPath, String outputPath, boolean isLHD) {
+            super(Mode.COMMAND_LINE, new ConsoleView());
+            super.inputDir = new File(inputPath);
+            super.outputDir = new File(outputPath);
+            super.isLHD = isLHD;
+        }
+        
+        @Override
+        public boolean readSettings() {
+            return true;
+        }
+        
+        @Override
+        public void writeControllerFile() {
+            WriteControllerTask writeTask = new WriteControllerTask(super.collectRULsTask, super.isLHD, super.patterns, super.inputDir.toURI(), super.outputFile, view) {
+                @Override
+                protected void done() {
+                    /*
+                     * Dirty hack so as to be able to call determineResult()
+                     * in the same Thread because SwingWorker is daemon!
+                     */
+                };
+            };
+            writeTask.execute();
+            writeTask.determineResult();
+        }
+
+        @Override
+        public void execute() {
+            runBefore.run();
+            runAfter.run();
         }
     }
 }

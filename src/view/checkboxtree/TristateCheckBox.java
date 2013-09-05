@@ -22,6 +22,7 @@ import javax.swing.plaf.ActionMapUIResource;
  * @author Dr. Heinz M. Kabutz
  * http://www.javaspecialists.co.za/archive/Issue145.html
  */
+@SuppressWarnings("serial")
 public final class TristateCheckBox extends JCheckBox {
 	// Listener on model changes to maintain correct focusability
 	private final ChangeListener enableListener =
