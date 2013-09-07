@@ -27,7 +27,7 @@ import view.CompilerFrame;
 import view.ConsoleView;
 import view.GUIView;
 import view.View;
-import view.checkboxtree.CheckTreeManager;
+import view.checkboxtree.MyCheckTreeManager;
 import controller.XMLParsing.MyNode;
 
 public abstract class Compiler extends AbstractCompiler {
@@ -45,7 +45,7 @@ public abstract class Compiler extends AbstractCompiler {
     private boolean isLHD;
 
     private JTree tree;
-    private CheckTreeManager checkTreeManager;
+    private MyCheckTreeManager checkTreeManager;
     private Queue<Pattern> patterns;
     private CollectRULsTask collectRULsTask;
     
@@ -86,8 +86,8 @@ public abstract class Compiler extends AbstractCompiler {
     @Override
     public boolean readXML() {
         try {
-            tree = XMLParsing.buildJTreeFromXML(XML_FILE);
-            checkTreeManager = new CheckTreeManager(tree);
+            tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE);
+            checkTreeManager = new MyCheckTreeManager(tree);
             return true;
         } catch (PatternSyntaxException e) {
             view.publishException("Syntax exception for Regular Expression in XML file", e);
@@ -160,8 +160,9 @@ public abstract class Compiler extends AbstractCompiler {
             }
         }
         
-        outputFile = new File(outputDir, String.format(
-                "NetworkAddonMod_Controller_%s_HAND_VERSION.dat", isLHD ? "LEFT" : "RIGHT"));
+//        outputFile = new File(outputDir, String.format(
+//                "NetworkAddonMod_Controller_%s_HAND_VERSION.dat", isLHD ? "LEFT" : "RIGHT"));
+        outputFile = new File(outputDir, "NetworkAddonMod_Controller.dat");
 
         if (outputFile.exists()) {
             if (!view.publishConfirmOption("The file \"{0}\" already exists. Do you wish to overwrite it?", outputFile.toString())) {

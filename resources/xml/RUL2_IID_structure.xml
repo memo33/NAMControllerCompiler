@@ -9,7 +9,7 @@
     It is no longer necessary for a regex to match the lower case hex IIDs.
  -->
 <iid_tree>
-    <node name="GLR">
+    <node name="GLR" disabled="true" selected="true">
         <regex value="0x5f88\p{XDigit}{4}" />
         <!-- crosslinks between RHW and GLR -->
         <regex value="0x57[0-4][0-9a][147a][78]0\p{XDigit}" />
@@ -332,7 +332,7 @@
         <node name="FARHW">
             <regex value="0x57b\p{XDigit}{5}" />
         </node>
-        <node name="3L-Crossings">
+        <node name="3L-Crossings" disabled="true" selected="true">
             <regex value="0x57a\p{XDigit}{5}" />
         </node>
     </node>
@@ -374,7 +374,7 @@
         <!-- crosslinks between RHW and TTR or QTR -->
         <regex value="0x57[0-4][0-9a][147a]6\p{XDigit}{2}" />
     </node>
-    <node name="El-Rail over Avenue">
+    <node name="El-Rail over Avenue" hidden="true" disabled="true">
         <regex value="0x5f85\p{XDigit}{4}" />
     </node>
 </iid_tree>

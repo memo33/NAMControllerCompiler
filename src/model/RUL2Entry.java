@@ -69,20 +69,20 @@ public class RUL2Entry extends RULEntry {
                     boolean matchFound = false;
                     Iterator<Pattern> iter = patterns.iterator();
                     
-                    OUT: while (iter.hasNext()) {
-                        Pattern p = iter.next();
-                        if (iidsStrings.length != 12) {
-                            NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
-                            matchFound = true;
-                            break;
-                        }
-                        for (int i = 9; i >= 0; i -= 3) {
-                            matchFound |= p.matcher(iidsStrings[i]).matches();
-                            if (matchFound) {
-                                // let's maintain MRU order
-                                iter.remove();
-                                patterns.addFirst(p);
-                                break OUT;
+                    if (iidsStrings.length != 12) {
+                        NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
+                        matchFound = true;
+                    } else {
+                        OUT: while (iter.hasNext()) {
+                            Pattern p = iter.next();
+                            for (int i = 9; i >= 0; i -= 3) {
+                                matchFound |= p.matcher(iidsStrings[i]).matches();
+                                if (matchFound) {
+                                    // let's maintain MRU order
+                                    iter.remove();
+                                    patterns.addFirst(p);
+                                    break OUT;
+                                }
                             }
                         }
                     }

@@ -24,7 +24,7 @@ public class CheckTreeSelectionModel extends DefaultTreeSelectionModel{
     } 
  
     // tests whether there is any unselected node in the subtree of given path 
-    public boolean isPartiallySelected(TreePath path){ 
+    public boolean isPartiallySelected(TreePath path){
         if(isPathSelected(path, true)) 
             return false; 
         TreePath[] selectionPaths = getSelectionPaths(); 
