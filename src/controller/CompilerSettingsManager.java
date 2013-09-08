@@ -32,7 +32,6 @@ public class CompilerSettingsManager {
      * Writes the settings into the dataFile.
      */
     public void writeSettings(File inputDir, File outputDir, boolean isLHD) throws FileNotFoundException {
-        // TODO write XML settings
         PrintWriter printer = new PrintWriter(tempFile1);
         printer.println(inputDir.getAbsolutePath());
         printer.println(outputDir.getAbsolutePath());

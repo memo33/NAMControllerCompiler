@@ -33,7 +33,7 @@ public abstract class Compiler extends AbstractCompiler {
     private final File
             XML_DIR = new File(RESOURCE_DIR, "xml"),
             XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
-            XML_FILE2 = new File(XML_DIR, "RUL2_IID_structure_b.xml"),
+            XML_FILE_TEMP = new File(XML_DIR, "RUL2_IID_structure.xml~1"),
             DATA_FILE = new File(RESOURCE_DIR, "NAMControllerCompilerData.txt");
     private final CompilerSettingsManager settingsManager ;
 
@@ -57,7 +57,7 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public boolean checkXMLExists() {
-        if (!XML_FILE.exists() && !XML_FILE2.exists()) {
+        if (!XML_FILE.exists() && !XML_FILE_TEMP.exists()) {
             view.publishIssue("XML file \"{0}\" is missing", XML_FILE.toString());
             return false;
         }
@@ -105,13 +105,13 @@ public abstract class Compiler extends AbstractCompiler {
                 message = e.getLocalizedMessage();
                 previousException = e;
             }
-            if (!XML_FILE2.exists()) {
+            if (!XML_FILE_TEMP.exists()) {
                 view.publishException(message, previousException);
             }
         }
-        if (XML_FILE2.exists()) {
+        if (XML_FILE_TEMP.exists()) {
             try {
-                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE2);
+                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE_TEMP);
                 new MyCheckTreeManager(tree);
                 firstXMLisActive = false;
                 return true;
@@ -189,8 +189,10 @@ public abstract class Compiler extends AbstractCompiler {
         try {
             settingsManager.writeSettings(inputDir, outputDir, isLHD);
             if (XML_FILE.exists() && firstXMLisActive) {
-                XML_FILE2.delete();
-                boolean success = XML_FILE.renameTo(XML_FILE2);
+                if (XML_FILE_TEMP.exists()) {
+                    XML_FILE_TEMP.delete();
+                }
+                boolean success = XML_FILE.renameTo(XML_FILE_TEMP);
                 if (!success) {
                     LOGGER.fine("First attempt to rename XML file failed");
                     try {
@@ -198,10 +200,11 @@ public abstract class Compiler extends AbstractCompiler {
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
-                    success = XML_FILE.renameTo(XML_FILE2);
+                    success = XML_FILE.renameTo(XML_FILE_TEMP);
                 }
                 if (!success) {
-                    LOGGER.severe("Renaming of XML file failed");
+                    view.publishIssue("Renaming/Writing of XML file failed. Cannot compile a new controller.");
+                    return false;
                 }
             }
             XMLParsing.writeXMLfromJTree(tree, XML_FILE);

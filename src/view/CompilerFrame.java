@@ -2,12 +2,12 @@ package view;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.FileDialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -30,6 +30,8 @@ import javax.swing.SwingConstants;
  */
 @SuppressWarnings("serial")
 public class CompilerFrame extends JFrame {
+    
+    private static final boolean isMacOS = System.getProperty("os.name").toLowerCase().startsWith("mac os x"); 
 
 	private JTextField[] fields = new JTextField[2];
 	private JRadioButton[] radioButtons = new JRadioButton[2];
@@ -102,17 +104,29 @@ public class CompilerFrame extends JFrame {
     				@Override
     				public void actionPerformed(ActionEvent arg0) {
     					File file = new File(CompilerFrame.this.fields[ii].getText());
-    					JFileChooser chooser = !file.exists() ? new JFileChooser() : new JFileChooser(file);
-    					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    					if (chooser.showOpenDialog(CompilerFrame.this)
-    							== JFileChooser.APPROVE_OPTION) {
-    						try {
-    							fields[ii].setText(chooser.getSelectedFile().getCanonicalPath());
-    						} catch (IOException e) {
-    							e.printStackTrace();
-    						}
+    					if (isMacOS) {
+    					    System.setProperty("apple.awt.fileDialogForDirectories", "true");
+    					    FileDialog dialog = new FileDialog(CompilerFrame.this);
+    					    if (file.exists()) {
+    					        dialog.setDirectory(file.getAbsolutePath());
+    					    }
+    					    dialog.setVisible(true);
+    					    System.setProperty("apple.awt.fileDialogForDirectories", "false");
+    					    String dir = dialog.getDirectory();
+    					    String folder = dialog.getFile();
+    					    if (dir != null && folder != null) {
+    					        File selectedFile = new File(dir, folder);
+                                fields[ii].setText(selectedFile.getAbsolutePath());
+    					    }
+    					    dialog.dispose();
+    					} else {
+        					JFileChooser chooser = !file.exists() ? new JFileChooser() : new JFileChooser(file);
+        					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        					if (chooser.showOpenDialog(CompilerFrame.this)
+        							== JFileChooser.APPROVE_OPTION) {
+    							fields[ii].setText(chooser.getSelectedFile().getAbsolutePath());
+        					}
     					}
-    					
     				}
     			});
     			c.fill = GridBagConstraints.BOTH;
