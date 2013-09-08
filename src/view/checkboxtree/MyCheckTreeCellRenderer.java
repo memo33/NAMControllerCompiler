@@ -7,11 +7,13 @@ import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.AbstractButton;
 import javax.swing.GrayFilter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTree;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
@@ -31,7 +33,8 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
 
     private MyCheckTreeSelectionModel selectionModel; 
     private TreeCellRenderer delegate; 
-    private TristateCheckBox checkBox = new TristateCheckBox(null); 
+    private TristateCheckBox checkBox = new TristateCheckBox(null);
+    private JRadioButton radioButton = new JRadioButton();
  
     public MyCheckTreeCellRenderer(TreeCellRenderer delegate, MyCheckTreeSelectionModel selectionModel){ 
         this.delegate = delegate; 
@@ -39,24 +42,29 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
         setLayout(new BorderLayout()); 
         setOpaque(false); 
         checkBox.setOpaque(false);
+        radioButton.setSelected(true);
     } 
  
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus){
         Component renderer = delegate.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         MyNode node = (MyNode) value;
  
+        AbstractButton button = checkBox;
         TreePath path = tree.getPathForRow(row); 
         if(path!=null) {
         	TristateButtonModel tristateModel = checkBox.getTristateModel();
-            if(selectionModel.isPathSelected(path, true))
+            if(selectionModel.isPathSelected(path)) {
             	tristateModel.setSelected(true);
-            else if (selectionModel.isPartiallySelected(path))
+            } else if (selectionModel.isPartiallySelected(path)) {
             	tristateModel.setIndeterminate();
-            else tristateModel.setSelected(false); 
+            	button = radioButton;
+            } else {
+                tristateModel.setSelected(false); 
+            }
         } 
         removeAll();
         
-        checkBox.setEnabled(!node.isDisabled());
+        button.setEnabled(!node.isDisabled());
         renderer.setEnabled(!node.isDisabled());
         if (node.isDisabled()) {
             JLabel label = (JLabel) renderer;
@@ -72,7 +80,7 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
             }
             label.setDisabledIcon(disabledIcon);
         }
-        add(checkBox, BorderLayout.WEST);
+        add(button, BorderLayout.WEST);
         add(renderer, BorderLayout.CENTER);
         return this; 
     } 

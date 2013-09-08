@@ -35,7 +35,7 @@ public class MyCheckTreeManager extends MouseAdapter implements TreeSelectionLis
         if(me.getX()>tree.getPathBounds(path).x+hotspot) 
             return;
  
-        boolean selected = selectionModel.isPathSelected(path, true); 
+        boolean selected = selectionModel.isPathSelected(path); 
         selectionModel.removeTreeSelectionListener(this); 
  
         try{ 

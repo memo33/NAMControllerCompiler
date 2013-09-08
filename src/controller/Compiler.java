@@ -106,40 +106,32 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public boolean collectPatterns() {
-        patterns = new ArrayDeque<Pattern>();
-        TreePath[] checkedPaths = checkTreeManager.getSelectionModel().getSelectionPaths();
-        if (checkedPaths != null) {
-            String newline = System.getProperty("line.separator");
-            StringBuilder sb = new StringBuilder("Selected Nodes:");
-            for (int i = 0; i < checkedPaths.length; i++) {
-                sb.append(newline + checkedPaths[i].toString());
-                MyNode node = (MyNode) checkedPaths[i].getLastPathComponent();
-                collectPatterns(patterns, node);
-            }
-            LOGGER.config(sb.toString());
+        patterns = ((MyNode) tree.getModel().getRoot()).getAllSelectedPatterns();
+        for (Pattern p : patterns) {
+            System.out.println(p);
         }
         return true;
     }
     
-    /**
-     * Recursive collecting.
-     * @param patterns an existing queue into which the patterns are to be inserted.
-     * @param node of the sub-tree.
-     */
-    private void collectPatterns(Collection<Pattern> patterns, MyNode node) {
-        if (node.hasPatterns()) {
-            for (Pattern p : node) {
-                patterns.add(p);
-            }
-        } else {
-            @SuppressWarnings("rawtypes")
-            Enumeration children = node.children();
-            while (children.hasMoreElements()) {
-                MyNode child = (MyNode) children.nextElement();
-                collectPatterns(patterns, child);
-            }
-        }
-    }
+//    /**
+//     * Recursive collecting.
+//     * @param patterns an existing queue into which the patterns are to be inserted.
+//     * @param node of the sub-tree.
+//     */
+//    private void collectPatterns(Collection<Pattern> patterns, MyNode node) {
+//        if (node.hasPatterns()) {
+//            for (Pattern p : node) {
+//                patterns.add(p);
+//            }
+//        } else {
+//            @SuppressWarnings("rawtypes")
+//            Enumeration children = node.children();
+//            while (children.hasMoreElements()) {
+//                MyNode child = (MyNode) children.nextElement();
+//                collectPatterns(patterns, child);
+//            }
+//        }
+//    }
 
     @Override
     public boolean collectRULInputFiles() {

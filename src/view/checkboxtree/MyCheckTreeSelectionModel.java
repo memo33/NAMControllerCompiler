@@ -31,44 +31,8 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     } 
     
     public boolean isPartiallySelected(TreePath path) {
-        if (isPathSelected(path, true)) {
-            return false;
-        }
-        TreePath[] selectionPaths = getSelectionPaths(); 
-        if(selectionPaths==null) 
-            return false; 
-        for(int j = 0; j < selectionPaths.length; j++){ 
-            if(isDescendant(selectionPaths[j], path)) { 
-                return true; 
-            }
-        } 
-        return false;//TODO 
-    }
-    
-    private boolean isDescendant(TreePath path1, TreePath path2) {
-        return ((MyNode) path2.getLastPathComponent()).isNodeDescendant((MyNode) path1.getLastPathComponent());
-    }
-    
-    public boolean isPathSelected(TreePath path, boolean dig) {
-        return ((MyNode) path.getLastPathComponent()).isSelected();
-    }
-    
-    private boolean hasUnselectedSiblings(MyNode node) {
-        MyNode parent = node.getParent();
-        if (parent == null) {
-            return false;
-        } else {
-            Enumeration<MyNode> siblings = parent.children();
-            while (siblings.hasMoreElements()) {
-                MyNode sibling = siblings.nextElement();
-                if (sibling == node) {
-                    continue; // TODO
-                } else if (!sibling.isSelected()) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        MyNode node = (MyNode) path.getLastPathComponent();
+        return node.isPartiallySelected();
     }
     
     @Override
@@ -76,13 +40,6 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
         MyNode node = (MyNode) path.getLastPathComponent();
         if (!node.isDisabled()) {
             node.setSelected(true);
-            if (!hasUnselectedSiblings(node)) {
-                addSelectionPath(new TreePath(node.getParent().getPath()));
-            }
-//            Enumeration<MyNode> children = node.children();
-//            while (children.hasMoreElements()) {
-//                addSelectionPath(new TreePath(children.nextElement().getPath()));
-//            }
         }
     }
 
@@ -97,22 +54,7 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     public void removeSelectionPath(TreePath path) {
         final MyNode node = (MyNode) path.getLastPathComponent();
         if (!node.isDisabled()) {
-            for (MyNode parent = node, child = null; parent != null && parent.isSelected(); child = parent, parent = parent.getParent()) {
-                parent.setSelected(false);
-                Enumeration<MyNode> children = parent.children();
-                while (children.hasMoreElements()) {
-                    MyNode sibling = children.nextElement();
-                    if (sibling == child) {
-                        continue;
-                    } else {
-                        if (parent == node) {
-                            removeSelectionPath(new TreePath(sibling.getPath()));
-                        } else {
-                            sibling.setSelected(true);
-                        }
-                    }
-                }
-            }
+            node.setSelected(false);
         }
     }
 
@@ -130,9 +72,10 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     
     @Override
     public TreePath[] getSelectionPaths() {
-        ArrayList<TreePath> selectedPaths = new ArrayList<TreePath>();
-        collectSelectedNodes(selectedPaths, rootNode);
-        return selectedPaths.toArray(new TreePath[selectedPaths.size()]);
+        throw new UnsupportedOperationException("Not implemented.");
+//        ArrayList<TreePath> selectedPaths = new ArrayList<TreePath>();
+//        collectSelectedNodes(selectedPaths, rootNode);
+//        return selectedPaths.toArray(new TreePath[selectedPaths.size()]);
     }
     
     private void collectSelectedNodes(Collection<TreePath> c, MyNode parent) {
@@ -146,6 +89,16 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
         }
     }
 
+    @Override
+    public void addTreeSelectionListener(TreeSelectionListener x) {
+        this.listeners.add(x);
+    }
+    
+    @Override
+    public void removeTreeSelectionListener(TreeSelectionListener x) {
+        listeners.remove(x);
+    }
+    
     @Override
     public void setSelectionPath(TreePath path) {
         throw new UnsupportedOperationException("Not implemented.");
@@ -161,16 +114,6 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
         throw new UnsupportedOperationException("Not implemented.");
     }
 
-    @Override
-    public void addTreeSelectionListener(TreeSelectionListener x) {
-        this.listeners.add(x);
-    }
-
-    @Override
-    public void removeTreeSelectionListener(TreeSelectionListener x) {
-        listeners.remove(x);
-    }
-    
     @Override
     public void clearSelection() {
         throw new UnsupportedOperationException("Not implemented.");
@@ -218,7 +161,7 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
 
     @Override
     public boolean isPathSelected(TreePath path) {
-        throw new UnsupportedOperationException("Not implemented.");
+        return ((MyNode) path.getLastPathComponent()).isSelected();
     }
 
     @Override

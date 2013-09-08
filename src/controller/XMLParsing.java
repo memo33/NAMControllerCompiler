@@ -1,12 +1,15 @@
 package controller;
 
+import static controller.NAMControllerCompilerMain.LOGGER;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -15,6 +18,7 @@ import java.util.regex.PatternSyntaxException;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -79,24 +83,35 @@ public class XMLParsing {
 	 * @throws SAXException if XML is not well-formed and possibly other cases.
 	 */
 	private static Queue<MyNode> getMyNodes(Mode mode, NodeList nodeList, MyNode parent) throws SAXException {
-		Queue<MyNode> queue = new ArrayDeque<MyNode>();
+		Queue<MyNode> queue = new LinkedList<MyNode>();
 		for (int count = 0; count < nodeList.getLength(); count++) {
 			Node tempNode = nodeList.item(count);
 			if (tempNode.getNodeType() == Node.ELEMENT_NODE) { // make sure it's element node.
 
 				String nodeName = "All Networks";
 				boolean disabled = false, selected = false, hidden = false;
+				if (parent != null) {
+				    disabled = parent.disabled;
+				    selected = parent.selected;
+				    hidden = parent.hidden;
+				}
 				String s = tempNode.getNodeName();
 				if (s.equals(KEY_NODE)) {
 					nodeName = tempNode.getAttributes().getNamedItem(KEY_NAME).getNodeValue();
-					selected = tempNode.getAttributes().getNamedItem(KEY_SELECTED).getNodeValue().equals("true");
-					disabled = tempNode.getAttributes().getNamedItem(KEY_DISABLED).getNodeValue().equals("true");
-					hidden = tempNode.getAttributes().getNamedItem(KEY_HIDDEN).getNodeValue().equals("true");
+					selected |= tempNode.getAttributes().getNamedItem(KEY_SELECTED).getNodeValue().equals("true");
+					disabled |= tempNode.getAttributes().getNamedItem(KEY_DISABLED).getNodeValue().equals("true");
+					hidden |= tempNode.getAttributes().getNamedItem(KEY_HIDDEN).getNodeValue().equals("true");
 				}
 				if (s.equals(KEY_NODE) || s.equals(KEY_IIDTREE)) {
 					MyNode myNode = new MyNode(mode, nodeName, selected, disabled, hidden);
 					if (tempNode.hasChildNodes()) {
 						Queue<MyNode> children = getMyNodes(mode, tempNode.getChildNodes(), myNode);
+						if (children.size() != 0) {
+						    // store attributes in leaf nodes only
+						    myNode.disabled = false;
+						    myNode.selected = false;
+//						    myNode.hidden = false;
+						}
 						for (MyNode child : children)
 							myNode.add(child);
 					}
@@ -157,7 +172,7 @@ public class XMLParsing {
 //    	}
 //    }
     
-	public static class MyNode extends DefaultMutableTreeNode implements TreeNode, Iterable<Pattern> {
+	public static class MyNode extends DefaultMutableTreeNode implements TreeNode {
 
         private List<MyNode> visibleChildren = new ArrayList<MyNode>();
         private List<MyNode> allChildren = new ArrayList<MyNode>();
@@ -165,10 +180,10 @@ public class XMLParsing {
         private final String name;
         private final Mode mode;
         
-        private Queue<Pattern> patterns = null;
+        private final Queue<Pattern> patterns;
         private boolean selected;
-        private final boolean disabled;
-        private final boolean hidden;
+        private boolean disabled;
+        private boolean hidden;
     
 
         public MyNode(Mode mode, String name, boolean selected, boolean disabled, boolean hidden) {
@@ -204,6 +219,10 @@ public class XMLParsing {
         @Override
         public Enumeration<MyNode> children() {
             return Collections.enumeration(visibleChildren);
+        }
+        
+        public Collection<MyNode> getChildren() {
+            return visibleChildren;
         }
 
         @Override
@@ -242,59 +261,82 @@ public class XMLParsing {
             return visibleChildren.size() == 0;
         }
         
-        public void addRegex(String regex) {
+        private void addRegex(String regex) {
             patterns.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
         }
         
-        public boolean hasPatterns() {
+        private boolean hasPatterns() {
             return !patterns.isEmpty();
         }
         
-        @Override
-        public Iterator<Pattern> iterator() {
-            return patterns.iterator();
-        }
+//        @Override
+//        public Iterator<Pattern> iterator() {
+//            return patterns.iterator();
+//        }
         
         public boolean isSelected() {
-            return isSelected(true);
+            if (this.isLeaf()) {
+                return this.selected;
+            } else {
+                for (MyNode child : getChildren()) {
+                    if (!child.isSelected()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }
-
-        private boolean isSelected(boolean checkAncestors) {
-            if (checkAncestors) {
-                for (MyNode ancestor = this; ancestor != null; ancestor = ancestor.parent) {
-                    if (ancestor.selected) {
+        
+        public boolean isPartiallySelected() {
+            if (this.isLeaf()) {
+                return false;
+            } else {
+//                for (MyNode child : getChildren()) {
+//                    if (child.isPartiallySelected()) {
+//                        return true;
+//                    }
+//                }
+                Collection<MyNode> c = new ArrayDeque<MyNode>();
+                collectLeaves(c, this);
+                boolean selectedFound = false, unselectedFound = false;
+                for (MyNode n : c) {
+                    if (!selectedFound && n.selected) {
+                        selectedFound = true;
+                    }
+                    if (!unselectedFound && !n.selected) {
+                        unselectedFound = true;
+                    }
+                    if (selectedFound && unselectedFound) {
                         return true;
                     }
                 }
+                return false;
             }
-            // else if all children are selected
-            for (MyNode child : visibleChildren) {
-                if (!child.isSelected(false)) {
-                    return false;
+        }
+        
+        private void collectLeaves(Collection<MyNode> c, MyNode node) {
+            if (node.isLeaf()) {
+                c.add(node);
+            } else {
+                for (MyNode child : node.getChildren()) {
+                    collectLeaves(c, child);
                 }
             }
-            return !visibleChildren.isEmpty();
         }
         
         public boolean isDisabled() {
-            return !this.mode.isDetailed() && this.isDisabled(true);
-        }
-        
-        private boolean isDisabled(boolean checkAncestors) {
-            if (checkAncestors) {
-                for (MyNode ancestor = this; ancestor != null; ancestor = ancestor.parent) {
-                    if (ancestor.disabled) {
-                        return true;
+            if (this.mode.isDetailed()) {
+                return false;
+            } else if (this.isLeaf()) {
+                return this.disabled;
+            } else {
+                for (MyNode child : getChildren()) {
+                    if (!child.isDisabled()) {
+                        return false;
                     }
                 }
+                return true;
             }
-            // else if all children are disabled
-            for (MyNode child : visibleChildren) {
-                if (!child.isDisabled(false)) {
-                    return false;
-                }
-            }
-            return !visibleChildren.isEmpty();
         }
         
         public boolean isHidden() {
@@ -313,7 +355,60 @@ public class XMLParsing {
             if (this.isHidden() || this.isDisabled()) {
                 throw new UnsupportedOperationException("Hidden or disabled nodes must not change selection type");
             }
-            this.selected = selected;
+            if (this.isLeaf()) {
+                this.selected = selected;
+            } else {
+                for (MyNode child : getChildren()) {
+                    if (!child.isDisabled()) {
+                        child.setSelected(selected);
+                    }
+                }
+            }
+        }
+        
+        private boolean isSelectedFully() {
+            if (this.allChildren.size() == 0) {
+                return this.selected;
+            } else {
+                for (MyNode child : allChildren) {
+                    if (!child.isSelectedFully()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        
+        private void collectSelectedPatterns(Collection<Pattern> c, MyNode node, StringBuilder sb) {
+            if (node.isSelectedFully() && node.hasPatterns()) {
+                sb.append(newline + new TreePath(node.getPath()));
+                c.addAll(node.patterns);
+            } else {
+                for (MyNode child : node.allChildren) {
+                    collectSelectedPatterns(c, child, sb);
+                }
+            }
+        }
+        
+        private static final String newline = System.getProperty("line.separator");
+        
+        public Queue<Pattern> getAllSelectedPatterns() {
+            Queue<Pattern> patterns = new ArrayDeque<Pattern>();
+            StringBuilder sb = new StringBuilder("Selected Nodes:");
+            collectSelectedPatterns(patterns, this, sb);
+            LOGGER.config(sb.toString());
+            return patterns;
         }
     }
+	
+//	private static void printNode(MyNode node, int indent) {
+//	    System.out.printf("%" + indent + "s %s %s %s %s%n", "", node.name, node.selected ? "selected" : "deselected", node.disabled ? "disabled" : "", node.hidden ? "hidden" : "");
+//	    indent += 2;
+//	    for (Pattern p : node.patterns) {
+//	        System.out.printf("%" + indent + "s %s%n", "", p);
+//	    }
+//	    for (MyNode child : node.allChildren) {
+//	        printNode(child, indent);
+//	    }
+//	}
 }
