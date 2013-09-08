@@ -18,7 +18,7 @@ import javax.swing.JTree;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import controller.XMLParsing.MyNode;
+import controller.PatternNode;
 
 /**
  * @author Santhosh Kumar T - santhosh@in.fiorano.com 
@@ -47,7 +47,7 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
  
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus){
         Component renderer = delegate.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-        MyNode node = (MyNode) value;
+        PatternNode visibleNode = ((PatternNode) value);
  
         AbstractButton button = checkBox;
         TreePath path = tree.getPathForRow(row); 
@@ -64,9 +64,9 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
         } 
         removeAll();
         
-        button.setEnabled(!node.isDisabled());
-        renderer.setEnabled(!node.isDisabled());
-        if (node.isDisabled()) {
+        button.setEnabled(!visibleNode.isDisabled());
+        renderer.setEnabled(!visibleNode.isDisabled());
+        if (visibleNode.isDisabled()) {
             JLabel label = (JLabel) renderer;
             Icon icon = label.getIcon();
             Icon disabledIcon;

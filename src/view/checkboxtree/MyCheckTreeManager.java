@@ -22,7 +22,7 @@ public class MyCheckTreeManager extends MouseAdapter implements TreeSelectionLis
  
     public MyCheckTreeManager(JTree tree){ 
         this.tree = tree; 
-        selectionModel = new MyCheckTreeSelectionModel(tree.getModel());
+        selectionModel = new MyCheckTreeSelectionModel(/*tree.getModel()*/);
         tree.setCellRenderer(new MyCheckTreeCellRenderer(tree.getCellRenderer(), selectionModel)); 
         tree.addMouseListener(this); 
         selectionModel.addTreeSelectionListener(this); 

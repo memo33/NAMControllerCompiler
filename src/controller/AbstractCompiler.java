@@ -60,7 +60,7 @@ public abstract class AbstractCompiler {
     
     public abstract void execute();
     
-    public enum Mode {
+    enum Mode {
         DEBUG,
         DEVELOPER,
         DEFAULT,

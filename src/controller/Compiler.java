@@ -7,9 +7,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -18,8 +15,8 @@ import java.util.regex.PatternSyntaxException;
 import javax.swing.JFrame;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.tree.TreePath;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
 
@@ -28,7 +25,6 @@ import view.ConsoleView;
 import view.GUIView;
 import view.View;
 import view.checkboxtree.MyCheckTreeManager;
-import controller.XMLParsing.MyNode;
 
 public abstract class Compiler extends AbstractCompiler {
 
@@ -37,15 +33,18 @@ public abstract class Compiler extends AbstractCompiler {
     private final File
             XML_DIR = new File(RESOURCE_DIR, "xml"),
             XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
+            XML_FILE2 = new File(XML_DIR, "RUL2_IID_structure_b.xml"),
             DATA_FILE = new File(RESOURCE_DIR, "NAMControllerCompilerData.txt");
     private final CompilerSettingsManager settingsManager ;
 
     private File inputDir, outputDir;
     private File[] rulDirs;
     private boolean isLHD;
+    
+    private boolean firstXMLisActive;
 
     private JTree tree;
-    private MyCheckTreeManager checkTreeManager;
+//    private MyCheckTreeManager checkTreeManager;
     private Queue<Pattern> patterns;
     private CollectRULsTask collectRULsTask;
     
@@ -58,7 +57,7 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public boolean checkXMLExists() {
-        if (!XML_FILE.exists()) {
+        if (!XML_FILE.exists() && !XML_FILE2.exists()) {
             view.publishIssue("XML file \"{0}\" is missing", XML_FILE.toString());
             return false;
         }
@@ -85,54 +84,72 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public boolean readXML() {
-        try {
-            tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE);
-            checkTreeManager = new MyCheckTreeManager(tree);
-            return true;
-        } catch (PatternSyntaxException e) {
-            view.publishException("Syntax exception for Regular Expression in XML file", e);
-            return false;
-        } catch (ParserConfigurationException e) {
-            view.publishException(e.getLocalizedMessage(), e);
-            return false;
-        } catch (SAXException e) {
-            view.publishException(e.getLocalizedMessage(), e);
-            return false;
-        } catch (IOException e) {
-            view.publishException(e.getLocalizedMessage(), e);
-            return false;
+        String message = null;
+        Exception previousException = null;
+        if (XML_FILE.exists()) {
+            try {
+                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE);
+                new MyCheckTreeManager(tree);
+                firstXMLisActive = true;
+                return true;
+            } catch (PatternSyntaxException e) {
+                message = "Syntax exception for Regular Expression in XML file";
+                previousException = e;
+            } catch (ParserConfigurationException e) {
+                message = e.getLocalizedMessage();
+                previousException = e;
+            } catch (SAXException e) {
+                message = e.getLocalizedMessage();
+                previousException = e;
+            } catch (IOException e) {
+                message = e.getLocalizedMessage();
+                previousException = e;
+            }
+            if (!XML_FILE2.exists()) {
+                view.publishException(message, previousException);
+            }
         }
+        if (XML_FILE2.exists()) {
+            try {
+                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE2);
+                new MyCheckTreeManager(tree);
+                firstXMLisActive = false;
+                return true;
+            } catch (PatternSyntaxException e) {
+                if (previousException != null) {
+                    view.publishException(message, previousException);
+                } else {
+                    view.publishException("Syntax exception for Regular Expression in XML file 2", e);
+                }
+            } catch (ParserConfigurationException e) {
+                if (previousException != null) {
+                    view.publishException(message, previousException);
+                } else {
+                    view.publishException(e.getLocalizedMessage(), e);
+                }
+            } catch (SAXException e) {
+                if (previousException != null) {
+                    view.publishException(message, previousException);
+                } else {
+                    view.publishException(e.getLocalizedMessage(), e);
+                }
+            } catch (IOException e) {
+                if (previousException != null) {
+                    view.publishException(message, previousException);
+                } else {
+                    view.publishException(e.getLocalizedMessage(), e);
+                }
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean collectPatterns() {
-        patterns = ((MyNode) tree.getModel().getRoot()).getAllSelectedPatterns();
-        for (Pattern p : patterns) {
-            System.out.println(p);
-        }
+        patterns = ((AbstractNode) tree.getModel().getRoot()).getAllSelectedPatterns();
         return true;
     }
     
-//    /**
-//     * Recursive collecting.
-//     * @param patterns an existing queue into which the patterns are to be inserted.
-//     * @param node of the sub-tree.
-//     */
-//    private void collectPatterns(Collection<Pattern> patterns, MyNode node) {
-//        if (node.hasPatterns()) {
-//            for (Pattern p : node) {
-//                patterns.add(p);
-//            }
-//        } else {
-//            @SuppressWarnings("rawtypes")
-//            Enumeration children = node.children();
-//            while (children.hasMoreElements()) {
-//                MyNode child = (MyNode) children.nextElement();
-//                collectPatterns(patterns, child);
-//            }
-//        }
-//    }
-
     @Override
     public boolean collectRULInputFiles() {
         collectRULsTask = new CollectRULsTask(rulDirs);
@@ -171,13 +188,34 @@ public abstract class Compiler extends AbstractCompiler {
     public boolean writeSettings() {
         try {
             settingsManager.writeSettings(inputDir, outputDir, isLHD);
+            if (XML_FILE.exists() && firstXMLisActive) {
+                XML_FILE2.delete();
+                boolean success = XML_FILE.renameTo(XML_FILE2);
+                if (!success) {
+                    LOGGER.fine("First attempt to rename XML file failed");
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    success = XML_FILE.renameTo(XML_FILE2);
+                }
+                if (!success) {
+                    LOGGER.severe("Renaming of XML file failed");
+                }
+            }
+            XMLParsing.writeXMLfromJTree(tree, XML_FILE);
             return true;
         } catch (FileNotFoundException e) {
             view.publishException("Could not write settings", e);
-            return false;
+        } catch (ParserConfigurationException e) {
+            view.publishException("Could not write XML file", e);
+        } catch (TransformerException e) {
+            view.publishException("Could not write XML file", e);
         }
+        return false;
     }
-
+    
     public static class GUICompiler extends Compiler {
         
         public GUICompiler(Mode mode) {

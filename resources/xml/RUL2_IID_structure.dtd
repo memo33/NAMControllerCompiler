@@ -6,6 +6,5 @@
     name CDATA #REQUIRED
     selected (true | false) "false"
     disabled (true | false) "false"
-    hidden (true | false) "false"
 >
 <!ATTLIST regex value CDATA #REQUIRED>

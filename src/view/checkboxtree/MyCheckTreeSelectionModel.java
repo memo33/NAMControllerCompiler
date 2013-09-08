@@ -2,17 +2,14 @@ package view.checkboxtree;
 
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.RowMapper;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import controller.XMLParsing.MyNode;
+import controller.PatternNode;
 
 /**
  * @author Santhosh Kumar T - santhosh@in.fiorano.com 
@@ -20,26 +17,29 @@ import controller.XMLParsing.MyNode;
  * 
  * modified by memo
  */
-@SuppressWarnings("serial")
 public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ implements TreeSelectionModel { 
-    private final MyNode rootNode;
+//    private final AbstractNode rootNode;
     private List<TreeSelectionListener> listeners = new ArrayList<TreeSelectionListener>();
  
-    public MyCheckTreeSelectionModel(TreeModel model){ 
-        this.rootNode = (MyNode) model.getRoot();
+    public MyCheckTreeSelectionModel(/*TreeModel model*/){ 
+//        this.rootNode = (AbstractNode) model.getRoot();
 //        setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
     } 
     
+    @Override
+    public boolean isPathSelected(TreePath path) {
+        return ((PatternNode) path.getLastPathComponent()).isSelected();
+    }
+
     public boolean isPartiallySelected(TreePath path) {
-        MyNode node = (MyNode) path.getLastPathComponent();
-        return node.isPartiallySelected();
+        return ((PatternNode) path.getLastPathComponent()).isPartiallySelected();
     }
     
     @Override
     public void addSelectionPath(TreePath path) {
-        MyNode node = (MyNode) path.getLastPathComponent();
-        if (!node.isDisabled()) {
-            node.setSelected(true);
+        final PatternNode visibleNode = ((PatternNode) path.getLastPathComponent());
+        if (!visibleNode.isDisabled()) {
+            visibleNode.setSelected(true);
         }
     }
 
@@ -52,9 +52,9 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     
     @Override
     public void removeSelectionPath(TreePath path) {
-        final MyNode node = (MyNode) path.getLastPathComponent();
-        if (!node.isDisabled()) {
-            node.setSelected(false);
+        final PatternNode visibleNode = ((PatternNode) path.getLastPathComponent());
+        if (!visibleNode.isDisabled()) {
+            visibleNode.setSelected(false);
         }
     }
 
@@ -78,16 +78,16 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
 //        return selectedPaths.toArray(new TreePath[selectedPaths.size()]);
     }
     
-    private void collectSelectedNodes(Collection<TreePath> c, MyNode parent) {
-        if (parent.isSelected()) {
-            c.add(new TreePath(parent.getPath()));
-        } else {
-            Enumeration<MyNode> children = parent.children();
-            while (children.hasMoreElements()) {
-                collectSelectedNodes(c, children.nextElement());
-            }
-        }
-    }
+//    private void collectSelectedNodes(Collection<TreePath> c, AbstractNode parent) {
+//        if (parent.isSelected()) {
+//            c.add(new TreePath(parent.getPath()));
+//        } else {
+//            Enumeration<AbstractNode> children = parent.children();
+//            while (children.hasMoreElements()) {
+//                collectSelectedNodes(c, children.nextElement());
+//            }
+//        }
+//    }
 
     @Override
     public void addTreeSelectionListener(TreeSelectionListener x) {
@@ -157,11 +157,6 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     @Override
     public int[] getSelectionRows() {
         throw new UnsupportedOperationException("Not implemented.");
-    }
-
-    @Override
-    public boolean isPathSelected(TreePath path) {
-        return ((MyNode) path.getLastPathComponent()).isSelected();
     }
 
     @Override
