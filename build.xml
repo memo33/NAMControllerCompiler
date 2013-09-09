@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="NAMControllerCompiler" default="dist" basedir=".">
     <property name="targetversion" value="1.6" />
-    <property name="project.version" value="0.3.2" />
+    <property name="project.version" value="0.3.3" />
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
     <property name="src.dir" value="${basedir}/src" />
     <property name="bin.dir" value="${basedir}/bin" />
@@ -36,6 +36,7 @@
             destdir="${doc.dir}"
             packagenames="*"
             link="http://docs.oracle.com/javase/7/docs/api/"
+            classpathref="compile.classpath"
         />
     </target>
 

@@ -35,8 +35,10 @@ public class GUIView extends ConsoleView {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-//                    Object[] options = {UIManager.getString("OptionPane.cancelButtonText")};
-//                    int result = JOptionPane.showOptionDialog(parentComponent, progressPanel, null, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+//                Object[] options = {UIManager.getString("OptionPane.cancelButtonText")};
+//                int result = JOptionPane.showOptionDialog(frame, progressPanel, null, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+//                if (result == 0) {
+//                }
                 dialog = new JDialog(frame, true);
                 dialog.add(new JOptionPane(progressPanel, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[0]));
                 dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);

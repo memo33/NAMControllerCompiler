@@ -1,5 +1,7 @@
 package model;
 
+import static controller.NAMControllerCompilerMain.LOGGER;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.TimeZone;
+import java.util.logging.Level;
 
 import javax.swing.event.ChangeListener;
 
@@ -24,7 +27,7 @@ import jdpbfx.DBPFTGI;
 public abstract class RULEntry extends DBPFEntry {
     
     private static final int BUFFER_SIZE = 8 * 1024;
-    static final String newline = "\r\n"; // TODO
+    static final String newline = "\r\n";
 
     private final DateFormat dateFormat;
     private long lastModified;
@@ -78,7 +81,6 @@ public abstract class RULEntry extends DBPFEntry {
                 newline));
     }
 
-    // TODO
     /**
      * Must provide an implementation that writes all the needed data to the
      * {@link #writer}.
@@ -102,31 +104,31 @@ public abstract class RULEntry extends DBPFEntry {
                         printHeader();
                         provideData();
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        Thread currentThread = Thread.currentThread();
+                        currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
                     } finally {
                         if (writer != null) {
                             try {
                                 writer.close();
                             } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                Thread currentThread = Thread.currentThread();
+                                currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
                             }
                         }
                         if (os != null) {
                             try {
                                 os.close();
                             } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                Thread currentThread = Thread.currentThread();
+                                currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
                             }
                         }
                         if (sink != null) {
                             try {
                                 sink.close();
                             } catch (IOException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                Thread currentThread = Thread.currentThread();
+                                currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
                             }
                         }
                     }
@@ -134,10 +136,9 @@ public abstract class RULEntry extends DBPFEntry {
             }).start();
             return pipe.source();
         } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            LOGGER.log(Level.SEVERE, "IOException while creating data channel for RUL entry", e1);
+            return null;
         }
-        return null;
     }
     
     /**

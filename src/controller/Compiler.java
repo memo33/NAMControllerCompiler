@@ -33,8 +33,11 @@ public abstract class Compiler extends AbstractCompiler {
     private final File
             XML_DIR = new File(RESOURCE_DIR, "xml"),
             XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
-            XML_FILE_TEMP = new File(XML_DIR, "RUL2_IID_structure.xml~1"),
-            DATA_FILE = new File(RESOURCE_DIR, "NAMControllerCompilerData.txt");
+            XML_FILE_TEMP = new File(XML_DIR, "RUL2_IID_structure.xml~1");
+    private final File[] DATA_FILES = new File[] {
+            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt"),
+            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~1"),
+            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~2")};
     private final CompilerSettingsManager settingsManager ;
 
     private File inputDir, outputDir;
@@ -52,7 +55,7 @@ public abstract class Compiler extends AbstractCompiler {
     
     public Compiler(Mode mode, View view) {
         super(mode, view);
-        this.settingsManager = new CompilerSettingsManager(DATA_FILE);
+        this.settingsManager = new CompilerSettingsManager(DATA_FILES);
     }
 
     @Override
@@ -230,7 +233,8 @@ public abstract class Compiler extends AbstractCompiler {
         
         @Override
         public boolean readSettings() {
-            if (super.DATA_FILE.exists()) {
+            // TODO
+            if (super.DATA_FILES[0].exists() || super.DATA_FILES[1].exists() || super.DATA_FILES[2].exists()) {
                 try {
                     super.settingsManager.readSettings();
                     super.inputDir = new File(super.settingsManager.getInput());
@@ -243,8 +247,7 @@ public abstract class Compiler extends AbstractCompiler {
                 }
                 return true;
             } else if (!this.mode.isDetailed()) {
-                // TODO
-                view.publishIssue("The settings file does not exist. It is necessary to reinstall the compiler.");
+                view.publishIssue("The settings file does not exist. You have to reinstall the compiler.");
                 return false;
             } else {
                 return true;

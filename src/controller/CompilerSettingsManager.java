@@ -13,10 +13,10 @@ public class CompilerSettingsManager {
     private boolean lhdFlag = false;
     private final File dataFile, tempFile1, tempFile2;
     
-    public CompilerSettingsManager(File dataFile) {
-        this.dataFile = dataFile;
-        this.tempFile1 = new File(dataFile.getPath() + "~1");
-        this.tempFile2 = new File(dataFile.getPath() + "~2");
+    public CompilerSettingsManager(File[] dataFiles) {
+        this.dataFile = dataFiles[0];
+        this.tempFile1 = dataFiles[1];
+        this.tempFile2 = dataFiles[2];
     }
     
     public void readSettings() throws FileNotFoundException {

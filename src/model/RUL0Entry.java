@@ -38,7 +38,6 @@ public class RUL0Entry extends RULEntry {
 		try {
     		/* print the orderings */
     		for (File file : inputFiles) {
-    		    this.changeListener.stateChanged(new ChangeEvent(file));
 //    			if (!RULEntry.fileMatchesSeries(file, isESeries)) {
 //    			    continue;
 //    			}
@@ -60,6 +59,7 @@ public class RUL0Entry extends RULEntry {
     		Iterator<BufferedReader> bufIter = bufReaders.iterator();
     		while (fileIter.hasNext() && bufIter.hasNext()) {
     			File file = fileIter.next();
+    			this.changeListener.stateChanged(new ChangeEvent(file));
     			BufferedReader bufReader = bufIter.next();
     			
     			super.printSubFileHeader(file);
