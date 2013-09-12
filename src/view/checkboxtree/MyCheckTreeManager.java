@@ -20,10 +20,10 @@ public class MyCheckTreeManager extends MouseAdapter implements TreeSelectionLis
     private JTree tree = new JTree(); 
     int hotspot = new JCheckBox().getPreferredSize().width; 
  
-    public MyCheckTreeManager(JTree tree){ 
+    public MyCheckTreeManager(JTree tree, boolean enableDisabledButtons){ 
         this.tree = tree; 
-        selectionModel = new MyCheckTreeSelectionModel(/*tree.getModel()*/);
-        tree.setCellRenderer(new MyCheckTreeCellRenderer(tree.getCellRenderer(), selectionModel)); 
+        selectionModel = new MyCheckTreeSelectionModel(/*tree.getModel(), */ enableDisabledButtons);
+        tree.setCellRenderer(new MyCheckTreeCellRenderer(tree.getCellRenderer(), selectionModel, enableDisabledButtons)); 
         tree.addMouseListener(this); 
         selectionModel.addTreeSelectionListener(this); 
     } 

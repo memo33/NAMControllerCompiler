@@ -92,7 +92,7 @@ public abstract class Compiler extends AbstractCompiler {
         if (XML_FILE.exists()) {
             try {
                 tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE);
-                new MyCheckTreeManager(tree);
+                new MyCheckTreeManager(tree, this.mode.isDetailed());
                 firstXMLisActive = true;
                 return true;
             } catch (PatternSyntaxException e) {
@@ -115,7 +115,7 @@ public abstract class Compiler extends AbstractCompiler {
         if (XML_FILE_TEMP.exists()) {
             try {
                 tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE_TEMP);
-                new MyCheckTreeManager(tree);
+                new MyCheckTreeManager(tree, this.mode.isDetailed());
                 firstXMLisActive = false;
                 return true;
             } catch (PatternSyntaxException e) {

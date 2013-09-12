@@ -35,10 +35,12 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
     private TreeCellRenderer delegate; 
     private TristateCheckBox checkBox = new TristateCheckBox(null);
     private JRadioButton radioButton = new JRadioButton();
+    private boolean enabledDisabledButtons;
  
-    public MyCheckTreeCellRenderer(TreeCellRenderer delegate, MyCheckTreeSelectionModel selectionModel){ 
+    public MyCheckTreeCellRenderer(TreeCellRenderer delegate, MyCheckTreeSelectionModel selectionModel, boolean enableDisabledButtons){ 
         this.delegate = delegate; 
-        this.selectionModel = selectionModel; 
+        this.selectionModel = selectionModel;
+        this.enabledDisabledButtons = enableDisabledButtons;
         setLayout(new BorderLayout()); 
         setOpaque(false); 
         checkBox.setOpaque(false);
@@ -65,8 +67,8 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
         } 
         removeAll();
         
-        button.setEnabled(!visibleNode.isDisabled());
-        renderer.setEnabled(!visibleNode.isDisabled());
+        button.setEnabled(enabledDisabledButtons || !visibleNode.isDisabled());
+        renderer.setEnabled(enabledDisabledButtons || !visibleNode.isDisabled());
         if (visibleNode.isDisabled()) {
             JLabel label = (JLabel) renderer;
             Icon icon = label.getIcon();

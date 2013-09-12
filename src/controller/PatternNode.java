@@ -103,9 +103,9 @@ public class PatternNode extends AbstractNode {
     }
     
     public boolean isDisabled() {
-        if (this.mode.isDetailed()) {
+        /*if (this.mode.isDetailed()) {
             return false;
-        } else if (this.isLeaf()) {
+        } else*/ if (this.isLeaf()) {
             return this.disabled;
         } else {
             for (PatternNode child : this.getActiveChildren()) {
@@ -138,7 +138,7 @@ public class PatternNode extends AbstractNode {
     }
     
     public void setSelected(boolean selected) {
-        if (/*this.isHidden() || */this.isDisabled()) {
+        if (/*this.isHidden() || */ !this.mode.isDetailed() && this.isDisabled()) {
             throw new UnsupportedOperationException(/*"Hidden or*/ "Disabled nodes must not change selection type");
         }
         if (this.isLeaf()) {

@@ -20,10 +20,12 @@ import controller.PatternNode;
 public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ implements TreeSelectionModel { 
 //    private final AbstractNode rootNode;
     private List<TreeSelectionListener> listeners = new ArrayList<TreeSelectionListener>();
+    private boolean enableDisabledButtons;
  
-    public MyCheckTreeSelectionModel(/*TreeModel model*/){ 
+    public MyCheckTreeSelectionModel(/*TreeModel model, */ boolean enableDisabledButtons){ 
 //        this.rootNode = (AbstractNode) model.getRoot();
 //        setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+        this.enableDisabledButtons = enableDisabledButtons;
     } 
     
     @Override
@@ -38,7 +40,7 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     @Override
     public void addSelectionPath(TreePath path) {
         final PatternNode visibleNode = ((PatternNode) path.getLastPathComponent());
-        if (!visibleNode.isDisabled()) {
+        if (this.enableDisabledButtons || !visibleNode.isDisabled()) {
             visibleNode.setSelected(true);
         }
     }
@@ -53,7 +55,7 @@ public class MyCheckTreeSelectionModel/* extends DefaultTreeSelectionModel*/ imp
     @Override
     public void removeSelectionPath(TreePath path) {
         final PatternNode visibleNode = ((PatternNode) path.getLastPathComponent());
-        if (!visibleNode.isDisabled()) {
+        if (this.enableDisabledButtons || !visibleNode.isDisabled()) {
             visibleNode.setSelected(false);
         }
     }

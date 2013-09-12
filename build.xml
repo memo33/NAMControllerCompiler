@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="NAMControllerCompiler" default="dist" basedir=".">
     <property name="targetversion" value="1.6" />
-    <property name="project.version" value="0.3.3" />
+    <property name="project.version" value="0.3.4" />
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
     <property name="src.dir" value="${basedir}/src" />
     <property name="bin.dir" value="${basedir}/bin" />
@@ -49,13 +49,17 @@
         <jar jarfile="${MyApp}.jar" basedir="${bin.dir}" manifest="manifest.txt" />
         <echo file="${MyApp}.bat">java -jar ${MyApp}.jar
         </echo>
+        <echo file="${MyApp}_developer.bat">java -jar ${MyApp}.jar dev
+        </echo>
+        <echo file="${MyApp}_debug.bat">java -jar ${MyApp}.jar debug
+        </echo>
         <zip destfile="${dist.dir}/${MyApp}_sources.zip">
             <fileset dir="${basedir}" includes="lib/** src/** resources/xml/**"/>
             <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat build.xml manifest.txt" />
         </zip>
         <zip destfile="${dist.dir}/${MyApp}.zip">
             <fileset dir="${basedir}" includes="lib/** resources/xml/**"/>
-            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat" />
+            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat ${MyApp}_developer.bat ${MyApp}_debug.bat" />
         </zip>
     </target>
 </project>
