@@ -1,0 +1,131 @@
+;T-intersections ;highways
+RotationRing = 2000, 12000, 512000, 22000, 32000, 522000, 42000, 52000, 532000, 62000, 72000, 502000 ;el3 / el3offset
+AddTypes     = 2010, 12010, 492010, 22010, 32010, 4A2010, 42010, 52010, 4B2010, 62010, 72010, 482010 ;gh3 / gh3offset
+AddTypes     = 2020, 92020, 292020, 12020, A2020, 2A2020, 22020, B2020, 2B2020, 32020, 82020, 282020 ;el2gh1
+AddTypes     = 2030, 92030, 112030, 12030, A2030, 122030, 22030, B2030, 132030, 32030, 82030, 102030 ;el1gh2
+
+;###separator###
+
+[HighwayIntersectionInfo_0x00002000]
+Piece       = 8.0, 8.0, 0, 0, 0x02011200
+HandleOffset = 2, 0
+
+CellLayout =.ab....
+CellLayout =.cd....
+CellLayout =+cd+...
+CellLayout =+cd++..
+CellLayout =+ABgggi<
+CellLayout =+CDhhhj.
+CellLayout =+cd++..
+CellLayout =+cd+...
+CellLayout =.cd....
+CellLayout =.ef....
+CellLayout =.^.....
+
+CheckType = a - highway:0x02040000,0xffff00ff check
+CheckType = b - highway:0x02000004,0xffff00ff check
+CheckType = c - highway:0x02040200
+CheckType = d - highway:0x02000204
+CheckType = e - highway:0x00040200,0x00ffffff check
+CheckType = f - highway:0x00000204,0x00ffffff check
+CheckType = g - highway:0x04020002
+CheckType = h - highway:0x00020402
+CheckType = i - highway:0x04000002,0xff00ffff check
+CheckType = j - highway:0x00000402,0xff00ffff check
+CheckType = A - highway:0x04040200
+CheckType = B - highway:0x04020204
+CheckType = C - highway:0x02040400
+CheckType = D - highway:0x02020404
+
+ConsLayout =.||....
+ConsLayout =X||X...
+ConsLayout =X||XX..
+ConsLayout =X##---<
+ConsLayout =X##---.
+ConsLayout =X||XX..
+ConsLayout =X||X...
+ConsLayout =.||....
+ConsLayout =.^.....
+
+PreviewEffect = preview_el_straight_tee
+AutoTileBase = 0x0C800000
+ConvertQueryID = 0x0c369c73
+PlaceQueryID = 0xA0000002
+Costs       = 2000
+AutoPlace   = 1
+[HighwayIntersectionInfo_0x00022000]
+CopyFrom = 0x2000
+Rotate = 1
+[HighwayIntersectionInfo_0x00042000]
+CopyFrom = 0x2000
+Rotate = 2
+[HighwayIntersectionInfo_0x00062000]
+CopyFrom = 0x2000
+Rotate = 3
+
+;hack to get a lower starting number
+[HighwayIntersectionInfo_0x000001FFE]
+Piece       = 8.0, 8.0, 0, 0, 0x02011200
+HandleOffset = 0, -1
+
+CellLayout =BC.....UV
+CellLayout =Abc+++uvW
+CellLayout =.abc+uvw.
+CellLayout =.+abHvw+.
+CellLayout =..+aIJ+..<
+CellLayout =..++abc+.
+CellLayout =...++abc.
+CellLayout =.....+abC
+CellLayout =.......AD
+CellLayout =.........
+CellLayout =.........
+CellLayout =....^....
+
+CheckType = X - highway:0,0
+CheckType = a - highway:0x00030100
+CheckType = b - highway:0x01030103
+CheckType = c - highway:0x01000003
+CheckType = A - highway:0x00030100 check
+CheckType = B - highway:0x01030000,0xFFFF0000 check
+CheckType = C - highway:0x01000003 check
+CheckType = D - highway:0x00000103,0x0000FFFF check
+CheckType = H - highway:0x02010003
+CheckType = I - highway:0x01020203
+CheckType = J - highway:0x01000302
+CheckType = u - highway:0x03010000
+CheckType = v - highway:0x03010301
+CheckType = w - highway:0x00000301
+CheckType = U - highway:0x03010000 check
+CheckType = V - highway:0x03000001, 0xFF0000FF check
+CheckType = W - highway:0x00000301 check
+
+ConsLayout =\\XXX//
+ConsLayout =\\\X///
+ConsLayout =X\\#//X
+ConsLayout =.X###X.<
+ConsLayout =.XX#\\X
+ConsLayout =..XX\\\
+ConsLayout =....X\\
+ConsLayout =.......
+ConsLayout =.......
+ConsLayout =.......
+ConsLayout =...^...
+
+AutoTileBase = 0x0C801000
+PreviewEffect = preview_el_diag1_tee
+ConvertQueryID = 0x0c369c73
+PlaceQueryID = 0xA0000002
+Costs       = 2000
+AutoPlace   = 1
+[HighwayIntersectionInfo_0x00012000]
+CopyFrom = 0x1FFE
+Rotate = 1
+[HighwayIntersectionInfo_0x00032000]
+CopyFrom = 0x1FFE
+Rotate = 2
+[HighwayIntersectionInfo_0x00052000]
+CopyFrom = 0x1FFE
+Rotate = 3
+[HighwayIntersectionInfo_0x00072000]
+CopyFrom = 0x1FFE
+Rotate = 0

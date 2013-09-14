@@ -1,0 +1,57 @@
+;;NOTE; file has been modified, has some sections throughout commented out,
+; has custom content, & contains various additional rules, done by NAM Team &/or others.
+; Updated: 26 February 2013, by Tarkus (r164)
+; fixes DDRHW starter
+;
+; format:
+;	[NetworkName1NetworkName2IntersectionSolutions]
+;	anything=Network1CheckFlag,Network2CheckFlag,InstanceID,Rotation,Flip
+; NetworkName1 & NetworkName2 in the Header require specific loading order in order for subsequent rules to work.
+; Networkcheckflags; 0xSouth/East/North/West. Only simple checkflags allowed/used
+; Rotation 0-3
+; Flip 0-1
+;
+;
+[RoadRailIntersectionSolutions]
+; format:
+; name=roadMajorTypesFlag,railMajorTypesFlag,textureId,rotation,flip
+; name is really not used and is just for our reference.
+;
+;flag byte order is SENW 
+;New RTL Initialization
+;Added by Tarkus 09/18/2012
+;Updated 02/27/2013
+;+-Intersection
+TYPE1=0x02020202,0x00000000,0x5F020700,0,0
+
+;T-Intersection
+TYPE1=0x02020200,0x00000000,0x5F005700,0,0
+TYPE2=0x02020002,0x00000000,0x5F005700,1,0
+TYPE3=0x02000202,0x00000000,0x5F005700,2,0
+TYPE4=0x00020202,0x00000000,0x5F005700,3,0
+
+;
+; straight road, straight rail
+rot0=0x02000200,0x00020002,0x03010100,0,0
+rot1=0x00020002,0x02000200,0x03010100,1,0
+;
+;
+; straight road, diagonal rail
+rot0flip0=0x02000200,0x00030100,0x03010200,0,0
+rot1flip0=0x00020002,0x03010000,0x03010200,1,0
+rot2flip0=0x02000200,0x01000003,0x03010200,2,0
+rot3flip0=0x00020002,0x00000301,0x03010200,3,0
+rot0flip1=0x02000200,0x00000301,0x03020500,0,1
+rot1flip1=0x00020002,0x01000003,0x03020500,1,1
+rot2flip1=0x02000200,0x03010000,0x03020500,2,1
+rot3flip1=0x00020002,0x00030100,0x03020500,3,1
+;
+; diagonal road, straight rail
+rot0flip0=0x00000301,0x02000200,0x03020100,0,0
+rot1flip0=0x00030100,0x00020002,0x03020100,1,0
+rot2flip0=0x03010000,0x02000200,0x03020100,2,0
+rot3flip0=0x01000003,0x00020002,0x03020100,3,0
+rot0flip1=0x00030100,0x02000200,0x03020400,0,1
+rot1flip1=0x00000301,0x00020002,0x03020400,1,1
+rot2flip1=0x01000003,0x02000200,0x03020400,2,1
+rot3flip1=0x03010000,0x00020002,0x03020400,3,1

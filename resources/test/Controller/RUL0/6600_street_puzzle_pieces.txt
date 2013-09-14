@@ -1,0 +1,154 @@
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;STREET BUTTON SECTION
+;STREET BUTTON SECTION
+; 0x65##
+; helper puzzle pieces for diagonal street plugin - content not included in this file
+RotationRing = 6600, 16600, 26600, 36600, 46600, 56600, 66600, 76600 ;Construction Piece for diagonal streets
+AddTypes     = 6620, 16620, 26620, 36620, 46620, 56620, 66620, 76620 ;Construction Piece for diagonal streets medium
+AddTypes     = 6610, 16610, 26610, 36610, 46610, 56610, 66610, 76610 ;Construction Piece for diagonal streets short version
+AddTypes     = 6520, 16520, 26520, 36520, 46520, 56520, 66520, 76520 ;diagonal Street Puzzle Piece
+AddTypes     = 6500, 16500, 26500, 36500, 46500, 56500, 66500, 76500 ;diagonal Street Puzzle Piece left
+AddTypes     = 6510, 16510, 26510, 36510, 46510, 56510, 66510, 76510 ;diagonal Street Puzzle Piece right
+
+;###separator###
+
+
+[HighwayIntersectionInfo_0x00006600]
+;Added by memo 09/03/06.
+;Construction Piece for diagonal streets
+Piece = 0.0, 0, 0, 0, 0x55387ff0
+PreviewEffect = preview_construction_piece
+
+CellLayout =..........
+CellLayout =.bca.....<
+CellLayout =...^......
+
+CheckType = a - road: 0x00000000
+CheckType = b - road: 0x02000200 lightrail: 0x02040000, 0xffffffff optional
+CheckType = c - road: 0x02000204 lightrail: 0x02000000, 0xffffffff optional
+
+ConsLayout =.........
+ConsLayout =..+.....<
+ConsLayout =..^......
+
+AutoTileBase = 0x55387000
+ReplacementIntersection = 0, 0
+PlaceQueryID = 0x55387ff0
+Costs = 50
+
+[HighwayIntersectionInfo_0x00016600]
+CopyFrom = 0x6600
+Rotate	= 1
+[HighwayIntersectionInfo_0x00026600]
+CopyFrom = 0x6600
+Rotate	= 2
+[HighwayIntersectionInfo_0x00036600]
+CopyFrom = 0x6600
+Rotate	= 3
+[HighwayIntersectionInfo_0x00046600]
+CopyFrom = 0x6600
+Transpose = 1
+[HighwayIntersectionInfo_0x00056600]
+CopyFrom = 0x46600
+Rotate = 1
+[HighwayIntersectionInfo_0x00066600]
+CopyFrom = 0x46600
+Rotate = 2
+[HighwayIntersectionInfo_0x00076600]
+CopyFrom = 0x46600
+Rotate = 3
+
+
+
+[HighwayIntersectionInfo_0x00006620]
+;Added by memo 10/11/06.
+;Construction Piece for diagonal streets medium
+Piece = 0.0, 0, 0, 0, 0x55387fd0
+PreviewEffect = preview_constructionmedium
+
+CellLayout =........
+CellLayout =.bca...<
+CellLayout =...^....
+
+CheckType = a - road: 0x00000000
+CheckType = b - road: 0x02040200 lightrail: 0x02000000, 0xffffffff optional
+CheckType = c - road: 0x02000200 lightrail: 0x02000004, 0xffffffff optional
+
+ConsLayout =.......
+ConsLayout =..+...<
+ConsLayout =..^....
+
+AutoTileBase = 0x55387000
+ReplacementIntersection = 0, 0
+PlaceQueryID = 0x55387ff0
+Costs = 50
+
+[HighwayIntersectionInfo_0x00016620]
+CopyFrom = 0x6620
+Rotate	= 1
+[HighwayIntersectionInfo_0x00026620]
+CopyFrom = 0x6620
+Rotate	= 2
+[HighwayIntersectionInfo_0x00036620]
+CopyFrom = 0x6620
+Rotate	= 3
+[HighwayIntersectionInfo_0x00046620]
+CopyFrom = 0x6620
+Transpose = 1
+[HighwayIntersectionInfo_0x00056620]
+CopyFrom = 0x46620
+Rotate = 1
+[HighwayIntersectionInfo_0x00066620]
+CopyFrom = 0x46620
+Rotate = 2
+[HighwayIntersectionInfo_0x00076620]
+CopyFrom = 0x46620
+Rotate = 3
+
+
+
+[HighwayIntersectionInfo_0x00006610]
+;Added by memo 09/04/06.
+;Construction Piece for diagonal streets short version
+Piece = 0.0, 0, 0, 0, 0x55387fe0
+PreviewEffect = preview_construction_short
+
+CellLayout =......
+CellLayout =.bca.<
+CellLayout =...^..
+
+CheckType = a - road: 0x00000000
+CheckType = b - road: 0x02020202 lightrail: 0x02040000, 0xffffffff optional
+CheckType = c - road: 0x02020202 lightrail: 0x02000004, 0xffffffff optional
+
+ConsLayout =.....
+ConsLayout =..+.<
+ConsLayout =..^..
+
+AutoTileBase = 0x55387000
+ReplacementIntersection = 0, 0
+PlaceQueryID = 0x55387ff0
+Costs = 50
+
+[HighwayIntersectionInfo_0x00016610]
+CopyFrom = 0x6610
+Rotate	= 1
+[HighwayIntersectionInfo_0x00026610]
+CopyFrom = 0x6610
+Rotate	= 2
+[HighwayIntersectionInfo_0x00036610]
+CopyFrom = 0x6610
+Rotate	= 3
+[HighwayIntersectionInfo_0x00046610]
+CopyFrom = 0x6610
+Transpose = 1
+[HighwayIntersectionInfo_0x00056610]
+CopyFrom = 0x46610
+Rotate = 1
+[HighwayIntersectionInfo_0x00066610]
+CopyFrom = 0x46610
+Rotate = 2
+[HighwayIntersectionInfo_0x00076610]
+CopyFrom = 0x46610
+Rotate = 3
