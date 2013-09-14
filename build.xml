@@ -3,67 +3,97 @@
     <property name="targetversion" value="1.6" />
     <property name="project.version" value="0.3.4" />
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
-    <property name="src.dir" value="${basedir}/src" />
-    <property name="bin.dir" value="${basedir}/bin" />
-    <property name="lib.dir" value="${basedir}/lib" />
-    <property name="doc.dir" value="${basedir}/doc" />
-    <property name="dist.dir" value="${basedir}/dist" />
-    <property name="jdbpfx.dir" value="${basedir}/../jDBPFX" />
+    <property name="MyApp.jar" value="${MyApp}.jar" />
+    <property name="src" location="src" relative="true" />
+    <property name="bin" location="bin" relative="true" />
+    <property name="lib" location="lib" relative="true" />
+    <property name="doc" location="doc" relative="true" />
+    <property name="dist" location="dist" relative="true" />
+    <property name="xml.resources" location="resources/xml" relative="true" />
+    <property name="rul2.structure.file" value="RUL2_IID_structure" />
     
-    <path id="compile.classpath">
-        <fileset dir="${lib.dir}" />
-        <pathelement path="${bin.dir}" />
+    <path id="build.classpath">
+        <fileset dir="${lib}" includes="jDBPFX*.jar" />
+        <pathelement path="${bin}" />
     </path>
-
-    <target name="lib" description="build libraries">
-        <subant target="dist">
-            <filelist dir="${jdbpfx.dir}" files="build.xml" />
-        </subant>
-        <copy file="${jdbpfx.dir}/dist/jDBPFX-1.0.jar" todir="${lib.dir}" />
-    </target>
+    
+    <pathconvert property="manifest.build.classpath" pathsep=" ">
+        <path refid="build.classpath"/>
+        <mapper>
+            <chainedmapper>
+                <flattenmapper/>
+                <globmapper from="*.jar" to="lib/*.jar"/>
+            </chainedmapper>
+        </mapper>
+    </pathconvert>
     
     <target name="resolve" description="retrieve dependencies with ivy">
-        <ivy:retrieve />
+        <ivy:retrieve conf="mainapp"/>
     </target>
     
-    <target name="compile" depends="lib,resolve" description="compile the sources">
-        <mkdir dir="${bin.dir}" />
-        <javac target="${targetversion}" srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
-            <classpath refid="compile.classpath" />
+    <target name="clean" description="delete generated files">
+        <delete dir="${bin}" />
+        <delete dir="${doc}" />
+        <delete dir="${dist}" />
+    </target>
+    
+    <target name="compile" depends="resolve" description="compile the sources">
+        <mkdir dir="${bin}" />
+        <javac target="${targetversion}" srcdir="${src}" destdir="${bin}" includeantruntime="false">
+            <classpath refid="build.classpath" />
         </javac>
     </target>
-
-    <target name="doc" description="generate documentation">
-        <mkdir dir="${doc.dir}" />
+    
+    <target name="doc" depends="compile" description="generate documentation">
+        <mkdir dir="${doc}" />
         <javadoc
-            sourcepath="${src.dir}"
-            destdir="${doc.dir}"
+            sourcepath="${src}"
+            destdir="${doc}"
             packagenames="*"
             link="http://docs.oracle.com/javase/7/docs/api/"
-            classpathref="compile.classpath"
+            classpathref="build.classpath"
         />
     </target>
-
-    <!-- Create binary distribution -->
-    <target name="dist" depends="compile,resolve,doc" description="create binary distribution with sources and documentation">
-        <delete file="${MyApp}.jar" />
-        <delete file="${dist.dir}/${MyApp}_sources.zip" />
-        <delete file="${dist.dir}/${MyApp}.zip" />
-        <mkdir dir="${dist.dir}" />
-        <jar jarfile="${MyApp}.jar" basedir="${bin.dir}" manifest="manifest.txt" />
-        <echo file="${MyApp}.bat">java -jar ${MyApp}.jar
-        </echo>
-        <echo file="${MyApp}_developer.bat">java -jar ${MyApp}.jar dev
-        </echo>
-        <echo file="${MyApp}_debug.bat">java -jar ${MyApp}.jar debug
-        </echo>
-        <zip destfile="${dist.dir}/${MyApp}_sources.zip">
-            <fileset dir="${basedir}" includes="lib/** src/** resources/xml/**"/>
-            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat build.xml manifest.txt" />
-        </zip>
-        <zip destfile="${dist.dir}/${MyApp}.zip">
-            <fileset dir="${basedir}" includes="lib/** resources/xml/**"/>
-            <fileset dir="${basedir}" includes="${MyApp}.jar ${MyApp}.bat ${MyApp}_developer.bat ${MyApp}_debug.bat" />
-        </zip>
+    
+    <target name="batchfiles" description="generate batch files">
+        <echo file="${MyApp}.bat">java -jar ${MyApp}.jar</echo>
+        <echo file="${MyApp}_developer.bat">java -jar ${MyApp}.jar dev</echo>
+        <echo file="${MyApp}_debug.bat">java -jar ${MyApp}.jar debug</echo>
     </target>
+    
+    <target name="dist" depends="compile,resolve,batchfiles" description="create binary distribution">
+    
+        <!-- Initialization -->
+        <delete file="${MyApp.jar}" />
+        <delete dir="${dist}" />
+        <mkdir dir="${dist}" />
+        
+        <!-- Create jar file -->
+        <jar jarfile="${MyApp.jar}" basedir="${bin}">
+            <manifest>
+                <attribute name="Main-Class" value="controller.NAMControllerCompilerMain"/>
+                <attribute name="Class-Path" value="${manifest.build.classpath}"/>
+            </manifest>
+        </jar>
+        
+        <!-- Create zip file with sources -->
+        <zip destfile="${dist}/${MyApp}_sources.zip">
+            <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
+            <fileset dir="${basedir}" includes="${MyApp}*,build.xml,ivy.xml" />
+            <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" />
+            <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" />
+            <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
+            <fileset dir="${basedir}" includes="${src}/**" />            
+        </zip>
+        
+        <!-- Create dist zip file -->
+        <zip destfile="${dist}/${MyApp}.zip">
+            <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
+            <fileset dir="${basedir}" includes="${MyApp}*" />
+            <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" />
+            <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
+        </zip>
+        
+    </target>
+    
 </project>

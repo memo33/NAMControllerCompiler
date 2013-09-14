@@ -1,7 +1,14 @@
 <ivy-module version="2.0">
-    <info organisation="nam" module="tests" />
+    <info organisation="nam.controller" module="compiler" />
+    <configurations>
+        <conf name="mainapp" description="Jars used by NAMControllerCompiler application"/>
+        <conf name="tests" description="Jars used for tests"/>
+    </configurations>
     <dependencies>
-        <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0">
+        <dependency org="com.github.memo33" name="jDBPFX" rev="1.0.1" conf="mainapp->default">
+            <artifact name="jDBPFX" url="https://dl.dropboxusercontent.com/sh/b8a2x16j1vmnlc5/r8CS9Y7L0X/jDBPFX-1.0.1.jar"/>
+        </dependency>
+        <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0" conf="tests->default">
             <artifact name="system-rules" type="jar"/>
         </dependency>
     </dependencies>
