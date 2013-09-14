@@ -34,7 +34,7 @@ import model.RULEntry;
 import view.View;
 import controller.AbstractCompiler.Mode;
 
-abstract class WriteControllerTask implements ExecutableTask<Boolean> {
+abstract class WriteControllerTask implements ExecutableTask {
    
     private final DBPFTGI[] RUL_TGIS = {
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
@@ -51,7 +51,7 @@ abstract class WriteControllerTask implements ExecutableTask<Boolean> {
 
     private long starttime;
     
-    public static ExecutableTask<Boolean> getInstance(Mode mode, CollectRULsTask collectRULsTask,
+    public static ExecutableTask getInstance(Mode mode, CollectRULsTask collectRULsTask,
             boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
         if (mode.isInteractive()) {
             return new GUITask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);

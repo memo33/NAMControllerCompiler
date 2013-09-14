@@ -13,7 +13,7 @@ import javax.swing.SwingWorker;
 
 import controller.AbstractCompiler.Mode;
 
-abstract class CollectRULsTask implements ExecutableTask<Queue<File>[]> {
+abstract class CollectRULsTask implements ExecutableTask {
     
     private static FileFilter fileFilter = new FileFilter() {
         @Override

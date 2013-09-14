@@ -236,7 +236,7 @@ public abstract class Compiler extends AbstractCompiler {
     
     @Override
     public void writeControllerFile() {
-        ExecutableTask<Boolean> writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, patterns, inputDir.toURI(), outputFile, view);
+        ExecutableTask writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, patterns, inputDir.toURI(), outputFile, view);
         writeTask.execute();
         // result will be handled by determineResult in writeTask
     }
@@ -245,6 +245,7 @@ public abstract class Compiler extends AbstractCompiler {
         
         private GUICompiler(File resourceDir, Mode mode) {
             super(resourceDir, mode, new GUIView());
+            assert mode.isInteractive() : mode;
         }
         
         @Override

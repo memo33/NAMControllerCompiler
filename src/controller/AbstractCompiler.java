@@ -2,7 +2,7 @@ package controller;
 
 import view.View;
 
-public abstract class AbstractCompiler {
+public abstract class AbstractCompiler implements ExecutableTask {
     
     final Runnable runBefore;
     final Runnable runAfter;
@@ -58,6 +58,7 @@ public abstract class AbstractCompiler {
     public abstract boolean writeSettings();
     public abstract void writeControllerFile();
     
+    @Override
     public abstract void execute();
     
     enum Mode {
