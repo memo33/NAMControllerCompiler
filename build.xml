@@ -5,36 +5,37 @@
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
     <property name="MyApp.jar" value="${MyApp}.jar" />
     <property name="src" location="src" relative="true" />
+    <property name="srctest" location="test" relative="true" />
     <property name="bin" location="bin" relative="true" />
+    <property name="bintest" location="bintest" relative="true" />
     <property name="lib" location="lib" relative="true" />
     <property name="doc" location="doc" relative="true" />
     <property name="dist" location="dist" relative="true" />
     <property name="xml.resources" location="resources/xml" relative="true" />
     <property name="rul2.structure.file" value="RUL2_IID_structure" />
+    <property name="test.resources" location="resources/test" relative="true" />
     
     <path id="build.classpath">
         <fileset dir="${lib}" includes="jDBPFX*.jar" />
         <pathelement path="${bin}" />
     </path>
-    
-    <pathconvert property="manifest.build.classpath" pathsep=" ">
-        <path refid="build.classpath"/>
-        <mapper>
-            <chainedmapper>
-                <flattenmapper/>
-                <globmapper from="*.jar" to="lib/*.jar"/>
-            </chainedmapper>
-        </mapper>
-    </pathconvert>
-    
+
     <target name="resolve" description="retrieve dependencies with ivy">
+        <mkdir dir="${lib}" />
         <ivy:retrieve conf="mainapp"/>
     </target>
     
     <target name="clean" description="delete generated files">
         <delete dir="${bin}" />
+        <delete dir="${bintest}" />
         <delete dir="${doc}" />
         <delete dir="${dist}" />
+        <delete file="TEST-testsuites.AllUnitTests.txt" />
+        <delete file="TEST-testsuites.AllIntegrationTests.txt" />
+        <delete file="${MyApp.jar}" />
+        <delete file="${MyApp}.bat" />
+        <delete file="${MyApp}_developer.bat" />
+        <delete file="${MyApp}_debug.bat" />
     </target>
     
     <target name="compile" depends="resolve" description="compile the sources">
@@ -62,6 +63,16 @@
     </target>
     
     <target name="dist" depends="compile,resolve,batchfiles" description="create binary distribution">
+        <!-- class path file list for manifest file -->
+        <pathconvert property="manifest.build.classpath" pathsep=" ">
+            <path refid="build.classpath"/>
+            <mapper>
+                <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from="*.jar" to="lib/*.jar"/>
+                </chainedmapper>
+            </mapper>
+        </pathconvert>
     
         <!-- Initialization -->
         <delete file="${MyApp.jar}" />
@@ -77,13 +88,19 @@
         </jar>
         
         <!-- Create zip file with sources -->
-        <zip destfile="${dist}/${MyApp}_sources.zip">
+        <zip destfile="${dist}/${MyApp}_sources_and_tests.zip">
             <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
             <fileset dir="${basedir}" includes="${MyApp}*,build.xml,ivy.xml" />
+            <!-- source files -->
+            <fileset dir="${basedir}" includes="${src}/**" />            
+            <fileset dir="${basedir}" includes="${srctest}/**" />
+            <!-- resource files -->            
             <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" />
             <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" />
             <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
-            <fileset dir="${basedir}" includes="${src}/**" />            
+            <fileset dir="${basedir}" includes="${test.resources}/Controller/**" />
+            <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${test.resources}/xml/${rul2.structure.file}.xml" />
+            <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" fullpath="${test.resources}/xml/${rul2.structure.file}.dtd" />
         </zip>
         
         <!-- Create dist zip file -->
@@ -94,6 +111,37 @@
             <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
         </zip>
         
+    </target>
+    
+    
+    <!-- ================================
+          tests
+         ================================-->    
+
+    <path id="test.build.classpath">
+        <fileset dir="${lib}" />
+        <pathelement path="${bintest}" />
+        <pathelement path="${bin}" />
+    </path>
+
+    <target name="resolvetests" description="retrieve dependencies for tests with ivy">
+        <ivy:retrieve conf="tests"/>
+    </target>
+    
+    <target name="compiletests" depends="compile,resolvetests" description="compile the tests">
+        <mkdir dir="${bintest}" />
+        <javac target="${targetversion}" srcdir="${srctest}" destdir="${bintest}" includeantruntime="false">
+            <classpath refid="test.build.classpath" />
+        </javac>
+    </target>
+    
+    <target name="test" depends="compiletests">
+        <junit printsummary="yes" fork="yes" haltonfailure="yes">
+            <classpath refid="test.build.classpath" />
+            <formatter type="plain"/>
+            <test name="testsuites.AllUnitTests"/>
+            <test name="testsuites.AllIntegrationTests"/>
+        </junit>
     </target>
     
 </project>
