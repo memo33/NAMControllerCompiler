@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="NAMControllerCompiler" default="dist" basedir=".">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="NAMControllerCompiler" default="dist" basedir=".">
     <property name="targetversion" value="1.6" />
     <property name="project.version" value="0.3.4" />
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
@@ -9,7 +9,7 @@
     <property name="doc.dir" value="${basedir}/doc" />
     <property name="dist.dir" value="${basedir}/dist" />
     <property name="jdbpfx.dir" value="${basedir}/../jDBPFX" />
-
+    
     <path id="compile.classpath">
         <fileset dir="${lib.dir}" />
         <pathelement path="${bin.dir}" />
@@ -22,7 +22,11 @@
         <copy file="${jdbpfx.dir}/dist/jDBPFX-1.0.jar" todir="${lib.dir}" />
     </target>
     
-    <target name="compile" depends="lib" description="compile the sources">
+    <target name="resolve" description="retrieve dependencies with ivy">
+        <ivy:retrieve />
+    </target>
+    
+    <target name="compile" depends="lib,resolve" description="compile the sources">
         <mkdir dir="${bin.dir}" />
         <javac target="${targetversion}" srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
             <classpath refid="compile.classpath" />
@@ -41,7 +45,7 @@
     </target>
 
     <!-- Create binary distribution -->
-    <target name="dist" depends="compile,doc" description="create binary distribution with sources and documentation">
+    <target name="dist" depends="compile,resolve,doc" description="create binary distribution with sources and documentation">
         <delete file="${MyApp}.jar" />
         <delete file="${dist.dir}/${MyApp}_sources.zip" />
         <delete file="${dist.dir}/${MyApp}.zip" />

@@ -1,0 +1,9 @@
+<ivy-module version="2.0">
+    <info organisation="nam" module="tests" />
+    <dependencies>
+        <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0">
+            <artifact name="system-rules" type="jar"/>
+        </dependency>
+    </dependencies>
+</ivy-module>
+
