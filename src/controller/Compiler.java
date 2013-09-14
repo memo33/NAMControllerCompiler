@@ -28,16 +28,10 @@ import view.checkboxtree.MyCheckTreeManager;
 
 public abstract class Compiler extends AbstractCompiler {
 
-    static final String RESOURCE_DIR = "resources"; 
+//    static final String RESOURCE_DIR = "resources"; 
 
-    private final File
-            XML_DIR = new File(RESOURCE_DIR, "xml"),
-            XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml"),
-            XML_FILE_TEMP = new File(XML_DIR, "RUL2_IID_structure.xml~1");
-    private final File[] DATA_FILES = new File[] {
-            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt"),
-            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~1"),
-            new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~2")};
+    private final File RESOURCE_DIR, XML_DIR, XML_FILE, XML_FILE_TEMP;
+    private final File[] DATA_FILES;
     private final CompilerSettingsManager settingsManager ;
 
     private File inputDir, outputDir;
@@ -46,6 +40,7 @@ public abstract class Compiler extends AbstractCompiler {
     
     private boolean firstXMLisActive;
 
+    private PatternNode rootNode;
     private JTree tree;
 //    private MyCheckTreeManager checkTreeManager;
     private Queue<Pattern> patterns;
@@ -53,8 +48,27 @@ public abstract class Compiler extends AbstractCompiler {
     
     private File outputFile;
     
-    public Compiler(Mode mode, View view) {
+    public static Compiler getCommandLineCompiler(File resourceDir, File inputPath, File outputPath, boolean isLHD) {
+        return new CommandLineCompiler(resourceDir, inputPath, outputPath, isLHD);
+    }
+    
+    public static Compiler getInteractiveCompiler(File resourceDir, Mode mode) {
+        if (!mode.isInteractive()) {
+            throw new IllegalArgumentException("GUICompiler must be executed in interactive mode.");
+        }
+        return new GUICompiler(resourceDir, mode);
+    }
+    
+    private Compiler(File resourceDir, Mode mode, View view) {
         super(mode, view);
+        this.RESOURCE_DIR = resourceDir;
+        this.XML_DIR = new File(RESOURCE_DIR, "xml");
+        this.XML_FILE = new File(XML_DIR, "RUL2_IID_structure.xml");
+        this.XML_FILE_TEMP = new File(XML_DIR, "RUL2_IID_structure.xml~1");
+        this.DATA_FILES = new File[] {
+                new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt"),
+                new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~1"),
+                new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~2")};
         this.settingsManager = new CompilerSettingsManager(DATA_FILES);
     }
 
@@ -91,8 +105,7 @@ public abstract class Compiler extends AbstractCompiler {
         Exception previousException = null;
         if (XML_FILE.exists()) {
             try {
-                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE);
-                new MyCheckTreeManager(tree, this.mode.isDetailed());
+                rootNode = XMLParsing.buildTreeFromXML(mode, XML_FILE);
                 firstXMLisActive = true;
                 return true;
             } catch (PatternSyntaxException e) {
@@ -114,8 +127,7 @@ public abstract class Compiler extends AbstractCompiler {
         }
         if (XML_FILE_TEMP.exists()) {
             try {
-                tree = XMLParsing.buildJTreeFromXML(mode, XML_FILE_TEMP);
-                new MyCheckTreeManager(tree, this.mode.isDetailed());
+                rootNode = XMLParsing.buildTreeFromXML(mode, XML_FILE_TEMP);
                 firstXMLisActive = false;
                 return true;
             } catch (PatternSyntaxException e) {
@@ -149,13 +161,13 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public boolean collectPatterns() {
-        patterns = ((AbstractNode) tree.getModel().getRoot()).getAllSelectedPatterns();
+        patterns = ((AbstractNode) rootNode).getAllSelectedPatterns();
         return true;
     }
     
     @Override
     public boolean collectRULInputFiles() {
-        collectRULsTask = new CollectRULsTask(rulDirs);
+        collectRULsTask = CollectRULsTask.getInstance(mode, rulDirs);
         collectRULsTask.execute();
         return true;
     }
@@ -210,7 +222,7 @@ public abstract class Compiler extends AbstractCompiler {
                     return false;
                 }
             }
-            XMLParsing.writeXMLfromJTree(tree, XML_FILE);
+            XMLParsing.writeXMLfromTree(rootNode, XML_FILE);
             return true;
         } catch (FileNotFoundException e) {
             view.publishException("Could not write settings", e);
@@ -222,13 +234,17 @@ public abstract class Compiler extends AbstractCompiler {
         return false;
     }
     
-    public static class GUICompiler extends Compiler {
+    @Override
+    public void writeControllerFile() {
+        ExecutableTask<Boolean> writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, patterns, inputDir.toURI(), outputFile, view);
+        writeTask.execute();
+        // result will be handled by determineResult in writeTask
+    }
+    
+    private static class GUICompiler extends Compiler {
         
-        public GUICompiler(Mode mode) {
-            super(mode, new GUIView());
-            if (!mode.isInteractive()) {
-                throw new RuntimeException("GUICompiler must be executed in interactive mode.");
-            }
+        private GUICompiler(File resourceDir, Mode mode) {
+            super(resourceDir, mode, new GUIView());
         }
         
         @Override
@@ -254,13 +270,6 @@ public abstract class Compiler extends AbstractCompiler {
             }
         }
         
-        @Override
-        public void writeControllerFile() {
-            WriteControllerTask writeTask = new WriteControllerTask(super.collectRULsTask, super.isLHD, super.patterns, super.inputDir.toURI(), super.outputFile, view);
-            writeTask.execute();
-            // result will be handled by done-method in writeTask
-        }
-
         @Override
         public void execute() {
             runBefore.run();
@@ -294,14 +303,24 @@ public abstract class Compiler extends AbstractCompiler {
                 }
             });
         }
+        
+        @Override
+        public boolean readXML() {
+            boolean success = super.readXML();
+            if (success && this.mode.isInteractive()) {
+                super.tree = new JTree(super.rootNode);
+                new MyCheckTreeManager(super.tree, this.mode.isDetailed());
+            }
+            return success;
+        }
     }
     
-    public static class CommandLineCompiler extends Compiler {
+    private static class CommandLineCompiler extends Compiler {
         
-        public CommandLineCompiler(String inputPath, String outputPath, boolean isLHD) {
-            super(Mode.COMMAND_LINE, new ConsoleView());
-            super.inputDir = new File(inputPath);
-            super.outputDir = new File(outputPath);
+        private CommandLineCompiler(File resourceDir, File inputPath, File outputPath, boolean isLHD) {
+            super(resourceDir, Mode.COMMAND_LINE, new ConsoleView());
+            super.inputDir = inputPath;
+            super.outputDir = outputPath;
             super.isLHD = isLHD;
         }
         
@@ -310,21 +329,6 @@ public abstract class Compiler extends AbstractCompiler {
             return true;
         }
         
-        @Override
-        public void writeControllerFile() {
-            WriteControllerTask writeTask = new WriteControllerTask(super.collectRULsTask, super.isLHD, super.patterns, super.inputDir.toURI(), super.outputFile, view) {
-                @Override
-                protected void done() {
-                    /*
-                     * Dirty hack so as to be able to call determineResult()
-                     * in the same Thread because SwingWorker is daemon!
-                     */
-                };
-            };
-            writeTask.execute();
-            writeTask.determineResult();
-        }
-
         @Override
         public void execute() {
             runBefore.run();

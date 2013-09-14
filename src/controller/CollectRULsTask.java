@@ -7,12 +7,14 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-public class CollectRULsTask extends SwingWorker<Queue<File>[], Void> {
+import controller.AbstractCompiler.Mode;
+
+abstract class CollectRULsTask implements ExecutableTask<Queue<File>[]> {
     
-    private final File[] rulDirs;
     private static FileFilter fileFilter = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
@@ -22,20 +24,27 @@ public class CollectRULsTask extends SwingWorker<Queue<File>[], Void> {
         }
     };
     
-    public CollectRULsTask(File[] rulDirs) {
+    private final File[] rulDirs;
+    
+    public static CollectRULsTask getInstance(Mode mode, File[] rulDirs) {
+        return mode.isInteractive() ? new GUITask(rulDirs) : new CommandLineTask(rulDirs); 
+    }
+    
+    private CollectRULsTask(File[] rulDirs) {
         this.rulDirs = rulDirs;
     }
-
-    @Override
-    protected Queue<File>[] doInBackground() {
+    
+    public abstract Queue<File>[] get() throws InterruptedException, ExecutionException;
+    
+    private Queue<File>[] mainProcess() {
         LOGGER.info("Collecting input data.");
         @SuppressWarnings("unchecked")
         Queue<File>[] rulInputFiles = new Queue[3];
         for (int i = 0; i < rulInputFiles.length; i++)
-            rulInputFiles[i] = collectRecursively(rulDirs[i]);
+            rulInputFiles[i] = collectRecursively(CollectRULsTask.this.rulDirs[i]);
         return rulInputFiles;
     }
-    
+
     /**
      * Recursive collecting.
      * @param parent parent file of the directory.
@@ -54,4 +63,50 @@ public class CollectRULsTask extends SwingWorker<Queue<File>[], Void> {
         }
         return result;
     }
+    private static class GUITask extends CollectRULsTask {
+        
+        private final SwingWorker<Queue<File>[], Void> worker;
+        
+        private GUITask(File[] rulDirs) {
+            super(rulDirs);
+            this.worker = new SwingWorker<Queue<File>[], Void>() {
+                
+                @Override
+                protected Queue<File>[] doInBackground() {
+                    return GUITask.super.mainProcess();
+                }
+            };
+        }
+        
+        @Override
+        public void execute() {
+            this.worker.execute();
+        }
+        
+        @Override
+        public Queue<File>[] get() throws InterruptedException, ExecutionException {
+            return worker.get();
+        }
+    }
+    
+    private static class CommandLineTask extends CollectRULsTask {
+        
+        private Queue<File>[] result;
+        
+        private CommandLineTask(File[] rulDirs) {
+            super(rulDirs);
+        }
+        
+        @Override
+        public void execute() {
+            result = CommandLineTask.super.mainProcess();
+        }
+        
+        @Override
+        public Queue<File>[] get() {
+            return result;
+        }
+        
+    }
 }
+

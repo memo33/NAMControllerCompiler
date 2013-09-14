@@ -141,14 +141,14 @@ public abstract class RULEntry extends DBPFEntry {
         }
     }
     
-    /**
-     * @return whether file has to be skipped because of s/e-series.
-     */
-    static boolean fileMatchesSeries(File file, boolean eSeriesFlag) {
-        String filename = file.getName().substring(0, file.getName().length() - 4).toLowerCase();
-        return !(filename.endsWith("_e-series") && !eSeriesFlag
-                || filename.endsWith("_s-series") && eSeriesFlag);                    
-    }
+//    /**
+//     * @return whether file has to be skipped because of s/e-series.
+//     */
+//    static boolean fileMatchesSeries(File file, boolean eSeriesFlag) {
+//        String filename = file.getName().substring(0, file.getName().length() - 4).toLowerCase();
+//        return !(filename.endsWith("_e-series") && !eSeriesFlag
+//                || filename.endsWith("_s-series") && eSeriesFlag);                    
+//    }
     
     public long getLastModified() {
         return this.lastModified;

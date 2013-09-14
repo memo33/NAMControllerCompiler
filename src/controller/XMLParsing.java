@@ -9,7 +9,6 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.swing.JTree;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -51,7 +50,7 @@ public class XMLParsing {
     private static String KEY_DISABLED = "disabled";
 //    private static String KEY_HIDDEN = "hidden";
     
-    public static void writeXMLfromJTree(JTree tree, File xmlFile) throws ParserConfigurationException, TransformerException {
+    public static void writeXMLfromTree(PatternNode rootNode, File xmlFile) throws ParserConfigurationException, TransformerException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(true);
         
@@ -60,7 +59,7 @@ public class XMLParsing {
         
         Element rootElement = doc.createElement(KEY_IIDTREE);
         doc.appendChild(rootElement);
-        appendNodes((PatternNode) tree.getModel().getRoot(), doc, rootElement);
+        appendNodes(rootNode, doc, rootElement);
         
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, SYSTEM_VALUE);
@@ -94,7 +93,9 @@ public class XMLParsing {
     }
     
 	/**
-	 * Builds a JTree of MyNodes, parsed from the XML file of iid_tree structure.
+	 * Builds a tree of PatternNodes, parsed from the XML file of iid_tree structure.
+	 * 
+	 * @param mode the compiler run mode.
 	 * @param xmlFile the XML file containing the iid_tree structure.
 	 * @return the JTree to be displayed in the GUI.
 	 * @throws ParserConfigurationException
@@ -102,7 +103,7 @@ public class XMLParsing {
 	 * @throws IOException
 	 * @throws PatternSyntaxException
 	 */
-	public static JTree buildJTreeFromXML(Mode mode, File xmlFile) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException {	
+	public static PatternNode buildTreeFromXML(Mode mode, File xmlFile) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException {	
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory.setValidating(true);
 
@@ -114,7 +115,7 @@ public class XMLParsing {
 		NodeList nodeList = doc.getChildNodes();
 		Queue<PatternNode> children = getMyNodes(mode, nodeList, null);
 		PatternNode rootNode = children.peek();
-		return new JTree(rootNode);
+		return rootNode;
 	}
 	
 	/**
