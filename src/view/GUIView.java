@@ -80,7 +80,9 @@ public class GUIView extends ConsoleView {
         } {
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
-            stackTracePanel.add(new JScrollPane(new JTextArea(sw.toString())));
+            JTextArea textArea = new JTextArea(sw.toString());
+            textArea.setEditable(false);
+            stackTracePanel.add(new JScrollPane(textArea));
         }
         stackTracePanel.setPreferredSize(new Dimension(600, 300));
         JOptionPane.showMessageDialog(frame, stackTracePanel, "Error", JOptionPane.ERROR_MESSAGE);

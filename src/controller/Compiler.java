@@ -103,11 +103,13 @@ public abstract class Compiler extends AbstractCompiler {
     public boolean readXML() {
         String message = null;
         Exception previousException = null;
+        firstXMLisActive = false;
+        boolean success = false;
         if (XML_FILE.exists()) {
             try {
                 rootNode = XMLParsing.buildTreeFromXML(mode, XML_FILE);
                 firstXMLisActive = true;
-                return true;
+                success = true;
             } catch (PatternSyntaxException e) {
                 message = "Syntax exception for Regular Expression in XML file";
                 previousException = e;
@@ -121,15 +123,15 @@ public abstract class Compiler extends AbstractCompiler {
                 message = e.getLocalizedMessage();
                 previousException = e;
             }
-            if (!XML_FILE_TEMP.exists()) {
+            if (!success && !XML_FILE_TEMP.exists()) {
                 view.publishException(message, previousException);
             }
         }
-        if (XML_FILE_TEMP.exists()) {
+        if (!success && XML_FILE_TEMP.exists()) {
             try {
                 rootNode = XMLParsing.buildTreeFromXML(mode, XML_FILE_TEMP);
                 firstXMLisActive = false;
-                return true;
+                success = true;
             } catch (PatternSyntaxException e) {
                 if (previousException != null) {
                     view.publishException(message, previousException);
@@ -156,13 +158,31 @@ public abstract class Compiler extends AbstractCompiler {
                 }
             }
         }
-        return false;
+        if (!success) {
+            return false;
+        } else if (!firstXMLisActive) {
+            LOGGER.log(Level.SEVERE, "The XML file \"{0}\" is unreadable.", XML_FILE);
+            boolean approved = view.publishConfirmOption("The XML file \"{0}\" is unreadable. Use previous configuration?", XML_FILE);
+            if (!approved) {
+                LOGGER.info("Using previous XML configuration denied");
+            } else {
+                LOGGER.info("Using previous XML configuration");
+            }
+            return approved;
+        } else {
+            return true;
+        }
     }
 
     @Override
     public boolean collectPatterns() {
-        patterns = ((AbstractNode) rootNode).getAllSelectedPatterns();
-        return true;
+        try {
+            patterns = ((AbstractNode) rootNode).getAllSelectedPatterns();
+            return true;
+        } catch (SAXException e) {
+            view.publishException(e.getLocalizedMessage(), e);
+            return false;
+        }
     }
     
     @Override

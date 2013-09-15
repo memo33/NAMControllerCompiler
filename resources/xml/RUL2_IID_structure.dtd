@@ -1,6 +1,7 @@
 <!ELEMENT iid_tree (node+)>
 <!ELEMENT node (regex*,(regex|node),node*)>
-<!ELEMENT regex EMPTY>
+<!ELEMENT regex (requires*)>
+<!ELEMENT requires EMPTY>
 
 <!ATTLIST node
     name CDATA #REQUIRED
@@ -8,3 +9,4 @@
     disabled (true | false) "false"
 >
 <!ATTLIST regex value CDATA #REQUIRED>
+<!ATTLIST requires nodename CDATA #REQUIRED>

@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.regex.Pattern;
 
-import controller.AbstractCompiler.Mode;
+import org.xml.sax.SAXException;
 
+import controller.AbstractCompiler.Mode;
 
 public class PatternNode extends AbstractNode {
 
@@ -19,7 +20,7 @@ public class PatternNode extends AbstractNode {
 //    private final List<BilateralNode> totalChildren = new ArrayList<BilateralNode>();
     private final Mode mode;
     private final String name;
-    private final Queue<Pattern> patterns = new ArrayDeque<Pattern>();;
+    private final Queue<PatternAttribute> patterns = new ArrayDeque<PatternAttribute>();;
     
 //    private ViewType viewType = ViewType.VISIBLE;
     private boolean selected;
@@ -129,8 +130,8 @@ public class PatternNode extends AbstractNode {
 //        return false;
 //    }
     
-    public void addRegex(String regex) {
-        patterns.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
+    public void addRegex(String regex, String... requiredSiblingNodes) {
+        patterns.add(new PatternAttribute(regex, requiredSiblingNodes));
     }
     
     public boolean hasPatterns() {
@@ -181,11 +182,41 @@ public class PatternNode extends AbstractNode {
         this.disabled = false;
     }
     
-    private static void collectSelectedPatterns(Collection<Pattern> c, PatternNode node, StringBuilder sb) {
+    private static boolean requirementsFulfilled(PatternNode node, PatternAttribute pa) throws SAXException {
+        for (int i = 0; i < pa.requiredSiblingNodes.length; i++) {
+            String requiredNodeName = pa.requiredSiblingNodes[i];
+            if (node.name.equals(requiredNodeName)) {
+                throw new SAXException("Required node must not be the node itself: " + node.getPathString());
+            } else if (node.getParent() == null) {
+                throw new SAXException("Root node cannot have required nodes");
+            } else {
+                PatternNode sibling = null;
+                for (PatternNode pn : node.getParent().visibleChildren) {
+                    if (pn.name.equals(requiredNodeName)) {
+                        sibling = pn;
+                        if (!pn.isSelected()) {
+                            return false;
+                        }
+                    }
+                }
+                if (sibling == null) {
+                    throw new SAXException("Sibling node " + requiredNodeName + " does not exist for node: " + node.getPathString());
+                }
+            }
+        }
+        return true;
+    }
+    
+    private static void collectSelectedPatterns(Collection<Pattern> c, PatternNode node, StringBuilder sb) throws SAXException {
 //        BilateralNode totalNode = node.getTotalView();
         if (node.isSelected() && node.hasPatterns()) {
             sb.append(newline + node.getPathString());
-            c.addAll(node.patterns);
+            for (PatternAttribute pa : node.getPatternAttributes()) {
+                if (requirementsFulfilled(node, pa)) {
+                    c.add(pa.pattern);
+                    sb.append(newline + "        " + pa.pattern.pattern());
+                }
+            }
         } else {
             for (PatternNode child : node.getActiveChildren()) {
                 collectSelectedPatterns(c, child, sb);
@@ -196,7 +227,7 @@ public class PatternNode extends AbstractNode {
     private static final String newline = System.getProperty("line.separator");
 
     @Override
-    public Queue<Pattern> getAllSelectedPatterns() {
+    public Queue<Pattern> getAllSelectedPatterns() throws SAXException {
         Queue<Pattern> patterns = new ArrayDeque<Pattern>();
         StringBuilder sb = new StringBuilder("Selected Nodes:");
         collectSelectedPatterns(patterns, this, sb);
@@ -208,7 +239,7 @@ public class PatternNode extends AbstractNode {
         return this.name;
     }
     
-    public Queue<Pattern> getPatterns() {
+    public Queue<PatternAttribute> getPatternAttributes() {
         return this.patterns;
     }
     

@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.tree.TreeNode;
 
+import org.xml.sax.SAXException;
+
 public abstract class AbstractNode implements TreeNode {
     
     protected abstract List<PatternNode> getActiveChildren();
@@ -21,7 +23,7 @@ public abstract class AbstractNode implements TreeNode {
     @Override
     public abstract AbstractNode getParent();
     
-    public abstract Queue<Pattern> getAllSelectedPatterns();
+    public abstract Queue<Pattern> getAllSelectedPatterns() throws SAXException;
 
     public abstract String getPathString();
     

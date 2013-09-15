@@ -4,9 +4,9 @@ import static controller.NAMControllerCompilerMain.LOGGER;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,6 +49,8 @@ public class XMLParsing {
     private static String KEY_SELECTED = "selected";
     private static String KEY_DISABLED = "disabled";
 //    private static String KEY_HIDDEN = "hidden";
+    private static String KEY_REQUIRES = "requires";
+    private static String KEY_REQUIRES_VALUE = "nodename";
     
     public static void writeXMLfromTree(PatternNode rootNode, File xmlFile) throws ParserConfigurationException, TransformerException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -79,9 +81,14 @@ public class XMLParsing {
         if (parentNode.isDisabled()) {
             parentElement.setAttribute(KEY_DISABLED, "true");
         }
-        for (Pattern p : parentNode.getPatterns()) {
+        for (PatternAttribute patternAttribute : parentNode.getPatternAttributes()) {
             Element regexElement = doc.createElement(KEY_REGEX);
-            regexElement.setAttribute(KEY_VALUE, p.pattern());
+            regexElement.setAttribute(KEY_VALUE, patternAttribute.pattern.pattern());
+            for (int i = 0; i < patternAttribute.requiredSiblingNodes.length; i++) {
+                Element requiresElement = doc.createElement(KEY_REQUIRES);
+                requiresElement.setAttribute(KEY_REQUIRES_VALUE, patternAttribute.requiredSiblingNodes[i]);
+                regexElement.appendChild(requiresElement);
+            }
             parentElement.appendChild(regexElement);
         }
         for (PatternNode childNode : parentNode.getActiveChildren()) {
@@ -159,7 +166,20 @@ public class XMLParsing {
 					queue.add(myNode);
 				} else if (s.equals(KEY_REGEX)) {
 					String regexValue = tempNode.getAttributes().getNamedItem(KEY_VALUE).getNodeValue();
-					parent.addRegex(regexValue);
+					// retrieve required nodes
+					NodeList childNodes = tempNode.getChildNodes();
+					ArrayList<String> requiresNamesList = new ArrayList<String>(2);
+					for (int i = 0; i < childNodes.getLength(); i++) {
+					    Node requiresNode = childNodes.item(i);
+					    if (requiresNode.getNodeType() != Node.ELEMENT_NODE) {
+					        continue;
+					    }
+					    if (!requiresNode.getNodeName().equals(KEY_REQUIRES)) {
+		                    throw new SAXException("Invalid node name in XML file: " + requiresNode.getNodeName());
+					    }
+					    requiresNamesList.add(requiresNode.getAttributes().getNamedItem(KEY_REQUIRES_VALUE).getNodeValue());
+					}
+					parent.addRegex(regexValue, requiresNamesList.toArray(new String[requiresNamesList.size()]));
 				} else {
 					throw new SAXException("Invalid node name in XML file: " + tempNode.getNodeName());
 				}
