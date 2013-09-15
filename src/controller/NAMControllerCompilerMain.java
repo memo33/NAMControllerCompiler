@@ -65,11 +65,16 @@ public class NAMControllerCompilerMain {
 	            LOGGER.log(Level.SEVERE, "IOException at instantiation of FileHandler", e);
 	        }
 		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, Mode.DEBUG);
-		} else if (args.length >= 3) { // TODO number of arguments 
+		} else if (args.length == CommandLineArguments.getExpectedArgumentCount()) { 
 		    // command line mode
 //	        consoleHandler.setLevel(Level.INFO);
 	        consoleHandler.setLevel(Level.ALL);
-		    compiler = Compiler.getCommandLineCompiler(RESOURCE_DIR, new File(args[0]), new File(args[1]), args[2].equals("lhd"));
+	        CommandLineArguments arguments = CommandLineArguments.getInstance(args);
+	        if (arguments != null) {
+	            compiler = Compiler.getCommandLineCompiler(RESOURCE_DIR, arguments);
+	        } else {
+	            throw new AssertionError("Malformed command line arguments.");
+	        }
 		} else {
 		    LOGGER.severe("Wrong number of arguments passed.");
 		    System.exit(-1);

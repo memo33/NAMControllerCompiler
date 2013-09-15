@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="NAMControllerCompiler" default="dist" basedir=".">
     <property name="targetversion" value="1.6" />
-    <property name="project.version" value="0.3.4" />
+    <property name="project.version" value="0.3.6" />
     <property name="MyApp" value="${ant.project.name}_${project.version}" />
     <property name="MyApp.jar" value="${MyApp}.jar" />
     <property name="src" location="src" relative="true" />
@@ -59,7 +59,7 @@
     <target name="batchfiles" description="generate batch files">
         <echo file="${MyApp}.bat">java -jar ${MyApp}.jar</echo>
         <echo file="${MyApp}_developer.bat">java -jar ${MyApp}.jar dev</echo>
-        <echo file="${MyApp}_debug.bat">java -jar ${MyApp}.jar debug</echo>
+        <echo file="${MyApp}_debug.bat">java -jar -ea ${MyApp}.jar debug</echo>
     </target>
     
     <target name="resources" description="copy resource files to appropriate locations in resource folder">

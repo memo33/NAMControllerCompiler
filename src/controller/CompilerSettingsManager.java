@@ -6,25 +6,35 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Scanner;
+import java.util.logging.Level;
+
+import controller.CommandLineArguments.ArgumentID;
 
 public class CompilerSettingsManager {
     
-    private String input = "", output = "";
-    private boolean lhdFlag = false;
+//    private String input = "", output = "";
+//    private boolean lhdFlag = false;
     private final File dataFile, tempFile1, tempFile2;
+    private final CommandLineArguments arguments;
     
-    public CompilerSettingsManager(File[] dataFiles) {
+    public CompilerSettingsManager(File[] dataFiles, CommandLineArguments arguments) {
         this.dataFile = dataFiles[0];
         this.tempFile1 = dataFiles[1];
         this.tempFile2 = dataFiles[2];
+        this.arguments = arguments;
     }
     
     public void readSettings() throws FileNotFoundException {
-        Scanner scanner = new Scanner(dataFile.exists() ? dataFile : (tempFile1.exists() ? tempFile1 : tempFile2));
-        input = scanner.hasNextLine() ? scanner.nextLine() : "";
-        output = scanner.hasNextLine() ? scanner.nextLine() : "";
-        lhdFlag = scanner.hasNextLine() ? scanner.nextLine().equals("lhd") : false;
-//        eseriesFlag = scanner.hasNextLine() ? scanner.nextLine().equals("eseries=true") : true;
+        File fileToRead = dataFile.exists() ? dataFile : (tempFile1.exists() ? tempFile1 : tempFile2);
+        Scanner scanner = new Scanner(fileToRead);
+        int i = 0;
+        while (scanner.hasNextLine()) {
+            this.arguments.setArgument(i, scanner.nextLine().trim());
+            i++;
+        }
+        if (i != CommandLineArguments.getExpectedArgumentCount()) {
+            LOGGER.log(Level.SEVERE, "The number of arguments found in \"{0}\" does not match the expected number of " + CommandLineArguments.getExpectedArgumentCount(), fileToRead);
+        }
         scanner.close();
     }
     
@@ -32,11 +42,14 @@ public class CompilerSettingsManager {
      * Writes the settings into the dataFile.
      */
     public void writeSettings(File inputDir, File outputDir, boolean isLHD) throws FileNotFoundException {
+        arguments.setArgument(ArgumentID.INPUT_DIR, inputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.OUTPUT_DIR, outputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.RHD_FLAG, isLHD ? "0" : "1");
+        
         PrintWriter printer = new PrintWriter(tempFile1);
-        printer.println(inputDir.getAbsolutePath());
-        printer.println(outputDir.getAbsolutePath());
-        printer.println(isLHD ? "lhd" : "rhd");
-//        printer.println(isESeries ? "eseries=true" : "eseries=false");
+        for (String arg : arguments) {
+            printer.println(arg);
+        }
         printer.close();
         
         if (dataFile.exists()) {
@@ -61,20 +74,20 @@ public class CompilerSettingsManager {
      * @return the input
      */
     public String getInput() {
-        return input;
+        return arguments.getArgument(ArgumentID.INPUT_DIR);
     }
 
     /**
      * @return the output
      */
     public String getOutput() {
-        return output;
+        return arguments.getArgument(ArgumentID.OUTPUT_DIR);
     }
 
     /**
      * @return the lhdFlag
      */
     public boolean getLhdFlag() {
-        return lhdFlag;
+        return arguments.getArgument(ArgumentID.RHD_FLAG).equals("0");
     }
 }

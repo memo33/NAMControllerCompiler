@@ -14,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import controller.CommandLineArguments.ArgumentID;
+
 /**
  * integration test
  */
@@ -42,7 +44,11 @@ public class ControllerTest {
     @Test
     public void test() throws SecurityException, NoSuchFieldException, Exception {
         File outputDir = tempFolder.newFolder();
-        Compiler compiler = Compiler.getCommandLineCompiler(resourcesTestDir, inputDir, outputDir, isLHD);
+        CommandLineArguments arguments = CommandLineArguments.getInstance();
+        arguments.setArgument(ArgumentID.INPUT_DIR, inputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.OUTPUT_DIR, outputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.RHD_FLAG, isLHD ? "0" : "1");
+        Compiler compiler = Compiler.getCommandLineCompiler(resourcesTestDir, arguments);
         assertTrue(compiler.readSettings());
         assertTrue(compiler.checkXMLExists());
         assertTrue(compiler.checkInputFilesExist());

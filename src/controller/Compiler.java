@@ -48,8 +48,8 @@ public abstract class Compiler extends AbstractCompiler {
     
     private File outputFile;
     
-    public static Compiler getCommandLineCompiler(File resourceDir, File inputPath, File outputPath, boolean isLHD) {
-        return new CommandLineCompiler(resourceDir, inputPath, outputPath, isLHD);
+    public static Compiler getCommandLineCompiler(File resourceDir, CommandLineArguments args) {
+        return new CommandLineCompiler(resourceDir, args);
     }
     
     public static Compiler getInteractiveCompiler(File resourceDir, Mode mode) {
@@ -59,7 +59,7 @@ public abstract class Compiler extends AbstractCompiler {
         return new GUICompiler(resourceDir, mode);
     }
     
-    private Compiler(File resourceDir, Mode mode, View view) {
+    private Compiler(File resourceDir, Mode mode, View view, CommandLineArguments args) {
         super(mode, view);
         this.RESOURCE_DIR = resourceDir;
         this.XML_DIR = new File(RESOURCE_DIR, "xml");
@@ -69,7 +69,7 @@ public abstract class Compiler extends AbstractCompiler {
                 new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt"),
                 new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~1"),
                 new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~2")};
-        this.settingsManager = new CompilerSettingsManager(DATA_FILES);
+        this.settingsManager = new CompilerSettingsManager(DATA_FILES, args);
     }
 
     @Override
@@ -264,7 +264,7 @@ public abstract class Compiler extends AbstractCompiler {
     private static class GUICompiler extends Compiler {
         
         private GUICompiler(File resourceDir, Mode mode) {
-            super(resourceDir, mode, new GUIView());
+            super(resourceDir, mode, new GUIView(), CommandLineArguments.getInstance());
             assert mode.isInteractive() : mode;
         }
         
@@ -338,11 +338,11 @@ public abstract class Compiler extends AbstractCompiler {
     
     private static class CommandLineCompiler extends Compiler {
         
-        private CommandLineCompiler(File resourceDir, File inputPath, File outputPath, boolean isLHD) {
-            super(resourceDir, Mode.COMMAND_LINE, new ConsoleView());
-            super.inputDir = inputPath;
-            super.outputDir = outputPath;
-            super.isLHD = isLHD;
+        private CommandLineCompiler(File resourceDir, CommandLineArguments args) {
+            super(resourceDir, Mode.COMMAND_LINE, new ConsoleView(), args);
+            super.inputDir = new File(super.settingsManager.getInput());
+            super.outputDir = new File(super.settingsManager.getOutput());
+            super.isLHD = super.settingsManager.getLhdFlag();
         }
         
         @Override
