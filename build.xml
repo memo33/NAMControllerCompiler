@@ -62,7 +62,25 @@
         <echo file="${MyApp}_debug.bat">java -jar ${MyApp}.jar debug</echo>
     </target>
     
-    <target name="dist" depends="compile,resolve,batchfiles" description="create binary distribution">
+    <target name="resources" description="copy resource files to appropriate locations in resource folder">
+        <copy file="${xml.resources}/${rul2.structure.file}_default.xml"
+            tofile="${xml.resources}/${rul2.structure.file}.xml"
+            preservelastmodified="true"
+            overwrite="true"
+        />
+        <copy file="${xml.resources}/${rul2.structure.file}_default.xml"
+            tofile="${test.resources}/xml/${rul2.structure.file}.xml"
+            preservelastmodified="true"
+            overwrite="true"
+        />
+        <copy file="${xml.resources}/${rul2.structure.file}.dtd"
+            todir="${test.resources}/xml/"
+            preservelastmodified="true"
+            overwrite="true"
+        />
+    </target>
+    
+    <target name="dist" depends="compile,resolve,batchfiles,resources" description="create binary distribution">
         <!-- class path file list for manifest file -->
         <pathconvert property="manifest.build.classpath" pathsep=" ">
             <path refid="build.classpath"/>
@@ -108,6 +126,7 @@
             <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
             <fileset dir="${basedir}" includes="${MyApp}*" />
             <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" />
+            <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" />
             <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
         </zip>
         
@@ -116,7 +135,7 @@
     
     <!-- ================================
           tests
-         ================================-->    
+         ================================ -->
 
     <path id="test.build.classpath">
         <fileset dir="${lib}" />
@@ -135,7 +154,7 @@
         </javac>
     </target>
     
-    <target name="test" depends="compiletests">
+    <target name="test" depends="compiletests,resources">
         <junit printsummary="yes" fork="yes" haltonfailure="yes">
             <classpath refid="test.build.classpath" />
             <formatter type="plain"/>
