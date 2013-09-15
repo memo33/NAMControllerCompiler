@@ -1,0 +1,22 @@
+# main build directories
+bin/
+bintest/
+dist/
+doc/
+lib/
+
+# generated files
+*.jar
+*.bat
+
+# compiler resource files
+resources/log*.txt
+resources/**/*~1
+resources/**/*~2
+NAMControllerCompilerSettings.txt
+resources/**/*.xml
+resources/**/*.dtd
+
+# ant test logs
+TEST-*.txt
+
