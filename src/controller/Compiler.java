@@ -15,6 +15,8 @@ import java.util.regex.PatternSyntaxException;
 import javax.swing.JFrame;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
@@ -55,6 +57,18 @@ public abstract class Compiler extends AbstractCompiler {
     public static Compiler getInteractiveCompiler(File resourceDir, Mode mode) {
         if (!mode.isInteractive()) {
             throw new IllegalArgumentException("GUICompiler must be executed in interactive mode.");
+        }
+        assert mode != Mode.COMMAND_LINE;
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.WARNING, "Could not set system Look and Feel", e);
+        } catch (InstantiationException e) {
+            LOGGER.log(Level.WARNING, "Could not set system Look and Feel", e);
+        } catch (IllegalAccessException e) {
+            LOGGER.log(Level.WARNING, "Could not set system Look and Feel", e);
+        } catch (UnsupportedLookAndFeelException e) {
+            LOGGER.log(Level.WARNING, "Could not set system Look and Feel", e);
         }
         return new GUICompiler(resourceDir, mode);
     }
