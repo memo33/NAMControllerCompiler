@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -22,17 +23,17 @@ import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
 
+import view.CompilerFrame;
+import view.ConsoleView;
+import view.GUIView;
+import view.View;
+import view.checkboxtree.MyCheckTreeManager;
 import controller.tasks.CollectRULsTask;
 import controller.tasks.ExecutableTask;
 import controller.tasks.WriteControllerTask;
 import controller.xml.AbstractNode;
 import controller.xml.PatternNode;
 import controller.xml.XMLParsing;
-import view.CompilerFrame;
-import view.ConsoleView;
-import view.GUIView;
-import view.View;
-import view.checkboxtree.MyCheckTreeManager;
 
 public abstract class Compiler extends AbstractCompiler {
 
@@ -286,6 +287,12 @@ public abstract class Compiler extends AbstractCompiler {
         private GUICompiler(File resourceDir, CompileMode mode) {
             super(resourceDir, mode, new GUIView(), CommandLineArguments.getInstance());
             assert mode.isInteractive() : mode;
+            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+				@Override
+				public void uncaughtException(Thread t, Throwable e) {
+					GUICompiler.super.view.publishException(e.getLocalizedMessage(), e);
+				}
+			});
         }
         
         @Override

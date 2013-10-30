@@ -78,6 +78,7 @@ public class ModelTest {
         while (scanner.hasNextLine()) {
             assertEquals(scanner.nextLine() + "\r\n", sampleText);
         }
+        scanner.close();
     }
     
     @Test
