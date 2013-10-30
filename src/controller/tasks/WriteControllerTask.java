@@ -1,4 +1,4 @@
-package controller;
+package controller.tasks;
 
 import static controller.NAMControllerCompilerMain.LOGGER;
 
@@ -23,6 +23,7 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import controller.CompileMode;
 import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFFile;
 import jdpbfx.DBPFTGI;
@@ -32,9 +33,8 @@ import model.RUL1Entry;
 import model.RUL2Entry;
 import model.RULEntry;
 import view.View;
-import controller.AbstractCompiler.Mode;
 
-abstract class WriteControllerTask implements ExecutableTask {
+public abstract class WriteControllerTask implements ExecutableTask {
    
     private final DBPFTGI[] RUL_TGIS = {
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
@@ -51,7 +51,7 @@ abstract class WriteControllerTask implements ExecutableTask {
 
     private long starttime;
     
-    public static ExecutableTask getInstance(Mode mode, CollectRULsTask collectRULsTask,
+    public static ExecutableTask getInstance(CompileMode mode, CollectRULsTask collectRULsTask,
             boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
         if (mode.isInteractive()) {
             return new GUITask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);

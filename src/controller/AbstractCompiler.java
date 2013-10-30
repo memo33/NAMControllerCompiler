@@ -1,5 +1,6 @@
 package controller;
 
+import controller.tasks.ExecutableTask;
 import view.View;
 
 public abstract class AbstractCompiler implements ExecutableTask {
@@ -7,9 +8,9 @@ public abstract class AbstractCompiler implements ExecutableTask {
     final Runnable runBefore;
     final Runnable runAfter;
     final View view;
-    final Mode mode;
+    final CompileMode mode;
     
-    public AbstractCompiler(Mode mode, View view) {
+    public AbstractCompiler(CompileMode mode, View view) {
         this.mode = mode;
         this.view = view;
         runBefore = new Runnable() {
@@ -60,19 +61,4 @@ public abstract class AbstractCompiler implements ExecutableTask {
     
     @Override
     public abstract void execute();
-    
-    enum Mode {
-        DEBUG,
-        DEVELOPER,
-        DEFAULT,
-        COMMAND_LINE;
-        
-        public boolean isInteractive() {
-            return this != Mode.COMMAND_LINE;
-        }
-        
-        public boolean isDetailed() {
-            return this == DEVELOPER || this == DEBUG;
-        }
-    }
 }

@@ -43,7 +43,7 @@ public class GUIView extends ConsoleView {
                 dialog.add(new JOptionPane(progressPanel, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[0]));
                 dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
                 dialog.pack();
-                dialog.setLocationByPlatform(true);
+                dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
             }
         });

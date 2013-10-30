@@ -9,7 +9,7 @@ import javax.swing.tree.RowMapper;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import controller.PatternNode;
+import controller.xml.PatternNode;
 
 /**
  * @author Santhosh Kumar T - santhosh@in.fiorano.com 

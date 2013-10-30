@@ -1,4 +1,4 @@
-package controller;
+package controller.xml;
 
 import static controller.NAMControllerCompilerMain.LOGGER;
 
@@ -11,14 +11,14 @@ import java.util.regex.Pattern;
 
 import org.xml.sax.SAXException;
 
-import controller.AbstractCompiler.Mode;
+import controller.CompileMode;
 
 public class PatternNode extends AbstractNode {
 
     private PatternNode parent = null;
     private final List<PatternNode> visibleChildren = new ArrayList<PatternNode>();
 //    private final List<BilateralNode> totalChildren = new ArrayList<BilateralNode>();
-    private final Mode mode;
+    private final CompileMode mode;
     private final String name;
     private final Queue<PatternAttribute> patterns = new ArrayDeque<PatternAttribute>();;
     
@@ -27,11 +27,11 @@ public class PatternNode extends AbstractNode {
     private boolean disabled;
 //    private boolean hidden;
     
-    public PatternNode(Mode mode, String name, boolean selected, boolean disabled, /*boolean hidden,*/ PatternNode parent) {
+    public PatternNode(CompileMode mode, String name, boolean selected, boolean disabled, /*boolean hidden,*/ PatternNode parent) {
         this(mode, name, selected || parent.selected, disabled || parent.disabled/*, hidden || parent.hidden*/);
     }
     
-    public PatternNode(Mode mode, String name, boolean selected, boolean disabled/*, boolean hidden*/) {
+    public PatternNode(CompileMode mode, String name, boolean selected, boolean disabled/*, boolean hidden*/) {
         this.mode = mode;
         this.name = name;
         this.selected = selected;
@@ -46,7 +46,7 @@ public class PatternNode extends AbstractNode {
 //            if (this.hidden) {
 //                hints += (hints.isEmpty() ? "" : ", ") + "hidden";
 //            }
-            if (this.mode == Mode.DEBUG) {
+            if (this.mode == CompileMode.DEBUG) {
                 hints += (hints.isEmpty() ? "" : ", ") + (this.selected ? "selected" : "deselected");
             }
             return name + (hints.isEmpty() ? "" : String.format(" (%s)", hints));

@@ -1,4 +1,4 @@
-package controller;
+package controller.tasks;
 
 import static controller.NAMControllerCompilerMain.LOGGER;
 
@@ -11,9 +11,9 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-import controller.AbstractCompiler.Mode;
+import controller.CompileMode;
 
-abstract class CollectRULsTask implements ExecutableTask {
+public abstract class CollectRULsTask implements ExecutableTask {
     
     private static FileFilter fileFilter = new FileFilter() {
         @Override
@@ -26,7 +26,7 @@ abstract class CollectRULsTask implements ExecutableTask {
     
     private final File[] rulDirs;
     
-    public static CollectRULsTask getInstance(Mode mode, File[] rulDirs) {
+    public static CollectRULsTask getInstance(CompileMode mode, File[] rulDirs) {
         return mode.isInteractive() ? new GUITask(rulDirs) : new CommandLineTask(rulDirs); 
     }
     

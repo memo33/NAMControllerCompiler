@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jdpbfx.util.DBPFUtil;
-import controller.AbstractCompiler.Mode;
 
 /**
  * Main class of NAMControllerCompiler.
@@ -46,11 +45,11 @@ public class NAMControllerCompilerMain {
 		if (args.length == 0) {
 		    // default user mode
 		    consoleHandler.setLevel(Level.SEVERE);
-		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, Mode.DEFAULT);
+		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, CompileMode.DEFAULT);
 		} else if (args.length == 1 && args[0].equals("dev")) {
 		    // developer mode
 	        consoleHandler.setLevel(Level.INFO);
-		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, Mode.DEVELOPER);
+		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, CompileMode.DEVELOPER);
 		} else if (args.length == 1 && args[0].equals("debug")) {
 		    // debug mode
 		    consoleHandler.setLevel(Level.ALL);
@@ -64,7 +63,7 @@ public class NAMControllerCompilerMain {
 	        } catch (IOException e) {
 	            LOGGER.log(Level.SEVERE, "IOException at instantiation of FileHandler", e);
 	        }
-		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, Mode.DEBUG);
+		    compiler = Compiler.getInteractiveCompiler(RESOURCE_DIR, CompileMode.DEBUG);
 		} else if (args.length == CommandLineArguments.getExpectedArgumentCount()) { 
 		    // command line mode
 //	        consoleHandler.setLevel(Level.INFO);

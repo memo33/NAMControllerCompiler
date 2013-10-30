@@ -1,4 +1,4 @@
-package controller;
+package controller.xml;
 
 import static controller.NAMControllerCompilerMain.LOGGER;
 
@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
 
 import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
 
-import controller.AbstractCompiler.Mode;
+import controller.CompileMode;
 
 /**
  * Utility class for parsing the XML and DTD files, containing the IID structure
@@ -110,7 +110,7 @@ public class XMLParsing {
 	 * @throws IOException
 	 * @throws PatternSyntaxException
 	 */
-	public static PatternNode buildTreeFromXML(Mode mode, File xmlFile) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException {	
+	public static PatternNode buildTreeFromXML(CompileMode mode, File xmlFile) throws ParserConfigurationException, SAXException, IOException, PatternSyntaxException {	
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		dbFactory.setValidating(true);
 
@@ -132,7 +132,7 @@ public class XMLParsing {
 	 * @return a queue of child nodes.
 	 * @throws SAXException if XML is not well-formed and possibly other cases.
 	 */
-	private static Queue<PatternNode> getMyNodes(Mode mode, NodeList nodeList, PatternNode parent) throws SAXException {
+	private static Queue<PatternNode> getMyNodes(CompileMode mode, NodeList nodeList, PatternNode parent) throws SAXException {
 		Queue<PatternNode> queue = new LinkedList<PatternNode>();
 		for (int count = 0; count < nodeList.getLength(); count++) {
 			Node tempNode = nodeList.item(count);

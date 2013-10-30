@@ -49,21 +49,22 @@ class CommandLineArguments implements Iterable<String> {
         return ArgumentID.values().length;
     }
 
-    private static final String def = "0xffff";
+    private static final String defaultWord = "0xFFFF";
     public enum ArgumentID {
         
         INPUT_DIR(0, ""),
         OUTPUT_DIR(1, ""),
         RHD_FLAG(2, "1"),
         PS_FLAG(3, "0"),
-        NWM_FLAGS(4, def),
-        RHW_L0_FLAGS(5, def),
-        RHW_L1_FLAGS(6, def),
-        RHW_L2_FLAGS(7, def),
-        RHW_L3_FLAGS(8, def),
-        RHW_L4_FLAGS(9, def),
-        RHW_ADDITIONAL_FLAGS(10, def),
-        SAM_FLAGS(11, def);
+        NWM_FLAGS(4, defaultWord),
+        RHW_L0_FLAGS(5, "0x01FF"),
+        RHW_L1_FLAGS(6, "0x01FF"),
+        RHW_L2_FLAGS(7, "0x01FF"),
+        RHW_L3_FLAGS(8, "0x001C"),
+        RHW_L4_FLAGS(9, "0x001C"),
+        RHW_DDRHW_FLAGS(10, "0x0008"),
+        RHW_FA_FLAGS(11, "0x0001"),
+        SAM_FLAGS(12, defaultWord); // TODO or 0x03FF ?
 
         private final int index;
         private final String defaultValue;

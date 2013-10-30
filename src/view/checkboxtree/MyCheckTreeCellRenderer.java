@@ -18,7 +18,7 @@ import javax.swing.JTree;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
-import controller.PatternNode;
+import controller.xml.PatternNode;
 
 /**
  * @author Santhosh Kumar T - santhosh@in.fiorano.com 

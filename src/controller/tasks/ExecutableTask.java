@@ -1,6 +1,6 @@
-package controller;
+package controller.tasks;
 
-interface ExecutableTask {
+public interface ExecutableTask {
 
     public abstract void execute();
     

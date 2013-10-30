@@ -22,6 +22,12 @@ import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
 
+import controller.tasks.CollectRULsTask;
+import controller.tasks.ExecutableTask;
+import controller.tasks.WriteControllerTask;
+import controller.xml.AbstractNode;
+import controller.xml.PatternNode;
+import controller.xml.XMLParsing;
 import view.CompilerFrame;
 import view.ConsoleView;
 import view.GUIView;
@@ -54,11 +60,11 @@ public abstract class Compiler extends AbstractCompiler {
         return new CommandLineCompiler(resourceDir, args);
     }
     
-    public static Compiler getInteractiveCompiler(File resourceDir, Mode mode) {
+    public static Compiler getInteractiveCompiler(File resourceDir, CompileMode mode) {
         if (!mode.isInteractive()) {
             throw new IllegalArgumentException("GUICompiler must be executed in interactive mode.");
         }
-        assert mode != Mode.COMMAND_LINE;
+        assert mode != CompileMode.COMMAND_LINE;
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -73,7 +79,7 @@ public abstract class Compiler extends AbstractCompiler {
         return new GUICompiler(resourceDir, mode);
     }
     
-    private Compiler(File resourceDir, Mode mode, View view, CommandLineArguments args) {
+    private Compiler(File resourceDir, CompileMode mode, View view, CommandLineArguments args) {
         super(mode, view);
         this.RESOURCE_DIR = resourceDir;
         this.XML_DIR = new File(RESOURCE_DIR, "xml");
@@ -277,7 +283,7 @@ public abstract class Compiler extends AbstractCompiler {
     
     private static class GUICompiler extends Compiler {
         
-        private GUICompiler(File resourceDir, Mode mode) {
+        private GUICompiler(File resourceDir, CompileMode mode) {
             super(resourceDir, mode, new GUIView(), CommandLineArguments.getInstance());
             assert mode.isInteractive() : mode;
         }
@@ -353,7 +359,7 @@ public abstract class Compiler extends AbstractCompiler {
     private static class CommandLineCompiler extends Compiler {
         
         private CommandLineCompiler(File resourceDir, CommandLineArguments args) {
-            super(resourceDir, Mode.COMMAND_LINE, new ConsoleView(), args);
+            super(resourceDir, CompileMode.COMMAND_LINE, new ConsoleView(), args);
             super.inputDir = new File(super.settingsManager.getInput());
             super.outputDir = new File(super.settingsManager.getOutput());
             super.isLHD = super.settingsManager.getLhdFlag();
