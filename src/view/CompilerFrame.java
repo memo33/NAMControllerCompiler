@@ -1,13 +1,20 @@
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -24,6 +31,8 @@ import javax.swing.JTree;
 import javax.swing.LayoutFocusTraversalPolicy;
 import javax.swing.SwingConstants;
 
+import controller.NAMControllerCompilerMain;
+
 /**
  * A custom Frame for the (developer's) perspective of the NAM Compiler.
  * @author memo
@@ -33,6 +42,8 @@ public class CompilerFrame extends JFrame {
     
     private static final boolean isMacOS = System.getProperty("os.name").toLowerCase().startsWith("mac os x"); 
 
+    private final String descriptionTextResource = "description text.txt";
+    
 	private JTextField[] fields = new JTextField[2];
 	private JRadioButton[] radioButtons = new JRadioButton[2];
 	private JButton startButton;
@@ -69,13 +80,30 @@ public class CompilerFrame extends JFrame {
 		this.setTitle("NAM Controller Compiler");
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel panel = new JPanel(new GridBagLayout());
+		panel.setPreferredSize(new Dimension(detailed ? 700 : 600, detailed ? 600 : 500));
 
-		//		JFileChooser chooser1 = new JFileChooser();
-		//		chooser1.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		//		chooser1.setVisible(true);
-		//		chooser1.showOpenDialog(this);
-
+		c.insets = new Insets(3,3,3,3);
+		
 		int y = 0;
+
+		c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.weighty = 0.0;
+        c.gridwidth = 2;
+        c.gridx = 1;
+        c.gridy = y++;
+        JLabel descLabel = new JLabel(this.loadDescriptionText());
+//        descLabel.setBorder(BorderFactory.createEtchedBorder());
+        panel.add(descLabel, c);
+
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.weighty = 0.0;
+        c.gridwidth = 4;
+        c.gridx = 0;
+        c.gridy = y++;
+        panel.add(new JSeparator(SwingConstants.HORIZONTAL), c);
+		
 		if (detailed) {
     		for (int i = 0; i < 2; i++, y++) {
     			JLabel label = new JLabel(i==0 ? "Input: " : "Output: ");
@@ -142,28 +170,17 @@ public class CompilerFrame extends JFrame {
 		for (int i = 0; i < radioButtons.length; i++) {
 		    radioButtons[i] = new JRadioButton((i==0 ? "Right" : "Left") + "-hand drive");
 		    buttonGroup.add(radioButtons[i]);
-			c.fill = GridBagConstraints.BOTH;
-			c.weightx = 1./radioButtons.length;
-			c.weighty = 0.0;
-			c.gridx = 1 + i;
-			c.gridy = y;
-			panel.add(radioButtons[i], c);
+		    c.fill = GridBagConstraints.BOTH;
+		    c.gridwidth = 1;
+		    c.weightx = 1./radioButtons.length;
+		    c.weighty = 0.0;
+		    c.gridx = 1 + i;
+		    c.gridy = y;
+		    panel.add(radioButtons[i], c);
 		}
 		radioButtons[isLHD ? 1 : 0].setSelected(true);
 		y++;
 		
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 0.0;
-		c.weighty = 0.0;
-		c.gridwidth = 4;
-		c.gridx = 0;
-		c.gridy = y++;
-		panel.add(new JSeparator(SwingConstants.HORIZONTAL), c);
-		c.gridwidth = 2;
-		c.gridx = 1;
-		c.gridy = y++;
-		panel.add(new JLabel("Select the networks to exclude from RUL2-stability:"), c);
-
 		tree.setVisibleRowCount(15);
 		JScrollPane treeView = new JScrollPane(tree);
 		c.fill = GridBagConstraints.BOTH;
@@ -173,15 +190,17 @@ public class CompilerFrame extends JFrame {
 		c.gridx = 1;
 		c.gridy = y++;
 		panel.add(treeView, c);
-
-		startButton = new JButton("Start");
+		
+		startButton = new JButton("Start Compilation");
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0.0;
 		c.weighty = 0.0;
 		c.gridwidth = 2;
 		c.gridx = 1;
 		c.gridy = y++;
-		panel.add(startButton, c);
+		JPanel wrapper = new JPanel(new BorderLayout());
+		wrapper.add(startButton, BorderLayout.EAST);
+		panel.add(wrapper, c);
 
 		this.getRootPane().setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 		this.add(panel);
@@ -193,4 +212,25 @@ public class CompilerFrame extends JFrame {
         });
 	}
 
+	private String loadDescriptionText() {
+	    InputStream is = null;
+	    Scanner scanner = null;
+	    try {
+    	    is = this.getClass().getResourceAsStream(descriptionTextResource);
+    	    scanner = new Scanner(is).useDelimiter("\\A"); // first match matches the whole text
+    	    return scanner.hasNext() ? scanner.next() : "FAILED TO LOAD DESCRIPTION";
+	    } finally {
+	        if (scanner != null) {
+	            scanner.close();
+	        }
+	        if (is != null) {
+	            try {
+                    is.close();
+                } catch (IOException e) {
+                    NAMControllerCompilerMain.LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
+                }
+	        }
+	    }
+	}
 }
+

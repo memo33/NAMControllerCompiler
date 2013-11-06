@@ -67,7 +67,8 @@ public class NAMControllerCompilerMain {
 		} else if (args.length == CommandLineArguments.getExpectedArgumentCount()) { 
 		    // command line mode
 //	        consoleHandler.setLevel(Level.INFO);
-	        consoleHandler.setLevel(Level.ALL);
+//	        consoleHandler.setLevel(Level.ALL);
+            consoleHandler.setLevel(Level.SEVERE);
 	        CommandLineArguments arguments = CommandLineArguments.getInstance(args);
 	        if (arguments != null) {
 	            compiler = Compiler.getCommandLineCompiler(RESOURCE_DIR, arguments);

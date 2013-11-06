@@ -2,7 +2,7 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="NAMControllerCompiler" default="dist" basedir=".">
     <property name="targetversion" value="1.6" />
     <property name="sourceversion" value="1.6" />
-    <property name="project.version" value="0.3.7" />
+    <property name="project.version" value="0.3.8" />
     <property name="MyApp" value="${ant.project.name}" />
     <property name="MyApp-zipname" value="${ant.project.name}_${project.version}" />
     <property name="MyApp.jar" value="${MyApp}.jar" />
@@ -45,6 +45,9 @@
         <javac source="${sourceversion}" target="${targetversion}" srcdir="${src}" destdir="${bin}" includeantruntime="false">
             <classpath refid="build.classpath" />
         </javac>
+    	<copy todir="${bin}">
+            <fileset dir="${src}" includes="**/*.txt" />
+    	</copy>
     </target>
     
     <target name="doc" depends="compile" description="generate documentation">
@@ -109,6 +112,7 @@ start /min cmd /C "java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${My
                 <attribute name="Main-Class" value="controller.NAMControllerCompilerMain"/>
                 <attribute name="Class-Path" value="${manifest.build.classpath}"/>
             </manifest>
+        	<!-- <zipfileset dir="${src}" includes="**/*.txt" /> -->
         </jar>
         
         <!-- Create zip file with sources -->

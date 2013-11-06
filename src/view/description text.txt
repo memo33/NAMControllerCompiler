@@ -1,0 +1,20 @@
+<html>
+  <div>
+    <p>
+      Use the options below to exclude override RULs from the NAM controller. This will decrease the size of the controller
+      and will make the game start up faster, but a selected network cannot be built in the game. Clicking existing networks
+      will deconvert them. It is however possible to play the game without the override RULs, if you do not plan
+      to touch the selected networks.
+    </p>
+    
+    <p>
+      The controller file will be saved in the directory of your latest NAM installation.
+    </p>
+    
+    <p>
+      <font color="red">
+        IMPORTANT! Selecting a network or networks in the controller compiler disables the rules for the selected networks.  This should be done only if you don't want to build or create additions to the selected networks in your city.
+      </font>
+    </p>
+  </div>
+</html>
