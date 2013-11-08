@@ -357,6 +357,7 @@ public abstract class Compiler extends AbstractCompiler {
             boolean success = super.readXML();
             if (success && this.mode.isInteractive()) {
                 super.tree = new JTree(super.rootNode);
+                super.tree.setToggleClickCount(0); // disables expansion on double click
                 new MyCheckTreeManager(super.tree, this.mode.isDetailed());
             }
             return success;

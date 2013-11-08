@@ -2,12 +2,16 @@ package view.checkboxtree;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
 
 import javax.swing.JCheckBox;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+
+import controller.xml.AbstractNode;
+import controller.xml.PatternNode;
 
 /**
  * @author Santhosh Kumar T - santhosh@in.fiorano.com 
@@ -35,19 +39,42 @@ public class MyCheckTreeManager extends MouseAdapter implements TreeSelectionLis
         if(me.getX()>tree.getPathBounds(path).x+hotspot) 
             return;
  
-        boolean selected = selectionModel.isPathSelected(path); 
-        selectionModel.removeTreeSelectionListener(this); 
+        boolean selected = selectionModel.isPathSelected(path);
+        boolean partiallySelected = selectionModel.isPartiallySelected(path);
+        selectionModel.removeTreeSelectionListener(this);
  
         try{ 
-            if(selected) 
-                selectionModel.removeSelectionPath(path); 
-            else 
-                selectionModel.addSelectionPath(path); 
+            if(selected) {
+                selectionModel.removeSelectionPath(path);
+            } else if (partiallySelected) {
+                if (shouldAdd((PatternNode) path.getLastPathComponent())) {
+                    selectionModel.addSelectionPath(path);
+                } else {
+                    selectionModel.removeSelectionPath(path);
+                }
+            } else { 
+                selectionModel.addSelectionPath(path);
+            }
         } finally{ 
             selectionModel.addTreeSelectionListener(this); 
-            tree.treeDidChange(); 
+            tree.treeDidChange();
         } 
-    } 
+    }
+    
+    private static boolean shouldAdd(PatternNode parent) {
+        Enumeration<? extends AbstractNode> children = parent.children();
+        while (children.hasMoreElements()) {
+            PatternNode child = (PatternNode) children.nextElement();
+            if (!child.isDisabled() && !child.isSelected() && !child.isPartiallySelected()) {
+                return true;
+            } else if (!child.isDisabled() && child.isPartiallySelected()) {
+                if(shouldAdd(child)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
  
     public MyCheckTreeSelectionModel getSelectionModel(){ 
         return selectionModel; 
