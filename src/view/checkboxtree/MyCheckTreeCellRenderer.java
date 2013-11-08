@@ -56,13 +56,23 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
         TreePath path = tree.getPathForRow(row); 
         if(path!=null) {
         	TristateButtonModel tristateModel = checkBox.getTristateModel();
+            /*
+             * Important! Only the GUI reverses the selection logic, which means
+             * that a visible selected check box actually represents an
+             * unselected check box, whereas an unselected check box stands for
+             * a selected one. Indeterminate stays indeterminate. This is a hack
+             * to avoid recoding of the entire model, but may be cleaned up in
+             * the future.
+             */
             if(selectionModel.isPathSelected(path)) {
-            	tristateModel.setSelected(true);
+//            	tristateModel.setSelected(true);
+            	tristateModel.setSelected(false);
             } else if (selectionModel.isPartiallySelected(path)) {
             	tristateModel.setIndeterminate();
             	button = radioButton;
             } else {
-                tristateModel.setSelected(false); 
+//                tristateModel.setSelected(false); 
+                tristateModel.setSelected(true); 
             }
         } 
         removeAll();
