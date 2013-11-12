@@ -509,11 +509,13 @@
             <regex value="0x5e5\p{XDigit}{2}a\p{XDigit}{2}"/>
         </node>
     </node>
+<!--
     <node name="Railway Addon Mod">
         <regex value="0x5d3\p{XDigit}{5}" />
         <!-- crosslinks between RHW and TTR or QTR -->
         <regex value="0x57[0-4][0-9a][147a]6\p{XDigit}{2}" />
     </node>
+  -->
     <node name="El Rail over Avenue">
         <regex value="0x5f85\p{XDigit}{4}" />
     </node>
