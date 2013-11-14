@@ -512,7 +512,7 @@
 <!--
     <node name="Railway Addon Mod">
         <regex value="0x5d3\p{XDigit}{5}" />
-        <!-- crosslinks between RHW and TTR or QTR -->
+            crosslinks between RHW and TTR or QTR  
         <regex value="0x57[0-4][0-9a][147a]6\p{XDigit}{2}" />
     </node>
   -->
