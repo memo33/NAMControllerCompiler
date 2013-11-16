@@ -163,8 +163,12 @@ start /min cmd /C "java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${My
             <classpath refid="test.build.classpath" />
         </javac>
     </target>
+	
+	<target name="deletexml" description="deletes xml backup so that syntax check fails if supposed to">
+        <delete file="${test.resources}/xml/${rul2.structure.file}.xml~1" />
+	</target>
     
-    <target name="test" depends="compiletests,resources">
+    <target name="test" depends="compiletests,resources,deletexml">
         <junit printsummary="yes" fork="yes" haltonfailure="yes">
             <classpath refid="test.build.classpath" />
             <formatter type="plain"/>

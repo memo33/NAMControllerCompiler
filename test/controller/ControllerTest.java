@@ -3,6 +3,7 @@ package controller;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -39,6 +40,18 @@ public class ControllerTest {
     
     public ControllerTest(boolean isLHDParameter) {
         this.isLHD = isLHDParameter;
+    }
+    
+    @Test
+    public void xmlSyntaxTest() throws IOException {
+        File outputDir = tempFolder.newFolder();
+        CommandLineArguments arguments = CommandLineArguments.getInstance();
+        arguments.setArgument(ArgumentID.INPUT_DIR, inputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.OUTPUT_DIR, outputDir.getAbsolutePath());
+        arguments.setArgument(ArgumentID.RHD_FLAG, isLHD ? "0" : "1");
+        Compiler compiler = Compiler.getCommandLineCompiler(resourcesTestDir, arguments);
+        assertTrue(compiler.checkXMLExists());
+        assertTrue(compiler.readXML());
     }
     
     @Test
