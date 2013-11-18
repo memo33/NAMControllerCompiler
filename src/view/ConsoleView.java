@@ -1,43 +1,41 @@
 package view;
 
-import static controller.NAMControllerCompilerMain.LOGGER;
-
-import java.util.logging.Level;
-
-public class ConsoleView implements View {
-
-    @Override
-    public void publishException(String message, Throwable e) {
-        LOGGER.log(Level.SEVERE, message, e);
-    }
-
-    @Override
-    public void publishIssue(String formatMessage, Object... args) {
-        LOGGER.log(Level.SEVERE, formatMessage, args);
-    }
-
-    @Override
-    public void publishInfoMessage(String formatMessage, Object... args) {
-        LOGGER.log(Level.INFO, formatMessage, args);
-    }
-
-    @Override
-    public boolean publishConfirmOption(String formatMessage, Object... args) {
-        return true; // always accept if no user input available
-    }
+public class ConsoleView extends DefaultView {
+    
+    private int min;
+    private int max;
+    private int progress;
+    private int scaledProgress = 0;
+    private final int WIDTH = 80;
 
     @Override
     public void initProgress(String message, int min, int max) {
-        // not implemented
+        super.initProgress(message, min, max);
+        System.out.println("The Controller Compiler is running right now, please wait.");
+        this.min = min;
+        this.max = max -1; // TODO fix -1 offset
+        this.progress = min;
     }
 
     @Override
     public void publishProgressIncrement(int increment, String note) {
-        // not implemented
+        super.publishProgressIncrement(increment, note);
+        progress += increment;
+        assert progress <= max;
+        if (progress <= max) {
+            int newScaledProgress = scale(progress);
+            for (int i = scaledProgress; i < newScaledProgress; i++) {
+                System.out.print(".");
+            }
+            scaledProgress = newScaledProgress;
+            if (progress == max) {
+                System.out.println();
+                System.out.println("The compilation process finished.");
+            }
+        }
     }
-
-    @Override
-    public void dispose() {
-        // nothing
+    
+    private int scale(int prog) {
+        return (int) ((progress - min) * WIDTH / (max - min));
     }
 }

@@ -16,7 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-public class GUIView extends ConsoleView {
+public class GUIView extends DefaultView {
     
     private static final int WIDTH = 400;
 
