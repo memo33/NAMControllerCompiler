@@ -383,5 +383,17 @@ public abstract class Compiler extends AbstractCompiler {
             runBefore.run();
             runAfter.run();
         }
+        
+        @Override
+        public boolean writeSettings() {
+            // this method does not write the XML file, in contrast to the super method
+            try {
+                super.settingsManager.writeSettings(super.inputDir, super.outputDir, super.isLHD);
+                return true;
+            } catch (FileNotFoundException e) {
+                view.publishException("Could not write settings", e);
+            }
+            return false;
+        }
     }
 }
