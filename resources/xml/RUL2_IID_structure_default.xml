@@ -7,6 +7,9 @@
     It is no longer necessary for a regex to match the lower case hex IIDs.
  -->
 <iid_tree>
+    <node name="El Rail over Avenue">
+        <regex value="0x5f85\p{XDigit}{4}" />
+    </node>
 	<node name="Elevated Road Networks">
 		<regex value="0x5c0[0-8]\p{XDigit}{4}" />
 		<!-- crosslinks between RHW and Elevated Road Networks -->
@@ -484,7 +487,7 @@
         <node name="Set 2 - Herringbone Brick Streets">
             <regex value="0x5e5\p{XDigit}{2}2\p{XDigit}{2}"/>
         </node>
-        <node name="Set 3 - PEG Dirt Roads">
+        <node name="Set 3 - PEG Dirt Streets">
             <regex value="0x5e5\p{XDigit}{2}3\p{XDigit}{2}"/>
         </node>
         <node name="Set 4 - PEG Gravel Streets">
@@ -502,7 +505,7 @@
         <node name="Set 8 - Cobblestone Streets">
             <regex value="0x5e5\p{XDigit}{2}8\p{XDigit}{2}"/>
         </node>
-        <node name="Set 9 - Brisk Streets">
+        <node name="Set 9 - Brick Streets">
             <regex value="0x5e5\p{XDigit}{2}9\p{XDigit}{2}"/>
         </node>
         <node name="Set 10 - Japanese Streets">
@@ -516,7 +519,4 @@
         <regex value="0x57[0-4][0-9a][147a]6\p{XDigit}{2}" />
     </node>
   -->
-    <node name="El Rail over Avenue">
-        <regex value="0x5f85\p{XDigit}{4}" />
-    </node>
 </iid_tree>
