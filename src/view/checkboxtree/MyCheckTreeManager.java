@@ -30,13 +30,28 @@ public class MyCheckTreeManager extends MouseAdapter implements TreeSelectionLis
         tree.setCellRenderer(new MyCheckTreeCellRenderer(tree.getCellRenderer(), selectionModel, enableDisabledButtons)); 
         tree.addMouseListener(this); 
         selectionModel.addTreeSelectionListener(this); 
-    } 
- 
-    public void mouseClicked(MouseEvent me){ 
+    }
+    
+    @Override
+    public void mouseClicked(MouseEvent me) {
+        TreePath path = tree.getPathForLocation(me.getX(), me.getY()); 
+        if (path != null && me.getX() > tree.getPathBounds(path).x + hotspot) {
+            if (me.getClickCount() > 1 && me.getClickCount() % 2 == 0) {
+                if (tree.isCollapsed(path)) {
+                    tree.expandPath(path);
+                } else {
+                    tree.collapsePath(path);
+                }
+            }
+        }
+    }
+    
+    @Override
+    public void mousePressed(MouseEvent me){ 
         TreePath path = tree.getPathForLocation(me.getX(), me.getY()); 
         if(path==null) 
             return; 
-        if(me.getX()>tree.getPathBounds(path).x+hotspot) 
+        if(me.getX()>tree.getPathBounds(path).x+hotspot)
             return;
  
         boolean selected = selectionModel.isPathSelected(path);
