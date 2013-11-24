@@ -1,6 +1,6 @@
 <html>
   <div>
-    <p>
+    <p style="padding:5" align="justify">
       Use the options below to compile a customized NAM controller file that includes only those
       override RULs that you need.
       This will decrease the size of the controller and will make the game start up faster, but a
@@ -9,11 +9,17 @@
       those networks.
     </p>
     
-    <p>
+    <p style="padding:5" align="justify">
+      If nodes are disabled, this is either because you did not select the option in the installer to
+      install the required resource files, like textures and paths of that network, or because the
+      component is in an unreleased developmental state.
+    </p>
+    
+    <p style="padding:5" align="justify">
       The controller file will be saved in the directory of your latest NAM installation.
     </p>
     
-    <p>
+    <p style="padding:5" align="justify">
       <font color="red">
         IMPORTANT! Deselecting a network or networks in the controller compiler disables the rules
         for these networks. This should be done only if you don't want to build or create additions

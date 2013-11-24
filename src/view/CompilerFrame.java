@@ -80,7 +80,7 @@ public class CompilerFrame extends JFrame {
 		this.setTitle("NAM Controller Compiler");
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setPreferredSize(new Dimension(detailed ? 700 : 600, detailed ? 600 : 500));
+		panel.setPreferredSize(new Dimension(detailed ? 800 : 700, detailed ? 660 : 600));
 
 		c.insets = new Insets(3,3,3,3);
 		
