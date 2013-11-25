@@ -66,7 +66,7 @@
             <!-- crosslinks between RHW and NWM OWR-3 -->
             <regex value="0x57[0-4][0-9a][258b]b\p{XDigit}{2}" />
         </node>
-        <node name="NWM RD-3">
+        <node name="NWM NRD-4">
             <regex value="0x5105\p{XDigit}{4}" />
             <!-- crosslinks between RHW and NWM RD-3 -->
             <regex value="0x57[0-4][0-9a][258b]c\p{XDigit}{2}" />
