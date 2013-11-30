@@ -420,9 +420,11 @@
             <node name="MIS">
                 <regex value="0x5752\p{XDigit}{4}" />
             </node>
+  -->
             <node name="RHW-4">
                 <regex value="0x5753\p{XDigit}{4}" />
             </node>
+<!--
             <node name="RHW-6S">
                 <regex value="0x5754\p{XDigit}{4}" />
             </node>
