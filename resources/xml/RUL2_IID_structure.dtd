@@ -3,6 +3,10 @@
 <!ELEMENT regex (requires*)>
 <!ELEMENT requires EMPTY>
 
+<!ATTLIST iid_tree
+    selected (true | false) "false"
+    disabled (true | false) "false"
+>
 <!ATTLIST node
     name CDATA #REQUIRED
     selected (true | false) "false"
