@@ -107,12 +107,12 @@
         <node name="L0 networks">
             <regex value="0x570\p{XDigit}{5}" />
             <regex value="0x57[0-5]\p{XDigit}([147a][a-f]|[258b][0-6])[048c]\p{XDigit}" />
-<!--
             <node name="RHW-2">
+<!--
                 <regex value="0x5700\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[147a]a[08]\p{XDigit}" />
-            </node>
   -->
+            </node>
             <node name="RHW-3">
                 <regex value="0x5701\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[147a]b[08]\p{XDigit}" />
