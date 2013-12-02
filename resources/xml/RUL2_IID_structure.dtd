@@ -1,5 +1,5 @@
 <!ELEMENT iid_tree (node+)>
-<!ELEMENT node (regex*,(regex|node),node*)>
+<!ELEMENT node (regex*,node*)>
 <!ELEMENT regex (requires*)>
 <!ELEMENT requires EMPTY>
 
