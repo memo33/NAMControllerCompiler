@@ -118,7 +118,7 @@ start /min cmd /C "java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${My
         <!-- Create zip file with sources -->
         <zip destfile="${dist}/${MyApp-zipname}_sources_and_tests.zip">
             <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
-            <fileset dir="${basedir}" includes="${MyApp}*,build.xml,ivy.xml" />
+            <fileset dir="${basedir}" includes="${MyApp}*,build.xml,ivy.xml,README.md,LICENSE" />
             <!-- source files -->
             <fileset dir="${basedir}" includes="${src}/**" />            
             <fileset dir="${basedir}" includes="${srctest}/**" />
@@ -134,7 +134,7 @@ start /min cmd /C "java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${My
         <!-- Create dist zip file -->
         <zip destfile="${dist}/${MyApp-zipname}.zip">
             <fileset dir="${basedir}" includes="${manifest.build.classpath}" />
-            <fileset dir="${basedir}" includes="${MyApp}*" />
+            <fileset dir="${basedir}" includes="${MyApp}*,README.md,LICENSE" />
             <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}.dtd" />
             <fileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" />
             <zipfileset dir="${basedir}" includes="${xml.resources}/${rul2.structure.file}_default.xml" fullpath="${xml.resources}/${rul2.structure.file}.xml" />
