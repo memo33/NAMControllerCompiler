@@ -137,7 +137,7 @@ public abstract class RULEntry extends DBPFEntry {
             return pipe.source();
         } catch (IOException e1) {
             LOGGER.log(Level.SEVERE, "IOException while creating data channel for RUL entry", e1);
-            return null;
+            throw new RuntimeException("IOException while creating data channel for RUL entry", e1);
         }
     }
     
