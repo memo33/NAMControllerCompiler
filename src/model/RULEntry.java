@@ -7,10 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.channels.Channels;
-import java.nio.channels.Pipe;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,7 +36,8 @@ public abstract class RULEntry extends DBPFEntry {
     
     Queue<File> inputFiles;
     OutputStreamWriter writer = null;
-    WritableByteChannel sink;
+//    WritableByteChannel sink;
+    private OutputStream sink;
 
     RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
         super(tgi);
@@ -90,17 +91,14 @@ public abstract class RULEntry extends DBPFEntry {
 
     @Override
     public ReadableByteChannel createDataChannel() {
-        Pipe pipe = null;
         try {
-            pipe = Pipe.open();
-            sink = pipe.sink();
+            PipedInputStream pis = new PipedInputStream();
+            sink = new PipedOutputStream(pis);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream os = null;
                     try {
-                        os = Channels.newOutputStream(sink);
-                        writer = new OutputStreamWriter(new BufferedOutputStream(os, BUFFER_SIZE));
+                        writer = new OutputStreamWriter(new BufferedOutputStream(sink, BUFFER_SIZE));
                         printHeader();
                         provideData();
                     } catch (IOException e) {
@@ -110,14 +108,6 @@ public abstract class RULEntry extends DBPFEntry {
                         if (writer != null) {
                             try {
                                 writer.close();
-                            } catch (IOException e) {
-                                Thread currentThread = Thread.currentThread();
-                                currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
-                            }
-                        }
-                        if (os != null) {
-                            try {
-                                os.close();
                             } catch (IOException e) {
                                 Thread currentThread = Thread.currentThread();
                                 currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
@@ -134,7 +124,7 @@ public abstract class RULEntry extends DBPFEntry {
                     }
                 }
             }).start();
-            return pipe.source();
+            return Channels.newChannel(pis);
         } catch (IOException e1) {
             LOGGER.log(Level.SEVERE, "IOException while creating data channel for RUL entry", e1);
             throw new RuntimeException("IOException while creating data channel for RUL entry", e1);
@@ -153,5 +143,4 @@ public abstract class RULEntry extends DBPFEntry {
     public long getLastModified() {
         return this.lastModified;
     }
-
 }

@@ -1,17 +1,17 @@
 package model;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.io.InputStreamReader;
 import java.util.Queue;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import controller.NAMControllerCompilerMain;
-
 import jdpbfx.DBPFTGI;
+import controller.NAMControllerCompilerMain;
 
 public class RUL1Entry extends RULEntry {
     
@@ -31,27 +31,25 @@ public class RUL1Entry extends RULEntry {
 //                continue;
 //            }
             FileInputStream fis = null;
-            FileChannel fc = null;
+            InputStreamReader isr = null;
+            BufferedReader br = null;
             try {
                 fis = new FileInputStream(file);
-                fc = fis.getChannel();
+                isr = new InputStreamReader(fis);
+                br = new BufferedReader(isr);
                 printSubFileHeader(file);
-                super.writer.flush();
+//                super.writer.flush();
                 
-                // writer is empty now, so we can transfer to its parent: sink
-                long size = fc.size();
-                long len = fc.transferTo(0, size, super.sink);
-                if (len != size) {
-                    throw new IOException("Could not transfer file completely: " + file);
+                // potentially inefficient because file is read line by line, but RUL1 is small,
+                // so this is secondary
+                for (String line = br.readLine(); line != null; line = br.readLine()) {
+                    super.writer.write(line + newline);
                 }
-
+                
                 super.writer.write(newline + newline);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if (fc != null) {
-                    fc.close();
-                }
                 if (fis != null) {
                     fis.close();
                 }
