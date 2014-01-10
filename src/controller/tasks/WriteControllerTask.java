@@ -100,7 +100,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 if (i==0) {
                     rulEntry = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
                 } else if (i==1) {
-                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], changeListener);
+                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
                 } else {
                     rulEntry = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener);
                 }

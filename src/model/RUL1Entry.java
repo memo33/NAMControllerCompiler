@@ -16,9 +16,11 @@ import controller.NAMControllerCompilerMain;
 public class RUL1Entry extends RULEntry {
     
 //    private final boolean isESeries;
+    private final boolean isLHD;
 
-    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
+    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener) {
         super(tgi, inputFiles, changeListener);
+        this.isLHD = isLHD;
 //        this.isESeries = isESeries;
     }
 
@@ -43,10 +45,10 @@ public class RUL1Entry extends RULEntry {
                 // potentially inefficient because file is read line by line, but RUL1 is small,
                 // so this is secondary
                 for (String line = br.readLine(); line != null; line = br.readLine()) {
-                    super.writer.write(line + newline);
+                    printLineChecked(line);
                 }
-                
-                super.writer.write(newline + newline);
+
+                writer.write(newline);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -56,5 +58,20 @@ public class RUL1Entry extends RULEntry {
             }
         }
         writer.flush();
+    }
+    
+    /**
+     * checks for LHD/RHD specific code.
+     * @param line
+     * @throws IOException 
+     */
+    private void printLineChecked(String line) throws IOException {
+        if (!isLHD && line.startsWith(";###RHD###")) {
+            writer.write(line.substring(10) + newline);
+        } else if (isLHD && line.startsWith(";###LHD###")) {
+            writer.write(line.substring(10) + newline);
+        } else {
+            writer.write(line + newline);
+        }
     }
 }

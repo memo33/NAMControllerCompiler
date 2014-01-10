@@ -82,9 +82,9 @@ public class RUL0Entry extends RULEntry {
 	 * @throws IOException 
 	 */
 	private void printLineChecked(String line) throws IOException {
-        if (line.startsWith(";###RHD###") && !isLHD)
+        if (!isLHD && line.startsWith(";###RHD###"))
             writer.write(line.substring(10) + newline);
-        else if (line.startsWith(";###LHD###") && isLHD)
+        else if (isLHD && line.startsWith(";###LHD###"))
             writer.write(line.substring(10) + newline);
 //        else if (line.startsWith(";###E-Series###") && isESeries)
 //            writer.write(line.substring(15) + newline);
