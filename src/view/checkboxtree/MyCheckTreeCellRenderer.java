@@ -4,8 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.AbstractButton;
 import javax.swing.GrayFilter;
@@ -29,7 +29,7 @@ import controller.xml.PatternNode;
 @SuppressWarnings("serial")
 public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
     
-    private static Map<Icon, Icon> disabledIconsMap = new ConcurrentHashMap<Icon, Icon>();
+    private final Map<Icon, Icon> disabledIconsMap = new HashMap<Icon, Icon>();
 
     private MyCheckTreeSelectionModel selectionModel; 
     private TreeCellRenderer delegate; 
@@ -83,15 +83,18 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
             JLabel label = (JLabel) renderer;
             Icon icon = label.getIcon();
             Icon disabledIcon;
-            if (disabledIconsMap.containsKey(icon)) {
-                disabledIcon = disabledIconsMap.get(icon);
-            } else {
-                Image img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-                icon.paintIcon(new JPanel(), img.getGraphics(), 0, 0);
-                disabledIcon = new ImageIcon(GrayFilter.createDisabledImage(img));
-                disabledIconsMap.put(icon, disabledIcon);
+            // only set disabled icon, if icon is not null
+            if (icon != null) {
+                if (disabledIconsMap.containsKey(icon)) {
+                    disabledIcon = disabledIconsMap.get(icon);
+                } else {
+                    Image img = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+                    icon.paintIcon(new JPanel(), img.getGraphics(), 0, 0);
+                    disabledIcon = new ImageIcon(GrayFilter.createDisabledImage(img));
+                    disabledIconsMap.put(icon, disabledIcon);
+                }
+                label.setDisabledIcon(disabledIcon);
             }
-            label.setDisabledIcon(disabledIcon);
         }
         add(button, BorderLayout.WEST);
         add(renderer, BorderLayout.CENTER);
