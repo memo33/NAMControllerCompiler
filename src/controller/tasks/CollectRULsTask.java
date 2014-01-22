@@ -20,7 +20,9 @@ public abstract class CollectRULsTask implements ExecutableTask {
         public boolean accept(File pathname) {
             return pathname.isDirectory() ||
                     pathname.getName().endsWith(".txt") ||
-                    pathname.getName().endsWith(".rul");
+                    pathname.getName().endsWith(".rul") ||
+                    pathname.getName().endsWith(".metarul");
+            // TODO add groovy file extension
         }
     };
     

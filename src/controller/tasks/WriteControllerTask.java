@@ -23,11 +23,15 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.parboiled.Parboiled;
+
 import controller.CompileMode;
 import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFFile;
 import jdpbfx.DBPFTGI;
 import jdpbfx.types.DBPFLText;
+import model.MetaController;
+import model.MetaOverrideParser;
 import model.RUL0Entry;
 import model.RUL1Entry;
 import model.RUL2Entry;
@@ -48,28 +52,30 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final URI inputURI;
     private final File outputFile;
     private final View view;
+    private final File metaRuleDefinitionsFile;
 
     private long starttime;
     
     public static ExecutableTask getInstance(CompileMode mode, CollectRULsTask collectRULsTask,
-            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
         if (mode.isInteractive()) {
-            return new GUITask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+            return new GUITask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
         } else {
-            return new CommandLineTask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+            return new CommandLineTask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
         }
     }
 
     public abstract boolean get() throws InterruptedException, ExecutionException;
 
     private WriteControllerTask(CollectRULsTask collectRULsTask,
-            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
         this.collectRULsTask = collectRULsTask;
         this.isLHD = isLHD;
         this.patterns = patterns;
         this.inputURI = inputURI;
         this.outputFile = outputFile;
         this.view = view;
+        this.metaRuleDefinitionsFile = metaRuleDefinitionsFile;
     }
     
     private Boolean mainProcess(final Publisher publisher) throws FileNotFoundException, IOException, InterruptedException, ExecutionException {
@@ -94,15 +100,19 @@ public abstract class WriteControllerTask implements ExecutableTask {
         {
             long lastModf = 0;
             
+            final MetaController metaController = new MetaController();
+            MetaOverrideParser overrideParser = Parboiled.createParser(MetaOverrideParser.class, metaController);
+            
             // RUL files
             for (int i = 0; i < RUL_TGIS.length; i++) {
                 RULEntry rulEntry;
                 if (i==0) {
                     rulEntry = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
                 } else if (i==1) {
-                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
+                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, metaRuleDefinitionsFile, metaController, overrideParser);
+//                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
                 } else {
-                    rulEntry = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener);
+                    rulEntry = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener, overrideParser);
                 }
                 if(rulEntry.getLastModified() > lastModf) {
                     lastModf = rulEntry.getLastModified();
@@ -151,6 +161,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
       } catch (CancellationException e) { // should not happen
           view.publishException("Unexpected exception! " + e.getLocalizedMessage(), e);
       }
+      // FIXME Find out for success, if the UncaughtExceptionHandler has not received any exceptions
       if (!successful) {
           view.publishIssue("Compiler finished with errors.");
           view.dispose();
@@ -188,8 +199,8 @@ public abstract class WriteControllerTask implements ExecutableTask {
         private final SwingWorker<Boolean, String> worker;
         
         private GUITask(CollectRULsTask collectRULsTask,
-                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
-            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
+            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
             worker = new MyWorker();
         }
 
@@ -231,8 +242,8 @@ public abstract class WriteControllerTask implements ExecutableTask {
         private Exception executionExceptionCause = null;
         
         private CommandLineTask(CollectRULsTask collectRULsTask,
-                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
-            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
+            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
         }
 
         @Override

@@ -8,6 +8,9 @@
         <dependency org="com.github.memo33" name="jDBPFX" rev="1.0.1" conf="mainapp->default">
             <artifact name="jDBPFX" url="https://dl.dropboxusercontent.com/sh/b8a2x16j1vmnlc5/r8CS9Y7L0X/jDBPFX-1.0.1.jar"/>
         </dependency>
+        <dependency org="org.parboiled" name="parboiled-java" rev="1.1.6" conf="mainapp->default">
+            <artifact name="parboiled-java" type="jar"/>
+        </dependency>
         <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0" conf="tests->default">
             <artifact name="system-rules" type="jar"/>
         </dependency>
