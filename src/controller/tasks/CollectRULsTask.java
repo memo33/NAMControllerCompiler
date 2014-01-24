@@ -21,8 +21,8 @@ public abstract class CollectRULsTask implements ExecutableTask {
             return pathname.isDirectory() ||
                     pathname.getName().endsWith(".txt") ||
                     pathname.getName().endsWith(".rul") ||
-                    pathname.getName().endsWith(".metarul");
-            // TODO add groovy file extension
+                    pathname.getName().endsWith(".metarul") ||
+                    pathname.getName().endsWith(".groovy");
         }
     };
     

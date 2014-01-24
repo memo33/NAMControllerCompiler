@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Queue;
 import java.util.Scanner;
@@ -15,6 +16,7 @@ import javax.swing.event.ChangeListener;
 
 import jdpbfx.DBPFTGI;
 
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.ReportingParseRunner;
@@ -69,13 +71,19 @@ public class RUL1Entry extends RULEntry {
 //            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
 //                continue;
 //            }
-            FileInputStream fis = null;
+            InputStream is = null;
             InputStreamReader isr = null;
             BufferedReader br = null;
             
             final RUL1Writer rul1Writer;
+            boolean isGroovy = false;
             if (collectMetaData) {
-                rul1Writer = file.getName().endsWith(METARUL_FILEEXTENSION) ? new MetaRUL1Writer() : new MetaCollectingRUL1Writer();
+                if (file.getName().endsWith(METARUL_FILEEXTENSION) ||
+                        (isGroovy = file.getName().endsWith(".groovy"))) {
+                    rul1Writer = new MetaRUL1Writer();
+                } else {
+                    rul1Writer = new MetaCollectingRUL1Writer();
+                }
             } else {
                 if (file.getName().endsWith(METARUL_FILEEXTENSION)) {
                     continue;
@@ -83,8 +91,8 @@ public class RUL1Entry extends RULEntry {
                 rul1Writer = new DefaultRUL1Writer();
             }
             try {
-                fis = new FileInputStream(file);
-                isr = new InputStreamReader(fis);
+                is = !isGroovy ? new FileInputStream(file) : RUL2Entry.createGroovyInputStream(file);
+                isr = new InputStreamReader(is);
                 br = new BufferedReader(isr);
                 printSubFileHeader(file);
                 
@@ -103,9 +111,24 @@ public class RUL1Entry extends RULEntry {
                 writer.write(newline);
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (CompilationFailedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (InstantiationException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            } catch (IllegalAccessException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
             } finally {
-                if (fis != null) {
-                    fis.close();
+                if (br != null) {
+                    br.close();
+                }
+                if (isr != null) {
+                    isr.close();
+                }
+                if (is != null) {
+                    is.close();
                 }
             }
         }

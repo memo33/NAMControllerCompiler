@@ -1,10 +1,18 @@
 package model;
 
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
@@ -17,6 +25,7 @@ import javax.swing.event.ChangeListener;
 
 import jdpbfx.DBPFTGI;
 
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.parboiled.errors.ErrorUtils;
 import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.support.ParsingResult;
@@ -54,7 +63,9 @@ public class RUL2Entry extends RULEntry {
 //                continue;
 //            }
             OverrideWriter overrideWriter;
-            if (file.getName().endsWith(RUL1Entry.METARUL_FILEEXTENSION)) {
+            boolean isGroovy = false;
+            if (file.getName().endsWith(RUL1Entry.METARUL_FILEEXTENSION) ||
+                    (isGroovy = file.getName().endsWith(".groovy"))) {
                 if (metaOverrideWriter == null) {
                     metaOverrideWriter = new MetaOverrideWriter();
                 }
@@ -65,11 +76,20 @@ public class RUL2Entry extends RULEntry {
                 }
                 overrideWriter = defaultOverrideWriter;
             }
+            
+            InputStream is = null;
+            InputStreamReader isReader = null;
             FileReader fReader = null;
             BufferedReader buffer = null;
             try {
-                fReader = new FileReader(file);
-                buffer = new BufferedReader(fReader);
+                if (isGroovy) {
+                    is = createGroovyInputStream(file);
+                    isReader = new InputStreamReader(is);
+                    buffer = new BufferedReader(isReader);
+                } else {
+                    fReader = new FileReader(file);
+                    buffer = new BufferedReader(fReader);
+                }
                 super.printSubFileHeader(file);
                 
                 for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
@@ -79,11 +99,20 @@ public class RUL2Entry extends RULEntry {
                         headerFound = true;
                         continue;
                     }
-                    // else                    
+                    // else
                     overrideWriter.writeLineChecked(line, writer, patterns);
                 }
                 writer.write(newline);
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (CompilationFailedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
                 if (buffer != null) {
@@ -92,10 +121,44 @@ public class RUL2Entry extends RULEntry {
                 if (fReader != null) {
                     fReader.close();
                 }
+                if (isReader != null) {
+                    isReader.close();
+                }
+                if (is != null) {
+                    is.close();
+                }
             }
         }
 //        System.out.println(((MetaOverrideWriter) overrideWriter).runner.getReport().print());
         writer.flush();
+    }
+    
+    static InputStream createGroovyInputStream(File groovyFile) throws CompilationFailedException, IOException, InstantiationException, IllegalAccessException {
+        ClassLoader parent = RUL2Entry.class.getClassLoader();
+        GroovyClassLoader loader = new GroovyClassLoader(parent);
+        Class<?> groovyClass = loader.parseClass(groovyFile);
+
+        final GroovyObject groovyObject = (GroovyObject) groovyClass.newInstance();
+        PipedInputStream pis = new PipedInputStream();
+        final PipedOutputStream pos = new PipedOutputStream(pis);
+        final PrintStream printer = new PrintStream(pos);
+        groovyObject.setProperty("out", printer);
+        new Thread(new Runnable() { // TODO threading
+            
+            @Override
+            public void run() {
+                groovyObject.invokeMethod("run", new Object[] {});
+                printer.close();
+                try {
+                    pos.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+        loader.close();
+        return pis;
     }
 
     private static class DefaultOverrideWriter implements OverrideWriter {

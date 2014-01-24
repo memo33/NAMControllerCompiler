@@ -11,6 +11,7 @@
         <dependency org="org.parboiled" name="parboiled-java" rev="1.1.6" conf="mainapp->default">
             <artifact name="parboiled-java" type="jar"/>
         </dependency>
+        <dependency org="org.codehaus.groovy" name="groovy-all-minimal" rev="1.5.8" conf="mainapp->default"/>    
         <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0" conf="tests->default">
             <artifact name="system-rules" type="jar"/>
         </dependency>
