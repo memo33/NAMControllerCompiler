@@ -5,7 +5,6 @@ import static controller.NAMControllerCompilerMain.LOGGER;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -36,8 +35,6 @@ public abstract class RULEntry extends DBPFEntry {
     
     Queue<File> inputFiles;
     OutputStreamWriter writer = null;
-//    WritableByteChannel sink;
-    private OutputStream sink;
 
     RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
         super(tgi);
@@ -93,26 +90,22 @@ public abstract class RULEntry extends DBPFEntry {
     public ReadableByteChannel createDataChannel() {
         try {
             PipedInputStream pis = new PipedInputStream();
-            sink = new PipedOutputStream(pis);
+            // sink needs to be connected here to avoid subsequent reads from unconnected pipe
+            final PipedOutputStream sink = new PipedOutputStream(pis);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        writer = new OutputStreamWriter(new BufferedOutputStream(sink, BUFFER_SIZE));
-                        printHeader();
-                        provideData();
-                    } catch (IOException e) {
-                        Thread currentThread = Thread.currentThread();
-                        currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
+                        try (OutputStreamWriter writerReference = new OutputStreamWriter(
+                                new BufferedOutputStream(sink, BUFFER_SIZE))) {
+                            writer = new OutputStreamWriter(new BufferedOutputStream(sink, BUFFER_SIZE));
+                            printHeader();
+                            provideData();
+                        } catch (IOException e1) {
+                            Thread currentThread = Thread.currentThread();
+                            currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e1);
+                        } // auto-closes writer
                     } finally {
-                        if (writer != null) {
-                            try {
-                                writer.close();
-                            } catch (IOException e) {
-                                Thread currentThread = Thread.currentThread();
-                                currentThread.getUncaughtExceptionHandler().uncaughtException(currentThread, e);
-                            }
-                        }
                         if (sink != null) {
                             try {
                                 sink.close();

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Queue;
 import java.util.Scanner;
@@ -74,9 +73,6 @@ public class RUL1Entry extends RULEntry {
 //            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
 //                continue;
 //            }
-            InputStream is = null;
-            InputStreamReader isr = null;
-            BufferedReader br = null;
             
             final RUL1Writer rul1Writer;
             boolean isGroovy = false;
@@ -93,10 +89,9 @@ public class RUL1Entry extends RULEntry {
                 }
                 rul1Writer = new DefaultRUL1Writer();
             }
-            try {
-                is = !isGroovy ? new FileInputStream(file) : RUL2Entry.createGroovyInputStream(file);
-                isr = new InputStreamReader(is);
-                br = new BufferedReader(isr);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(!isGroovy ?
+                    new FileInputStream(file) :
+                        RUL2Entry.createGroovyInputStream(file)))) {
                 printSubFileHeader(file);
                 
                 int i = 1;
@@ -105,34 +100,16 @@ public class RUL1Entry extends RULEntry {
                         rul1Writer.writeLineChecked(line);
                     } catch (DuplicateDefinitionException e) {
                         NAMControllerCompilerMain.LOGGER.log(Level.WARNING, String.format("Duplicate definition in line %d of file %s:%n%s", i, file, line));
-//                    } catch (RuntimeException e) {
-//                        NAMControllerCompilerMain.LOGGER.log(Level.WARNING, String.format("Exception while parsing line %d in file %s:%n%s",
-//                                new Object[] {i, file, line}), e);
                     }
                 }
 
                 writer.write(newline);
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (CompilationFailedException e1) {
+            } catch (CompilationFailedException | InstantiationException | IllegalAccessException e) {
+                assert isGroovy;
                 // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (InstantiationException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (IllegalAccessException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } finally {
-                if (br != null) {
-                    br.close();
-                }
-                if (isr != null) {
-                    isr.close();
-                }
-                if (is != null) {
-                    is.close();
-                }
+                e.printStackTrace();
             }
         }
         writer.flush();

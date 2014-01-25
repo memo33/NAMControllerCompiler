@@ -78,19 +78,9 @@ public class RUL2Entry extends RULEntry {
                 overrideWriter = defaultOverrideWriter;
             }
             
-            InputStream is = null;
-            InputStreamReader isReader = null;
-            FileReader fReader = null;
-            BufferedReader buffer = null;
-            try {
-                if (isGroovy) {
-                    is = createGroovyInputStream(file);
-                    isReader = new InputStreamReader(is);
-                    buffer = new BufferedReader(isReader);
-                } else {
-                    fReader = new FileReader(file);
-                    buffer = new BufferedReader(fReader);
-                }
+            try (BufferedReader buffer = new BufferedReader(!isGroovy ?
+                    new FileReader(file) :
+                        new InputStreamReader(createGroovyInputStream(file)))) {
                 super.printSubFileHeader(file);
                 
                 for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
@@ -106,28 +96,10 @@ public class RUL2Entry extends RULEntry {
                 writer.write(newline);
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (CompilationFailedException e) {
+            } catch (CompilationFailedException | InstantiationException | IllegalAccessException e) {
+                assert isGroovy;
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-            } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } finally {
-                if (buffer != null) {
-                    buffer.close();
-                }
-                if (fReader != null) {
-                    fReader.close();
-                }
-                if (isReader != null) {
-                    isReader.close();
-                }
-                if (is != null) {
-                    is.close();
-                }
             }
         }
 //        System.out.println(((MetaOverrideWriter) overrideWriter).runner.getReport().print());

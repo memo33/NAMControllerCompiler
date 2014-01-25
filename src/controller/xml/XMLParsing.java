@@ -25,8 +25,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.sun.org.apache.xml.internal.utils.DefaultErrorHandler;
-
 import controller.CompileMode;
 
 /**
@@ -115,7 +113,7 @@ public class XMLParsing {
 		dbFactory.setValidating(true);
 
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		dBuilder.setErrorHandler(new DefaultErrorHandler());
+		dBuilder.setErrorHandler(null); // use default error handler
 		Document doc = dBuilder.parse(xmlFile);
 		doc.getDocumentElement().normalize();
 
