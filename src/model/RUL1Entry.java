@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 
 import javax.swing.event.ChangeEvent;
@@ -51,8 +52,8 @@ public class RUL1Entry extends RULEntry {
 //    }
     
     public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener,
-            File metaRuleDefinitionsFile, MetaController metaController, MetaOverrideParser overrideParser) {
-        super(tgi, inputFiles, changeListener);
+            File metaRuleDefinitionsFile, MetaController metaController, MetaOverrideParser overrideParser, ExecutorService executor) {
+        super(tgi, inputFiles, changeListener, executor);
         this.isLHD = isLHD;
         this.collectMetaData = true;
         this.metaRuleDefinitionsFile = metaRuleDefinitionsFile;

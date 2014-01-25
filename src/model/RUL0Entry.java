@@ -8,13 +8,13 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import controller.NAMControllerCompilerMain;
-
 import jdpbfx.DBPFTGI;
+import controller.NAMControllerCompilerMain;
 
 /**
  * Specifically for the RUL0 file. The RUL0 file is actually parsed in here.
@@ -24,8 +24,8 @@ public class RUL0Entry extends RULEntry {
 
 	private final boolean isLHD;//, isESeries;
 
-	public RUL0Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener) {
-	    super(tgi, inputFiles, changeListener);
+	public RUL0Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener, ExecutorService executor) {
+	    super(tgi, inputFiles, changeListener, executor);
 		this.isLHD = isLHD;
 //		this.isESeries = isESeries;
 	}

@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -46,7 +48,8 @@ public class ModelTest {
                 // do nothing
             }
         };
-        RULEntry rulEntry = new RULEntry(DBPFTGI.BLANKTGI, new ArrayDeque<File>(0), changeListener) {
+        ExecutorService parsingExecutor = Executors.newSingleThreadExecutor(); 
+        RULEntry rulEntry = new RULEntry(DBPFTGI.BLANKTGI, new ArrayDeque<File>(0), changeListener, parsingExecutor) {
             @Override
             void printHeader() throws IOException {
                 // do not print header as it depends on modification dates
