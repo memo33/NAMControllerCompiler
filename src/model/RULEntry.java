@@ -17,6 +17,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.swing.event.ChangeListener;
@@ -39,13 +42,17 @@ public abstract class RULEntry extends DBPFEntry {
 //    WritableByteChannel sink;
     private OutputStream sink;
 
-    RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener) {
+    private final ExecutorService executor;
+    private Future<Void> result;
+    
+    RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener, ExecutorService executor) {
         super(tgi);
         this.inputFiles = inputFiles;
         dateFormat = new SimpleDateFormat("MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         this.changeListener = changeListener;
         this.calculateLastModified();
+        this.executor = executor;
     }
     
     /**
@@ -88,15 +95,20 @@ public abstract class RULEntry extends DBPFEntry {
      * @throws IOException
      */
     abstract void provideData() throws IOException;
+    
+    public Future<Void> getExecutionResult() {
+        return this.result;
+    }
 
     @Override
     public ReadableByteChannel createDataChannel() {
         try {
             PipedInputStream pis = new PipedInputStream();
             sink = new PipedOutputStream(pis);
-            new Thread(new Runnable() {
+            
+            Callable<Void> callable = new Callable<Void>() {
                 @Override
-                public void run() {
+                public Void call() throws Exception {
                     try {
                         writer = new OutputStreamWriter(new BufferedOutputStream(sink, BUFFER_SIZE));
                         printHeader();
@@ -122,8 +134,10 @@ public abstract class RULEntry extends DBPFEntry {
                             }
                         }
                     }
+                    return null;
                 }
-            }).start();
+            };
+            result = executor.submit(callable);
             return Channels.newChannel(pis);
         } catch (IOException e1) {
             LOGGER.log(Level.SEVERE, "IOException while creating data channel for RUL entry", e1);

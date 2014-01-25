@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
 import javax.swing.event.ChangeEvent;
@@ -23,8 +24,8 @@ public class RUL2Entry extends RULEntry {
 //    private final boolean isESeries;
     private final Deque<Pattern> patterns;
     
-    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener) {
-        super(tgi, inputFiles, changeListener);
+    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, ExecutorService executor) {
+        super(tgi, inputFiles, changeListener, executor);
         this.patterns = new LinkedList<Pattern>(patternsForExclusion);
 //        this.isESeries = isESeries;
     }

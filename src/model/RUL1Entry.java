@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -18,10 +19,9 @@ public class RUL1Entry extends RULEntry {
 //    private final boolean isESeries;
     private final boolean isLHD;
 
-    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener) {
-        super(tgi, inputFiles, changeListener);
+    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener, ExecutorService executor) {
+        super(tgi, inputFiles, changeListener, executor);
         this.isLHD = isLHD;
-//        this.isESeries = isESeries;
     }
 
     @Override
@@ -52,6 +52,12 @@ public class RUL1Entry extends RULEntry {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
+                if (br != null) {
+                    br.close();
+                }
+                if (isr != null) {
+                    isr.close();
+                }
                 if (fis != null) {
                     fis.close();
                 }

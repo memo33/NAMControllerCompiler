@@ -16,6 +16,8 @@ import java.util.Queue;
 import java.util.TimeZone;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -48,6 +50,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final URI inputURI;
     private final File outputFile;
     private final View view;
+    private final RULEntry[] rulEntries = new RULEntry[3];
 
     private long starttime;
     
@@ -94,20 +97,24 @@ public abstract class WriteControllerTask implements ExecutableTask {
         {
             long lastModf = 0;
             
+            // all the parsing and source file reading happens on the following executor thread,
+            // while the writing of DBPF file happens on the current thread
+            ExecutorService parsingExecutor = Executors.newSingleThreadExecutor();
+            
             // RUL files
+            {
+                int i = 0;
+                rulEntries[i] = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
+                i++;
+                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
+                i++;
+                rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener, parsingExecutor);
+            }
             for (int i = 0; i < RUL_TGIS.length; i++) {
-                RULEntry rulEntry;
-                if (i==0) {
-                    rulEntry = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
-                } else if (i==1) {
-                    rulEntry = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener);
-                } else {
-                    rulEntry = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener);
+                if(rulEntries[i].getLastModified() > lastModf) {
+                    lastModf = rulEntries[i].getLastModified();
                 }
-                if(rulEntry.getLastModified() > lastModf) {
-                    lastModf = rulEntry.getLastModified();
-                }
-                writeList.add(rulEntry);
+                writeList.add(rulEntries[i]);
             }
             // LText (Controller marker)
             LOGGER.info("Adding Controller marker description text");
@@ -120,37 +127,25 @@ public abstract class WriteControllerTask implements ExecutableTask {
     }
     
     private void determineResult() {
-//      try {
-//          if (!this.isCancelled() && this.get()) {
-//              LOGGER.log(Level.INFO,
-//                      "Total time for writing: {0} milliseconds.", this.getTimeConsumed());
-//              view.publishInfoMessage("The file \"{0}\" has been successfully compiled", outputFile.toString());
-//              view.dispose();
-//              System.exit(0);
-//          } else {
-//              view.publishIssue("Compiler finished with errors.");
-//              view.dispose();
-//              System.exit(-1);
-//          }
-//      } catch (InterruptedException e) {
-//          view.publishException("Compiler finished with errors: " + e.getLocalizedMessage(), e);
-//          view.dispose();
-//          System.exit(-1);
-//      } catch (ExecutionException e) {
-//          view.publishException("Compiler finished with errors: " + e.getLocalizedMessage(), e);
-//          view.dispose();
-//          System.exit(-1);
-//      }
       boolean successful = false;
       try {
-          successful = this.get();
+          successful = this.get(); // test for execution exception
+          if (successful) {
+              for (int i = 0; i < rulEntries.length; i++) {
+                  rulEntries[i].getExecutionResult().get(); // test for execution exception
+              }
+          }
       } catch (InterruptedException e) {
           view.publishException(e.getLocalizedMessage(), e);
+          successful = false;
       } catch (ExecutionException e) {
           view.publishException(e.getLocalizedMessage(), e);
+          successful = false;
       } catch (CancellationException e) { // should not happen
           view.publishException("Unexpected exception! " + e.getLocalizedMessage(), e);
+          successful = false;
       }
+      // FIXME Before exiting, find out for success, if the UncaughtExceptionHandler has not received any exceptions
       if (!successful) {
           view.publishIssue("Compiler finished with errors.");
           view.dispose();
