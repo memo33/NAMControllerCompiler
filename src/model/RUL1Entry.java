@@ -136,6 +136,10 @@ public class RUL1Entry extends RULEntry {
     }
         
     private void readDefinitionsFile() throws FileNotFoundException {
+        if (!metaRuleDefinitionsFile.exists()) {
+            NAMControllerCompilerMain.LOGGER.log(Level.WARNING, "Source file \"{0}\" does not exist", metaRuleDefinitionsFile);
+            return;
+        }
         Scanner scanner = new Scanner(metaRuleDefinitionsFile);
         
         MetaDefinitionsParser parser = Parboiled.createParser(MetaDefinitionsParser.class);

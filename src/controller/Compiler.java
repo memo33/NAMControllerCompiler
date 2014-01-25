@@ -118,10 +118,10 @@ public abstract class Compiler extends AbstractCompiler {
                 }
             }
             metaRuleDefinitionsFile = new File(inputDir, "MetaRULDefinitions.metarul");
-            if (!metaRuleDefinitionsFile.exists()) {
-                view.publishIssue("Source file \"{0}\" does not exist", metaRuleDefinitionsFile);
-                return false;
-            }
+//            if (!metaRuleDefinitionsFile.exists()) {
+//                view.publishIssue("Source file \"{0}\" does not exist", metaRuleDefinitionsFile);
+//                return false;
+//            }
             return true;
         }
     }
