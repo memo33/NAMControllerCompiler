@@ -31,11 +31,11 @@ import jdpbfx.DBPFFile;
 import jdpbfx.DBPFTGI;
 import jdpbfx.types.DBPFLText;
 import model.MetaController;
-import model.MetaOverrideParser;
 import model.RUL0Entry;
 import model.RUL1Entry;
 import model.RUL2Entry;
 import model.RULEntry;
+import model.parser.MetaOverrideParser;
 import view.View;
 
 public abstract class WriteControllerTask implements ExecutableTask {

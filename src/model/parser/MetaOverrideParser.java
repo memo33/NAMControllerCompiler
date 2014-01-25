@@ -1,5 +1,9 @@
-package model;
+package model.parser;
 
+import model.MetaController;
+import model.MetaNetworkTile;
+import model.NetworkTile;
+import model.OverrideRule;
 import model.MetaNetworkTile.MetaNetwork;
 
 import org.parboiled.Rule;
@@ -11,7 +15,7 @@ import org.parboiled.annotations.SuppressSubnodes;
 public class MetaOverrideParser extends AbstractRULParser {
 
 //    @SuppressNode
-    Rule Override() {
+    public Rule Override() {
         return Sequence(
                 Tile(false),
                 OptionalComma(),
@@ -89,7 +93,7 @@ public class MetaOverrideParser extends AbstractRULParser {
     /**
      * Pushes {@link MetaNetworkTile} (bottom) and {@link NetworkTile} (top) on stack.
      */
-    Rule MetaIntersectionDefinition() {
+    public Rule MetaIntersectionDefinition() {
         return Sequence(
                 Intersection(),
                 "= ",

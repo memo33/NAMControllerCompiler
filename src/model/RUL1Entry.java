@@ -15,6 +15,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jdpbfx.DBPFTGI;
+import model.parser.MetaDefinitionsParser;
+import model.parser.MetaOverrideParser;
+import model.parser.RUL1Parser;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.parboiled.Parboiled;

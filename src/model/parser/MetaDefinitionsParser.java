@@ -1,4 +1,4 @@
-package model;
+package model.parser;
 
 import org.parboiled.BaseParser;
 import org.parboiled.Rule;
@@ -32,7 +32,7 @@ public class MetaDefinitionsParser extends BaseParser<String> {
      * After match, top element of stack is the first network name, followed by
      * the rest of the network names that are synonyms.
      */
-    Rule NameSynonymDefinition() {
+    public Rule NameSynonymDefinition() {
         return Sequence(
                 "DEFINE-SYNONYM-NAME ",
                 "= ",
@@ -49,7 +49,7 @@ public class MetaDefinitionsParser extends BaseParser<String> {
      * After match, top element of stack is Group name, followed by network
      * names that are members of this group.
      */
-    Rule GroupDefinition() {
+    public Rule GroupDefinition() {
         return Sequence(
                 "DEFINE-GROUP ",
                 Name(), push(match().trim()),
@@ -67,7 +67,7 @@ public class MetaDefinitionsParser extends BaseParser<String> {
      * Afterward match, top element of stack is Group name, second is the first
      * direction name, followed by the rest of the direction names.
      */
-    Rule DirectionSynonymDefinition() {
+    public Rule DirectionSynonymDefinition() {
         return Sequence(
                 "DEFINE-SYNONYM-DIRECTION ",
                 Name(), push(match().trim()),

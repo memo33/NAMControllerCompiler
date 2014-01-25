@@ -1,5 +1,6 @@
-package model;
+package model.parser;
 
+import model.NetworkTile;
 import model.NetworkTile.StringIID;
 
 import org.parboiled.BaseParser;

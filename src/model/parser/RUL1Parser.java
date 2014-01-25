@@ -1,4 +1,6 @@
-package model;
+package model.parser;
+
+import model.NetworkTile;
 
 import org.parboiled.Rule;
 
@@ -8,7 +10,7 @@ public class RUL1Parser extends AbstractRULParser {
      * Pushes String flags (bottom), String flags, {@link NetworkTile}
      * IID,rot,flip (top) on stack.
      */
-    Rule RUL1IntersectionDefinition() {
+    public Rule RUL1IntersectionDefinition() {
         return Sequence(
                 ZeroOrMore(TestNot(AnyOf("=;")), ANY),
                 "= ",

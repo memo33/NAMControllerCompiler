@@ -24,6 +24,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jdpbfx.DBPFTGI;
+import model.parser.MetaOverrideParser;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.parboiled.errors.ErrorUtils;
@@ -160,6 +161,11 @@ public class RUL2Entry extends RULEntry {
         loader.close();
         return pis;
     }
+    
+    private static interface OverrideWriter {
+
+        public void writeLineChecked(String line, OutputStreamWriter writer, Deque<Pattern> patterns) throws IOException;
+    }
 
     private static class DefaultOverrideWriter implements OverrideWriter {
 
@@ -251,95 +257,4 @@ public class RUL2Entry extends RULEntry {
             }
         }
     }
-    
-//    private static class RegexOverrideWriter implements OverrideWriter {
-//        
-//        private final String COMMENT_DELIMITER = ";";
-//        private final RegexParser parser = new RegexParser();
-//
-//        @Override
-//        public void writeLineChecked(String line, OutputStreamWriter writer,
-//                Deque<Pattern> patterns) throws IOException {
-//            String[] splits = line.split(COMMENT_DELIMITER, 2);
-//            if (splits.length == 0) {
-//                return;
-//            }
-//            line = splits[0].trim();
-//            if (line.isEmpty()) {
-//                return;
-//            }
-//            
-//            OverrideRule overrideRule = parser.parseOverrideRule(line);
-//            if (overrideRule == null) {
-//                NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
-//            } else {
-//                String[] iidsStrings = new String[] {
-//                        overrideRule.getOutputTuple().getLeftTile().getID().asString(),
-//                        overrideRule.getOutputTuple().getRightTile().getID().asString(),
-//                        overrideRule.getInputTuple().getLeftTile().getID().asString(),
-//                        overrideRule.getInputTuple().getRightTile().getID().asString(),
-//                };
-//                Iterator<Pattern> iter = patterns.iterator();
-//                while (iter.hasNext()) {
-//                    Pattern p = iter.next();
-//                    for (int i = 0; i < iidsStrings.length; i++) {
-//                        if (p.matcher(iidsStrings[i]).matches()) {
-//                            // let's maintain MRU order
-//                            iter.remove();
-//                            patterns.addFirst(p);
-//                            return;
-//                        }
-//                    }
-//                }
-//                writer.write(overrideRule + newline);
-//            }
-//        }
-//        
-//        private class RegexParser {
-//            
-//            String hexUInt = "0x\\p{XDigit}{8}\\s*";
-//            String rot = "[0-3]\\s*";
-//            String flip = "[01]\\s*";
-//            String prevent = "0\\s*,\\s*0\\s*,\\s*0\\s*";
-//            
-//            String iidTile = String.format("%s,\\s*%s,\\s*%s", hexUInt, rot, flip);
-//            String iidPrevTile = prevent + "|" + iidTile;
-//            
-//            String metaName = "[!\\[\\]=;,]+";
-//            String metaDir = "[!\\[\\]=;]+";
-//            String metaNetwork = metaName + ",\\s*" + metaDir;
-//            
-//            String metaTile = String.format("\\[%s(?:;\\s*%s)*\\](?:,%s,\\s*%s)?", metaNetwork, metaNetwork, rot, flip);
-//            
-//            String override = String.format("(%s|%s)\\s*,\\s*(%s|%s)\\s*=\\s*(%s|%s)\\s*,\\s*(%s|%s)\\s*",
-//                    iidTile, metaTile,
-//                    iidTile, metaTile,
-//                    iidPrevTile, metaTile,
-//                    iidPrevTile, metaTile);
-//            
-//            Pattern overridePattern = Pattern.compile(override);
-//            Pattern iidPrevTilePattern = Pattern.compile(iidPrevTile);
-//            
-//            
-//            OverrideRule parseOverrideRule(String line) {
-//                Matcher m = overridePattern.matcher(line);
-//                if (!m.matches()) {
-//                    return null;
-//                }
-//                return new OverrideRule(getNetworkTile(m.group(1)), getNetworkTile(m.group(2)), getNetworkTile(m.group(3)), getNetworkTile(m.group(4)));
-//            }
-//            
-//            private NetworkTile getNetworkTile(String tile) {
-//                Matcher mTile =iidPrevTilePattern.matcher(tile);
-//                if (mTile.matches()) {
-//                    String[] items = tile.split(",");
-//                    return new NetworkTile(new StringIID(items[0]), Integer.decode(items[1]), Integer.decode(items[2]) == 1);
-//                } else {
-//                    // TODO
-//                }
-//                return null;
-//            }
-//        }
-//        
-//    }
 }
