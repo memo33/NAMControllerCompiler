@@ -1,18 +1,11 @@
 package model;
 
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyObject;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
@@ -35,30 +28,30 @@ import org.parboiled.support.ParsingResult;
 import controller.NAMControllerCompilerMain;
 
 public class RUL2Entry extends RULEntry {
-    
+
 //    private final boolean isESeries;
     private final Deque<Pattern> patterns;
     private final MetaOverrideParser parser;
-    
+
     private MetaOverrideWriter metaOverrideWriter;
     private DefaultOverrideWriter defaultOverrideWriter;
-    
-    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, MetaOverrideParser parser, ExecutorService executor) {
-        super(tgi, inputFiles, changeListener, executor);
+
+    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, MetaOverrideParser parser, ExecutorService executor, ExecutorService groovyExecutor) {
+        super(tgi, inputFiles, changeListener, executor, groovyExecutor);
         this.patterns = new LinkedList<Pattern>(patternsForExclusion);
 //        this.isESeries = isESeries;
         this.parser = parser;
     }
-    
+
     /*
      * parses files line by line, tests if pattern matches and excludes these lines as well as empty lines and comments;
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
     public void provideData() throws IOException {
         NAMControllerCompilerMain.LOGGER.info("Writing file RUL2");
         boolean headerFound = false;
-        
+
         for (File file : inputFiles) {
             this.changeListener.stateChanged(new ChangeEvent(file));
 //            if (!RULEntry.fileMatchesSeries(file, isESeries)) {
@@ -78,12 +71,12 @@ public class RUL2Entry extends RULEntry {
                 }
                 overrideWriter = defaultOverrideWriter;
             }
-            
+
             try (BufferedReader buffer = new BufferedReader(!isGroovy ?
                     new FileReader(file) :
                         new InputStreamReader(createGroovyInputStream(file)))) {
                 super.printSubFileHeader(file);
-                
+
                 for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
                     // special treatment for RUL2 header
                     if (!headerFound && line.trim().equalsIgnoreCase("[ruleoverrides]")) {
@@ -106,35 +99,7 @@ public class RUL2Entry extends RULEntry {
 //        System.out.println(((MetaOverrideWriter) overrideWriter).runner.getReport().print());
         writer.flush();
     }
-    
-    static InputStream createGroovyInputStream(File groovyFile) throws CompilationFailedException, IOException, InstantiationException, IllegalAccessException {
-        ClassLoader parent = RUL2Entry.class.getClassLoader();
-        GroovyClassLoader loader = new GroovyClassLoader(parent);
-        Class<?> groovyClass = loader.parseClass(groovyFile);
 
-        final GroovyObject groovyObject = (GroovyObject) groovyClass.newInstance();
-        PipedInputStream pis = new PipedInputStream();
-        final PipedOutputStream pos = new PipedOutputStream(pis);
-        final PrintStream printer = new PrintStream(pos);
-        groovyObject.setProperty("out", printer);
-        new Thread(new Runnable() { // TODO threading
-            
-            @Override
-            public void run() {
-                groovyObject.invokeMethod("run", new Object[] {});
-                printer.close();
-                try {
-                    pos.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-        loader.close();
-        return pis;
-    }
-    
     private static interface OverrideWriter {
 
         public void writeLineChecked(String line, OutputStreamWriter writer, Deque<Pattern> patterns) throws IOException;
@@ -153,7 +118,7 @@ public class RUL2Entry extends RULEntry {
             if (line.isEmpty()) {
                 return;
             }
-            
+
             String[] iidsStrings = line.split(",|=");
             boolean matchFound = false;
             if (iidsStrings.length != 12) {
@@ -174,17 +139,17 @@ public class RUL2Entry extends RULEntry {
                     }
                 }
             }
-            
+
             if (!matchFound) {
                 writer.write(line + newline);
             }
         }
     }
-    
+
     private class MetaOverrideWriter implements OverrideWriter {
-        
+
         private final String COMMENT_DELIMITER = "#";
-        
+
 //        private final ProfilingParseRunner<OverrideRule> runner = new ProfilingParseRunner<OverrideRule>(parser.Override());
         private final ReportingParseRunner<OverrideRule> runner = new ReportingParseRunner<OverrideRule>(parser.Override());
 
@@ -199,7 +164,7 @@ public class RUL2Entry extends RULEntry {
             if (line.isEmpty()) {
                 return;
             }
-            
+
             ParsingResult<OverrideRule> result = runner.run(line);
             if (!result.parseErrors.isEmpty()) {
                 NAMControllerCompilerMain.LOGGER.warning(ErrorUtils.printParseError(result.parseErrors.get(0)));
@@ -207,7 +172,7 @@ public class RUL2Entry extends RULEntry {
             } else {
                 OverrideRule overrideRule = result.resultValue;
                 assert overrideRule != null : "Result value was null";
-                
+
                 String[] iidsStrings = new String[] {
                         overrideRule.getOutputTuple().getLeftTile().getID().asString(),
                         overrideRule.getOutputTuple().getRightTile().getID().asString(),

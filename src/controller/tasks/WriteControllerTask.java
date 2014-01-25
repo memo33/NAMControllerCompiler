@@ -25,9 +25,6 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.parboiled.Parboiled;
-
-import controller.CompileMode;
 import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFFile;
 import jdpbfx.DBPFTGI;
@@ -38,16 +35,20 @@ import model.RUL1Entry;
 import model.RUL2Entry;
 import model.RULEntry;
 import model.parser.MetaOverrideParser;
+
+import org.parboiled.Parboiled;
+
 import view.View;
+import controller.CompileMode;
 
 public abstract class WriteControllerTask implements ExecutableTask {
-   
+
     private final DBPFTGI[] RUL_TGIS = {
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000001L),
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000002L)};
     private final DBPFTGI LTEXT_TGI = DBPFTGI.valueOf(0x2026960bL, 0x123006aaL, 0x6a47ffffL);
-    
+
     private final CollectRULsTask collectRULsTask;
     private final boolean isLHD;
     private final Queue<Pattern> patterns;
@@ -58,7 +59,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final RULEntry[] rulEntries = new RULEntry[3];
 
     private long starttime;
-    
+
     public static ExecutableTask getInstance(CompileMode mode, CollectRULsTask collectRULsTask,
             boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
         if (mode.isInteractive()) {
@@ -80,7 +81,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         this.view = view;
         this.metaRuleDefinitionsFile = metaRuleDefinitionsFile;
     }
-    
+
     private Boolean mainProcess(final Publisher publisher) throws FileNotFoundException, IOException, InterruptedException, ExecutionException {
         starttime = System.currentTimeMillis();
         Queue<File>[] rulInputFiles = WriteControllerTask.this.collectRULsTask.get();
@@ -88,7 +89,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         for (int i = 0; i < rulInputFiles.length; i++) {
             max += rulInputFiles[i].size();
         }
-        
+
         WriteControllerTask.this.view.initProgress("Processing file...", 0, max + 1);
         ChangeListener changeListener = new ChangeListener() {
             @Override
@@ -98,26 +99,29 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 publisher.publish(file.getName());
             }
         };
-        
+
         Queue<DBPFEntry> writeList = new ArrayDeque<DBPFEntry>();
         {
             long lastModf = 0;
-            
+
             final MetaController metaController = new MetaController();
             MetaOverrideParser overrideParser = Parboiled.createParser(MetaOverrideParser.class, metaController);
-            
+
             // all the parsing and source file reading happens on the following executor thread,
             // while the writing of DBPF file happens on the current thread
             ExecutorService parsingExecutor = Executors.newSingleThreadExecutor();
-            
+
+            // this executor will be used to execute groovy script files
+            ExecutorService groovyExecutor = Executors.newCachedThreadPool();
+
             // RUL files
             {
                 int i = 0;
                 rulEntries[i] = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
                 i++;
-                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, metaRuleDefinitionsFile, metaController, overrideParser, parsingExecutor);
+                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, metaRuleDefinitionsFile, metaController, overrideParser, parsingExecutor, groovyExecutor);
                 i++;
-                rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener, overrideParser, parsingExecutor);
+                rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener, overrideParser, parsingExecutor, groovyExecutor);
             }
             for (int i = 0; i < RUL_TGIS.length; i++) {
                 if(rulEntries[i].getLastModified() > lastModf) {
@@ -134,7 +138,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         // write to file
         return DBPFFile.Writer.write(WriteControllerTask.this.outputFile, writeList);
     }
-    
+
     private void determineResult() {
       boolean successful = false;
       try {
@@ -182,15 +186,15 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 isLHD ? "LHD" : "RHD",
                 dateFormat.format(new Date(date)));
     }
-    
+
     private long getTimeConsumed() {
         return System.currentTimeMillis() - starttime;
     }
 
     private static class GUITask extends WriteControllerTask {
-        
+
         private final SwingWorker<Boolean, String> worker;
-        
+
         private GUITask(CollectRULsTask collectRULsTask,
                 boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
             super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
@@ -228,12 +232,12 @@ public abstract class WriteControllerTask implements ExecutableTask {
             }
         };
     }
-    
+
     private static class CommandLineTask extends WriteControllerTask implements Publisher {
 
         private boolean result;
         private Exception executionExceptionCause = null;
-        
+
         private CommandLineTask(CollectRULsTask collectRULsTask,
                 boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view, File metaRuleDefinitionsFile) {
             super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view, metaRuleDefinitionsFile);
@@ -257,7 +261,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 return this.result;
             }
         }
-        
+
         @Override
         public void publish(String message) {
             super.view.publishProgressIncrement(1, message);

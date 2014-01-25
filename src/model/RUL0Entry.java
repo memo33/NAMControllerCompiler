@@ -25,7 +25,7 @@ public class RUL0Entry extends RULEntry {
 	private final boolean isLHD;//, isESeries;
 
 	public RUL0Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener, ExecutorService executor) {
-	    super(tgi, inputFiles, changeListener, executor);
+        super(tgi, inputFiles, changeListener, executor, null); // groovy executor not required
 		this.isLHD = isLHD;
 //		this.isESeries = isESeries;
 	}
@@ -61,10 +61,11 @@ public class RUL0Entry extends RULEntry {
     			File file = fileIter.next();
     			this.changeListener.stateChanged(new ChangeEvent(file));
     			BufferedReader bufReader = bufIter.next();
-    			
+
     			super.printSubFileHeader(file);
-    			for (String line = bufReader.readLine(); line != null; line = bufReader.readLine())
-    				printLineChecked(line);
+    			for (String line = bufReader.readLine(); line != null; line = bufReader.readLine()) {
+                    printLineChecked(line);
+                }
     			writer.write(newline);
     			bufReader.close();
     		}
@@ -79,17 +80,18 @@ public class RUL0Entry extends RULEntry {
 	/**
 	 * checks for E-Series and LHD/RHD specific code.
 	 * @param line
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	private void printLineChecked(String line) throws IOException {
-        if (!isLHD && line.startsWith(";###RHD###"))
+        if (!isLHD && line.startsWith(";###RHD###")) {
             writer.write(line.substring(10) + newline);
-        else if (isLHD && line.startsWith(";###LHD###"))
+        } else if (isLHD && line.startsWith(";###LHD###")) {
             writer.write(line.substring(10) + newline);
 //        else if (line.startsWith(";###E-Series###") && isESeries)
 //            writer.write(line.substring(15) + newline);
-        else
+        } else {
             writer.write(line + newline);
+        }
 	}
 
 }

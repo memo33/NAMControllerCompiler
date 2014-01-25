@@ -35,21 +35,22 @@ public class ModelTest {
 
     @Rule
     public final TemporaryFolder tempFolder = new TemporaryFolder();
-    
+
     @Test
     public void testWritingOfDBPFFile() throws IOException {
         final String sampleText = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\r\n";
         final int count = 10000;
         File outputFile = tempFolder.newFile();
-        
+
         ChangeListener changeListener = new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 // do nothing
             }
         };
-        ExecutorService parsingExecutor = Executors.newSingleThreadExecutor(); 
-        RULEntry rulEntry = new RULEntry(DBPFTGI.BLANKTGI, new ArrayDeque<File>(0), changeListener, parsingExecutor) {
+        ExecutorService parsingExecutor = Executors.newSingleThreadExecutor();
+        ExecutorService groovyExecutor = null; // not required
+        RULEntry rulEntry = new RULEntry(DBPFTGI.BLANKTGI, new ArrayDeque<File>(0), changeListener, parsingExecutor, groovyExecutor) {
             @Override
             void printHeader() throws IOException {
                 // do not print header as it depends on modification dates
@@ -62,11 +63,11 @@ public class ModelTest {
                 writer.flush();
             }
         };
-        
+
         Collection<DBPFEntry> writeList = Arrays.asList((DBPFEntry) rulEntry);
         assertTrue(DBPFFile.Writer.write(outputFile, writeList));
         assertTrue(DBPFFile.Header.HEADER_SIZE + count * sampleText.length() + writeList.size() * 20 == outputFile.length());
-        
+
         DBPFFile dbpfFile = DBPFFile.Reader.read(outputFile);
         assertTrue(dbpfFile.header.getIndexEntryCount() == writeList.size());
         assertTrue(dbpfFile.header.getIndexOffsetLocation() == DBPFFile.Header.HEADER_SIZE + count * sampleText.length());
@@ -83,7 +84,7 @@ public class ModelTest {
         }
         scanner.close();
     }
-    
+
     @Test
     public void testWritingOfMultipleEntries() throws IOException {
         int count = 20;
@@ -101,7 +102,7 @@ public class ModelTest {
         File outputFile = tempFolder.newFile();
         assertTrue(DBPFFile.Writer.write(outputFile, writeList));
         assertTrue(DBPFFile.Header.HEADER_SIZE + count * data.length + writeList.size() * 20 == outputFile.length());
-        
+
         DBPFFile dbpfFile = DBPFFile.Reader.read(outputFile);
         assertTrue(dbpfFile.header.getIndexEntryCount() == writeList.size());
         assertTrue(dbpfFile.header.getIndexOffsetLocation() == DBPFFile.Header.HEADER_SIZE + count * data.length);

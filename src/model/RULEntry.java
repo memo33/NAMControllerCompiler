@@ -1,13 +1,17 @@
 package model;
 
 import static controller.NAMControllerCompilerMain.LOGGER;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.text.DateFormat;
@@ -26,23 +30,26 @@ import javax.swing.event.ChangeListener;
 import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFTGI;
 
+import org.codehaus.groovy.control.CompilationFailedException;
+
 public abstract class RULEntry extends DBPFEntry {
-    
+
     private static final int BUFFER_SIZE = 8 * 1024;
     static final String newline = "\r\n";
 
     private final DateFormat dateFormat;
     private long lastModified;
-    
+
     final ChangeListener changeListener;
-    
+
     Queue<File> inputFiles;
     OutputStreamWriter writer = null;
-    
+
     private final ExecutorService executor;
+    private final ExecutorService groovyExecutor;
     private Future<Void> result;
-    
-    RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener, ExecutorService executor) {
+
+    RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener, ExecutorService executor, ExecutorService groovyExecutor) {
         super(tgi);
         this.inputFiles = inputFiles;
         dateFormat = new SimpleDateFormat("MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
@@ -50,33 +57,35 @@ public abstract class RULEntry extends DBPFEntry {
         this.changeListener = changeListener;
         this.calculateLastModified();
         this.executor = executor;
+        this.groovyExecutor = groovyExecutor;
     }
-    
+
     /**
      * finds the date of latest modification of input files.
      */
     private void calculateLastModified() {
         lastModified = 0;
         for (File file : inputFiles) {
-            if (file.lastModified() > lastModified)
+            if (file.lastModified() > lastModified) {
                 lastModified = file.lastModified();
+            }
         }
     }
-    
+
     /**
      * prints a timestamp.
-     * @throws IOException 
+     * @throws IOException
      */
     void printHeader() throws IOException {
         writer.write(String.format(";### Date created: %s ###%s",
                 dateFormat.format(new Date(lastModified)),
                 newline));
     }
-    
+
     /**
      * prints name and timestamp of subfile.
      * @param inputFile
-     * @throws IOException 
+     * @throws IOException
      */
     void printSubFileHeader(File inputFile) throws IOException {
         writer.write(String.format(";### next file: %s ###%s;### last modified: %s ###%s",
@@ -92,7 +101,7 @@ public abstract class RULEntry extends DBPFEntry {
      * @throws IOException
      */
     abstract void provideData() throws IOException;
-    
+
     public Future<Void> getExecutionResult() {
         return this.result;
     }
@@ -103,7 +112,7 @@ public abstract class RULEntry extends DBPFEntry {
             PipedInputStream pis = new PipedInputStream();
             // sink needs to be connected here to avoid subsequent reads from unconnected pipe
             final PipedOutputStream sink = new PipedOutputStream(pis);
-            
+
             Callable<Void> callable = new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -137,17 +146,40 @@ public abstract class RULEntry extends DBPFEntry {
             throw new RuntimeException("IOException while creating data channel for RUL entry", e1);
         }
     }
-    
+
 //    /**
 //     * @return whether file has to be skipped because of s/e-series.
 //     */
 //    static boolean fileMatchesSeries(File file, boolean eSeriesFlag) {
 //        String filename = file.getName().substring(0, file.getName().length() - 4).toLowerCase();
 //        return !(filename.endsWith("_e-series") && !eSeriesFlag
-//                || filename.endsWith("_s-series") && eSeriesFlag);                    
+//                || filename.endsWith("_s-series") && eSeriesFlag);
 //    }
-    
+
     public long getLastModified() {
         return this.lastModified;
+    }
+
+    InputStream createGroovyInputStream(File groovyFile) throws CompilationFailedException, IOException, InstantiationException, IllegalAccessException {
+        ClassLoader parent = RUL2Entry.class.getClassLoader();
+        GroovyClassLoader loader = new GroovyClassLoader(parent);
+        Class<?> groovyClass = loader.parseClass(groovyFile);
+
+        final GroovyObject groovyObject = (GroovyObject) groovyClass.newInstance();
+        PipedInputStream pis = new PipedInputStream();
+        final PrintStream printer = new PrintStream(new PipedOutputStream(pis));
+        groovyObject.setProperty("out", printer);
+        Callable<Void> callable = new Callable<Void>() {
+            @Override
+            public Void call() {
+                groovyObject.invokeMethod("run", new Object[] {});
+                printer.close(); // closes underlying stream
+                return null;
+            }
+        };
+        assert groovyExecutor != null; // groovy is currently only supported for RUL1 and RUL2
+        groovyExecutor.submit(callable); // will not throw any exception, so no need to keep a reference to result
+        loader.close();
+        return pis;
     }
 }
