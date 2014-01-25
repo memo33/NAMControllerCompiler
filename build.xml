@@ -17,14 +17,10 @@
     <property name="rul2.structure.file" value="RUL2_IID_structure" />
     <property name="test.resources" location="resources/test" relative="true" />
     
-    <path id="build.classpath">
-        <fileset dir="${lib}" includes="jDBPFX*.jar" />
-        <pathelement path="${bin}" />
-    </path>
-
     <target name="resolve" description="retrieve dependencies with ivy">
         <mkdir dir="${lib}" />
         <ivy:retrieve conf="mainapp"/>
+        <ivy:cachepath pathid="build.classpath" conf="mainapp"/>
     </target>
     
     <target name="clean" description="delete generated files">
@@ -147,16 +143,19 @@ java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${MyApp}.jar %*</echo>
           tests
          ================================ -->
 
+    <target name="resolvetests" description="retrieve dependencies for tests with ivy">
+        <ivy:retrieve conf="tests"/>
+        <ivy:cachepath pathid="lib.test.build.classpath" conf="tests"/>
+        <ivy:cachepath pathid="build.classpath" conf="mainapp"/>
+    </target>
+
     <path id="test.build.classpath">
-        <fileset dir="${lib}" />
+        <path refid="lib.test.build.classpath"/>
+        <path refid="build.classpath"/>
         <pathelement path="${bintest}" />
         <pathelement path="${bin}" />
     </path>
 
-    <target name="resolvetests" description="retrieve dependencies for tests with ivy">
-        <ivy:retrieve conf="tests"/>
-    </target>
-    
     <target name="compiletests" depends="compile,resolvetests" description="compile the tests">
         <mkdir dir="${bintest}" />
         <javac source="${sourceversion}" target="${targetversion}" srcdir="${srctest}" destdir="${bintest}" includeantruntime="false">
