@@ -310,7 +310,7 @@ public abstract class Compiler extends AbstractCompiler {
                     return false;
                 }
                 return true;
-            } else if (!this.mode.isDetailed()) {
+            } else if (!this.mode.isDetailed() && this.mode.isStrict()) {
                 view.publishIssue("The settings file does not exist. You have to reinstall the compiler.");
                 return false;
             } else {
@@ -328,14 +328,14 @@ public abstract class Compiler extends AbstractCompiler {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    final CompilerFrame frame = new CompilerFrame(mode.isDetailed(),
+                    final CompilerFrame frame = new CompilerFrame(!mode.isStrict(),
                             GUICompiler.super.settingsManager.getInput(), GUICompiler.super.settingsManager.getOutput(),
                             GUICompiler.super.settingsManager.getLhdFlag(), GUICompiler.super.tree);
                     ((GUIView) view).setFrame(frame);
                     frame.addStartButtonListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent ae) {
-                            if (mode.isDetailed()) {
+                            if (!mode.isStrict()) {
                                 GUICompiler.super.inputDir = new File(frame.getInputPath());
                                 GUICompiler.super.outputDir = new File(frame.getOutputPath());
                             }

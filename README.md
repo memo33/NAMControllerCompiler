@@ -1,7 +1,7 @@
 
  NAMControllerCompiler
 =======================
-(Version 1.0.3)
+(Version 1.2.0)
 
 
  Contents

@@ -13,13 +13,14 @@ public abstract class AbstractCompiler implements ExecutableTask {
     public AbstractCompiler(CompileMode mode, View view) {
         this.mode = mode;
         this.view = view;
+        final boolean checkInputFirst = !mode.isDetailed() && mode != CompileMode.DEFAULT;
         runBefore = new Runnable() {
             @Override
             public void run() {
                 boolean success = true;
                 success = success && readSettings();
                 success = success && checkXMLExists();
-                if (!AbstractCompiler.this.mode.isDetailed()) {
+                if (checkInputFirst) {
                     success = success && checkInputFilesExist();
                 }
                 success = success && readXML();
@@ -34,7 +35,7 @@ public abstract class AbstractCompiler implements ExecutableTask {
             public void run() {
                 boolean success = true;
                 success = success && collectPatterns();
-                if (AbstractCompiler.this.mode.isDetailed()) {
+                if (!checkInputFirst) {
                     success = success && checkInputFilesExist();
                 }
                 success = success && collectRULInputFiles();
