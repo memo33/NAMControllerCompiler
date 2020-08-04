@@ -1,0 +1,16 @@
+language: java
+sudo: false
+jdk: openjdk8
+
+before_install:
+  - sudo apt-get -y install ant-optional
+
+install:
+  - ant init-ivy
+
+script:
+  - ant dist test
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
