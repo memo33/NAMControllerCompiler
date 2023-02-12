@@ -14,19 +14,24 @@ import javax.swing.event.ChangeListener;
 import jdpbfx.DBPFTGI;
 import controller.NAMControllerCompilerMain;
 
+/**
+ * Used for RUL1 and the Network INI.
+ */
 public class RUL1Entry extends RULEntry {
     
 //    private final boolean isESeries;
     private final boolean isLHD;
+    private final boolean isINI;
 
-    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, ChangeListener changeListener, ExecutorService executor) {
+    public RUL1Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, boolean isINI, ChangeListener changeListener, ExecutorService executor) {
         super(tgi, inputFiles, changeListener, executor);
         this.isLHD = isLHD;
+        this.isINI = isINI;
     }
 
     @Override
     protected void provideData() throws IOException {
-        NAMControllerCompilerMain.LOGGER.info("Writing file RUL1");
+        NAMControllerCompilerMain.LOGGER.info("Writing file " + (this.isINI ? "Network INI" : "RUL1"));
         for (File file : inputFiles) {
             this.changeListener.stateChanged(new ChangeEvent(file));
 //            if (!RULEntry.fileMatchesSeries(file, isESeries)) {

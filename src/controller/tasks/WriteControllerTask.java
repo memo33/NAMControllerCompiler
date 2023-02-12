@@ -41,7 +41,8 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final DBPFTGI[] RUL_TGIS = {
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000001L),
-            DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000002L)};
+            DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000002L),
+            DBPFTGI.valueOf(0x00000000L, 0x8a5971c5L, 0x8a5993b9L)};  // Network INI
     private final DBPFTGI LTEXT_TGI = DBPFTGI.valueOf(0x2026960bL, 0x123006aaL, 0x6a47ffffL);
     
     private final CollectRULsTask collectRULsTask;
@@ -50,7 +51,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final URI inputURI;
     private final File outputFile;
     private final View view;
-    private final RULEntry[] rulEntries = new RULEntry[3];
+    private final RULEntry[] rulEntries = new RULEntry[4];
 
     private long starttime;
     
@@ -106,9 +107,12 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 int i = 0;
                 rulEntries[i] = new RUL0Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
                 i++;
-                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
+                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, false, changeListener, parsingExecutor);
                 i++;
                 rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, WriteControllerTask.this.patterns, changeListener, parsingExecutor);
+                i++;
+                // Network INI
+                rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, true, changeListener, parsingExecutor);
             }
             for (int i = 0; i < RUL_TGIS.length; i++) {
                 if(rulEntries[i].getLastModified() > lastModf) {

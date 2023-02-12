@@ -108,9 +108,9 @@ public abstract class Compiler extends AbstractCompiler {
             view.publishIssue("Input directory \"{0}\" does not exist", inputDir);
             return false;
         } else {
-            rulDirs = new File[3];
+            rulDirs = new File[4];
             for (int i = 0; i < rulDirs.length; i++) {
-                rulDirs[i] = new File(inputDir, "RUL" + i);
+                rulDirs[i] = new File(inputDir, i==3 ? "INI" : ("RUL" + i));
                 if (!rulDirs[i].exists()) {
                     view.publishIssue("Input directory \"{0}\" does not exist", rulDirs[i]);
                     return false;

@@ -20,6 +20,7 @@ public abstract class CollectRULsTask implements ExecutableTask {
         public boolean accept(File pathname) {
             return pathname.isDirectory() ||
                     pathname.getName().endsWith(".txt") ||
+                    pathname.getName().endsWith(".ini") ||
                     pathname.getName().endsWith(".rul");
         }
     };
@@ -39,7 +40,7 @@ public abstract class CollectRULsTask implements ExecutableTask {
     private Queue<File>[] mainProcess() {
         LOGGER.info("Collecting input data.");
         @SuppressWarnings("unchecked")
-        Queue<File>[] rulInputFiles = new Queue[3];
+        Queue<File>[] rulInputFiles = new Queue[4];
         for (int i = 0; i < rulInputFiles.length; i++)
             rulInputFiles[i] = collectRecursively(CollectRULsTask.this.rulDirs[i]);
         return rulInputFiles;
