@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="NAMControllerCompiler" default="dist" basedir=".">
-    <property name="targetversion" value="1.7" />
-    <property name="sourceversion" value="1.7" />
-    <property name="project.version" value="1.2.1" />
+    <property name="targetversion" value="8" />
+    <property name="project.version" value="1.3.0-SNAPSHOT" />
     <property name="MyApp" value="${ant.project.name}" />
     <property name="MyApp-zipname" value="${ant.project.name}_${project.version}" />
     <property name="MyApp.jar" value="${MyApp}.jar" />
@@ -65,7 +64,7 @@
     
     <target name="compile" depends="resolve" description="compile the sources">
         <mkdir dir="${bin}" />
-        <javac source="${sourceversion}" target="${targetversion}" srcdir="${src}" destdir="${bin}" includeantruntime="false">
+        <javac release="${targetversion}" srcdir="${src}" destdir="${bin}" includeantruntime="false">
             <classpath refid="build.classpath" />
         </javac>
     	<copy todir="${bin}">
@@ -185,7 +184,7 @@ java -jar ${MyApp}.jar %* || %windir%\SysWOW64\java -jar ${MyApp}.jar %*</echo>
 
     <target name="compiletests" depends="compile,resolvetests" description="compile the tests">
         <mkdir dir="${bintest}" />
-        <javac source="${sourceversion}" target="${targetversion}" srcdir="${srctest}" destdir="${bintest}" includeantruntime="false">
+        <javac release="${targetversion}" srcdir="${srctest}" destdir="${bintest}" includeantruntime="false">
             <classpath refid="test.build.classpath" />
         </javac>
     </target>

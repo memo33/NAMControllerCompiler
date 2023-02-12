@@ -8,7 +8,7 @@
         <dependency org="com.github.memo33" name="jDBPFX" rev="1.0.4" conf="mainapp->default">
             <artifact name="jDBPFX" url="https://dl.dropboxusercontent.com/s/jpky311w4onkwf3/jDBPFX-1.0.4.jar"/>
         </dependency>
-        <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0" conf="tests->default">
+        <dependency org="com.github.stefanbirkner" name="system-rules" rev="1.19.0" conf="tests->default">
             <artifact name="system-rules" type="jar"/>
         </dependency>
     </dependencies>

@@ -45,6 +45,17 @@ The source files can be found at
 [GitHub.com](https://github.com/memo33/NAMControllerCompiler).
 
 
+ Build Instructions
+--------------------
+
+Run
+
+    ant init-ivy
+    ant dist
+
+Optionally, run `ant test` (currently fails due to https://github.com/stefanbirkner/system-rules/issues/85).
+
+
  License
 ---------
 
