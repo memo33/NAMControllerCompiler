@@ -2,8 +2,6 @@
  NAMControllerCompiler
 =======================
 
-[![Build Status](https://travis-ci.org/memo33/NAMControllerCompiler.svg?branch=master)](https://travis-ci.org/memo33/NAMControllerCompiler)
-
  Contents
 ----------
 
