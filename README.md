@@ -1,43 +1,29 @@
-
  NAMControllerCompiler
 =======================
 
  Contents
 ----------
 
-This application allows to compile a customized NAM controller file for the
-_Network Addon Mod_ for _SimCity 4_. This helps minimizing the size of the
-controller, and thus loading times of the game, by installing only those
-override rules that are required for one's personal style of using the NAM.
+This application allows you to compile a customized NAM controller file for the
+[Network Addon Mod](https://www.moddb.com/mods/network-addon-mod) for SimCity 4.
 
-By default, the NAM installer builds a controller file that contains those rules
-that are necessary for the required components. Using this application, it is
-possible to exclude rules, even if the corresponding networks exist in your
-cities. For instance, you can deselect various RHW networks as long as you don't
-plan to touch those networks during your game play. The game will start much
-faster, then. Note that redragging these RHW networks would revert the network
-to RHW-2 because the required override rules are absent. In this case, run the
-compiler again to build a different compiler that includes the RHW networks you
-want to use.
-
-To start this application, double-click the file `NAMControllerCompiler.bat`.
-The compiler cannot build a new controller while the game is running.
+By default, the NAM installer comes with a full-sized controller file.
+Using this compiler application, you can build a smaller controller file that
+only contains what you need, which helps reduce the start-up time of the game.
 
 
  Installation
 --------------
 
-This program is automatically installed by the NAM installer. The location
-will be next to the Plugins folder, typically:
+Download the [latest version of the compiler](https://github.com/memo33/NAMControllerCompiler/releases)
+and launch it by double-clicking the file `NAMControllerCompiler.bat` while the
+game is not running. Select a copy of the
+[Controller directory](https://github.com/NAMTeam/Network-Addon-Mod/tree/master/Controller)
+as `input`.
 
-    Documents/SimCity 4/NAM Auxiliary Files/Controller Compiler/
 
-
- Contact and Support
----------------------
-
-Support is provided at
-[SC4Devotion.com](http://sc4devotion.com/forums/index.php?board=90.0).
+ Source code
+-------------
 
 The source files can be found at
 [GitHub.com](https://github.com/memo33/NAMControllerCompiler).
@@ -58,4 +44,3 @@ Optionally, run `ant test` (currently fails due to https://github.com/stefanbirk
 ---------
 
 This program is released under the MIT license (see included license file).
-
