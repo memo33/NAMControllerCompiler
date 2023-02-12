@@ -108,7 +108,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 i++;
                 rulEntries[i] = new RUL1Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, changeListener, parsingExecutor);
                 i++;
-                rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.patterns, changeListener, parsingExecutor);
+                rulEntries[i] = new RUL2Entry(RUL_TGIS[i], rulInputFiles[i], WriteControllerTask.this.isLHD, WriteControllerTask.this.patterns, changeListener, parsingExecutor);
             }
             for (int i = 0; i < RUL_TGIS.length; i++) {
                 if(rulEntries[i].getLastModified() > lastModf) {

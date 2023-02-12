@@ -22,10 +22,12 @@ import jdpbfx.DBPFTGI;
 public class RUL2Entry extends RULEntry {
     
 //    private final boolean isESeries;
+    private final boolean isLHD;
     private final Deque<Pattern> patterns;
     
-    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, ExecutorService executor) {
+    public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, ExecutorService executor) {
         super(tgi, inputFiles, changeListener, executor);
+        this.isLHD = isLHD;
         this.patterns = new LinkedList<Pattern>(patternsForExclusion);
 //        this.isESeries = isESeries;
     }
@@ -57,7 +59,14 @@ public class RUL2Entry extends RULEntry {
                         headerFound = true;
                         continue;
                     }
-                    // else
+
+                    // RHD/LHD-specific lines
+                    if (!isLHD && line.startsWith(";###RHD###")) {
+                        line = line.substring(10);
+                    } else if (isLHD && line.startsWith(";###LHD###")) {
+                        line = line.substring(10);
+                    }
+
                     String[] splits = line.split(";", 2);
                     if (splits.length == 0) {
                         continue;
