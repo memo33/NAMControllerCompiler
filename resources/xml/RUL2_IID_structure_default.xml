@@ -33,7 +33,7 @@
         </node>
     </node>
     <node name="High Speed Rail">
-        <regex value="0x5dd\p{XDigit}{5}" />
+        <regex value="0x5d[dc]\p{XDigit}{5}" />
         <!-- crosslinks between RHW and HSR -->
         <regex value="0x57[0-4][0-9a][147a]9\p{XDigit}5" />
     </node>
@@ -145,7 +145,7 @@
                 <regex value="0x5706\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]1[048c]\p{XDigit}" />
             </node>
-            <node name="RHW-12S" disabled="true" selected="true">
+            <node name="RHW-12S" selected="true">
                 <regex value="0x5707\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]2[048c]\p{XDigit}" />
             </node>
@@ -165,7 +165,7 @@
                 <regex value="0x5709\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]5[048c]\p{XDigit}" />
             </node>
-            <node name="RHW-10C" disabled="true" selected="true">
+            <node name="RHW-10C" selected="true">
                 <regex value="0x570a\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]6[048c]\p{XDigit}" />
             </node>
@@ -209,7 +209,7 @@
                 <regex value="0x5716\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]1[159d]\p{XDigit}" />
             </node>
-            <node name="RHW-12S" disabled="true" selected="true">
+            <node name="RHW-12S" selected="true">
                 <regex value="0x5717\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]2[159d]\p{XDigit}" />
             </node>
@@ -229,7 +229,7 @@
                 <regex value="0x5719\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]5[159d]\p{XDigit}" />
             </node>
-            <node name="RHW-10C" disabled="true" selected="true">
+            <node name="RHW-10C" selected="true">
                 <regex value="0x571a\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]6[159d]\p{XDigit}" />
             </node>
@@ -273,7 +273,7 @@
                 <regex value="0x5726\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]1[26ae]\p{XDigit}" />
             </node>
-            <node name="RHW-12S" disabled="true" selected="true">
+            <node name="RHW-12S" selected="true">
                 <regex value="0x5727\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]2[26ae]\p{XDigit}" />
             </node>
@@ -293,7 +293,7 @@
                 <regex value="0x5729\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]5[26ae]\p{XDigit}" />
             </node>
-            <node name="RHW-10C" disabled="true" selected="true">
+            <node name="RHW-10C" selected="true">
                 <regex value="0x572a\p{XDigit}{4}" />
                 <regex value="0x57[0-5]\p{XDigit}[258b]6[26ae]\p{XDigit}" />
             </node>
@@ -477,7 +477,7 @@
             </node>
   -->
         </node>
-        <node name="3L-Crossings" disabled="true" selected="true">
+        <node name="3L-Crossings" selected="true">
             <regex value="0x57a\p{XDigit}{5}" />
         </node>
     </node>
