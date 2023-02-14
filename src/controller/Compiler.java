@@ -208,7 +208,7 @@ public abstract class Compiler extends AbstractCompiler {
     
     @Override
     public boolean collectRULInputFiles() {
-        collectRULsTask = CollectRULsTask.getInstance(mode, rulDirs);
+        collectRULsTask = CollectRULsTask.getInstance(mode, rulDirs, isLHD);
         collectRULsTask.execute();
         return true;
     }

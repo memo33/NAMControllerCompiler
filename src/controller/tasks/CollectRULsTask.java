@@ -15,24 +15,30 @@ import controller.CompileMode;
 
 public abstract class CollectRULsTask implements ExecutableTask {
     
-    private static FileFilter fileFilter = new FileFilter() {
+    private FileFilter fileFilter = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-            return pathname.isDirectory() ||
-                    pathname.getName().endsWith(".txt") ||
-                    pathname.getName().endsWith(".ini") ||
-                    pathname.getName().endsWith(".rul");
+            String name = pathname.getName().toLowerCase();
+            if (pathname.isDirectory()) {
+                return true;
+            } else if (name.endsWith(".txt") || name.endsWith(".ini") || name.endsWith(".rul")) {
+                return isLHD ? !name.contains("rhd.") : !name.contains("lhd.");
+            } else {
+                return false;
+            }
         }
     };
     
     private final File[] rulDirs;
+    private final boolean isLHD;
     
-    public static CollectRULsTask getInstance(CompileMode mode, File[] rulDirs) {
-        return mode.isInteractive() ? new GUITask(rulDirs) : new CommandLineTask(rulDirs); 
+    public static CollectRULsTask getInstance(CompileMode mode, File[] rulDirs, boolean isLHD) {
+        return mode.isInteractive() ? new GUITask(rulDirs, isLHD) : new CommandLineTask(rulDirs, isLHD);
     }
     
-    private CollectRULsTask(File[] rulDirs) {
+    private CollectRULsTask(File[] rulDirs, boolean isLHD) {
         this.rulDirs = rulDirs;
+        this.isLHD = isLHD;
     }
     
     public abstract Queue<File>[] get() throws InterruptedException, ExecutionException;
@@ -68,8 +74,8 @@ public abstract class CollectRULsTask implements ExecutableTask {
         
         private final SwingWorker<Queue<File>[], Void> worker;
         
-        private GUITask(File[] rulDirs) {
-            super(rulDirs);
+        private GUITask(File[] rulDirs, boolean isLHD) {
+            super(rulDirs, isLHD);
             this.worker = new SwingWorker<Queue<File>[], Void>() {
                 
                 @Override
@@ -94,8 +100,8 @@ public abstract class CollectRULsTask implements ExecutableTask {
         
         private Queue<File>[] result;
         
-        private CommandLineTask(File[] rulDirs) {
-            super(rulDirs);
+        private CommandLineTask(File[] rulDirs, boolean isLHD) {
+            super(rulDirs, isLHD);
         }
         
         @Override
