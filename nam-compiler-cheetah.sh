@@ -61,7 +61,7 @@ done
 
 sorted_input_files() {
     # If lowram, this skips all paths containing 'RHW'
-    find "$INDIR/$1" -type f  \( -name '*.txt' -o -name '*.rul' -o -name '*.ini' \) \
+    find -L "$INDIR/$1" -type f  \( -name '*.txt' -o -name '*.rul' -o -name '*.ini' \) \
         \! -ipath "$drivesideignore" ${lowram:+ \! -ipath '*RHW*'} -print0 | sort -z
 }
 
