@@ -41,7 +41,8 @@ public abstract class Compiler extends AbstractCompiler {
 
     private final File RESOURCE_DIR, XML_DIR, XML_FILE, XML_FILE_TEMP;
     private final File[] DATA_FILES;
-    private final CompilerSettingsManager settingsManager ;
+    private final CompilerSettingsManager settingsManager;
+    private final String markerText;
 
     private File inputDir, outputDir;
     private File[] rulDirs;
@@ -91,6 +92,7 @@ public abstract class Compiler extends AbstractCompiler {
                 new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~1"),
                 new File(RESOURCE_DIR, "NAMControllerCompilerSettings.txt~2")};
         this.settingsManager = new CompilerSettingsManager(DATA_FILES, args);
+        this.markerText = args.getArgument(CommandLineArguments.ArgumentID.LTEXT);
     }
 
     @Override
@@ -277,7 +279,7 @@ public abstract class Compiler extends AbstractCompiler {
 
     @Override
     public void writeControllerFile() {
-        ExecutableTask writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, patterns, inputDir.toURI(), outputFile, view);
+        ExecutableTask writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, markerText, patterns, inputDir.toURI(), outputFile, view);
         writeTask.execute();
         // result will be handled by determineResult in writeTask
     }

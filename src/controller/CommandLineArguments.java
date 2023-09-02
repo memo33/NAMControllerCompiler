@@ -54,17 +54,8 @@ class CommandLineArguments implements Iterable<String> {
 
         INPUT_DIR(0, ""),
         OUTPUT_DIR(1, ""),
-        RHD_FLAG(2, "1"),
-        PS_FLAG(3, "0"),
-        NWM_FLAGS(4, defaultWord),
-        RHW_L0_FLAGS(5, "0x01FF"),
-        RHW_L1_FLAGS(6, "0x01FF"),
-        RHW_L2_FLAGS(7, "0x01FF"),
-        RHW_L3_FLAGS(8, "0x001C"),
-        RHW_L4_FLAGS(9, "0x001C"),
-        RHW_DDRHW_FLAGS(10, "0x0008"),
-        RHW_FA_FLAGS(11, "0x0001"),
-        SAM_FLAGS(12, defaultWord); // TODO or 0x03FF ?
+        RHD_FLAG(2, "1"),  // 1=RHD, 0=LHD
+        LTEXT(3, "");
 
         private final int index;
         private final String defaultValue;

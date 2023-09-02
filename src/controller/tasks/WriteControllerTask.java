@@ -47,6 +47,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
 
     private final CollectRULsTask collectRULsTask;
     private final boolean isLHD;
+    private final String markerText;
     private final Queue<Pattern> patterns;
     private final URI inputURI;
     private final File outputFile;
@@ -56,20 +57,21 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private long starttime;
 
     public static ExecutableTask getInstance(CompileMode mode, CollectRULsTask collectRULsTask,
-            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            boolean isLHD, String markerText, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
         if (mode.isInteractive()) {
-            return new GUITask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+            return new GUITask(collectRULsTask, isLHD, markerText, patterns, inputURI, outputFile, view);
         } else {
-            return new CommandLineTask(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+            return new CommandLineTask(collectRULsTask, isLHD, markerText, patterns, inputURI, outputFile, view);
         }
     }
 
     public abstract boolean get() throws InterruptedException, ExecutionException;
 
     private WriteControllerTask(CollectRULsTask collectRULsTask,
-            boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            boolean isLHD, String markerText, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
         this.collectRULsTask = collectRULsTask;
         this.isLHD = isLHD;
+        this.markerText = markerText;
         this.patterns = patterns;
         this.inputURI = inputURI;
         this.outputFile = outputFile;
@@ -123,7 +125,10 @@ public abstract class WriteControllerTask implements ExecutableTask {
             // LText (Controller marker)
             LOGGER.info("Adding Controller marker description text");
             DBPFLText ltext = new DBPFLText(new byte[0], LTEXT_TGI, false);
-            ltext.setString(getControllerMarkerText(lastModf, WriteControllerTask.this.isLHD));
+            ltext.setString(
+                    WriteControllerTask.this.markerText.isEmpty()
+                    ? getDefaultControllerMarkerText(lastModf, WriteControllerTask.this.isLHD)
+                    : WriteControllerTask.this.markerText);
             writeList.add(ltext);
         }
         // write to file
@@ -169,7 +174,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
      * @param isLHD
      * @return
      */
-    private String getControllerMarkerText(long date, boolean isLHD) {
+    private String getDefaultControllerMarkerText(long date, boolean isLHD) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy MMM dd - HH:mm:ss (z)", Locale.ENGLISH);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 //        return "Version: " + (isLHD ? "LHD " : "RHD ") + (isESeries ? "(e-series) - " : "(s-series) - ") + dateFormat.format(new Date(date));
@@ -187,8 +192,8 @@ public abstract class WriteControllerTask implements ExecutableTask {
         private final SwingWorker<Boolean, String> worker;
 
         private GUITask(CollectRULsTask collectRULsTask,
-                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
-            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+                boolean isLHD, String markerText, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            super(collectRULsTask, isLHD, markerText, patterns, inputURI, outputFile, view);
             worker = new MyWorker();
         }
 
@@ -230,8 +235,8 @@ public abstract class WriteControllerTask implements ExecutableTask {
         private Exception executionExceptionCause = null;
 
         private CommandLineTask(CollectRULsTask collectRULsTask,
-                boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
-            super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
+                boolean isLHD, String markerText, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
+            super(collectRULsTask, isLHD, markerText, patterns, inputURI, outputFile, view);
         }
 
         @Override
