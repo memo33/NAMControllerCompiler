@@ -28,15 +28,15 @@ import jdpbfx.DBPFEntry;
 import jdpbfx.DBPFTGI;
 
 public abstract class RULEntry extends DBPFEntry {
-    
+
     private static final int BUFFER_SIZE = 8 * 1024;
     static final String newline = "\r\n";
 
     private final DateFormat dateFormat;
     private long lastModified;
-    
+
     final ChangeListener changeListener;
-    
+
     Queue<File> inputFiles;
     OutputStreamWriter writer = null;
 //    WritableByteChannel sink;
@@ -44,7 +44,7 @@ public abstract class RULEntry extends DBPFEntry {
 
     private final ExecutorService executor;
     private Future<Void> result;
-    
+
     RULEntry(DBPFTGI tgi, Queue<File> inputFiles, ChangeListener changeListener, ExecutorService executor) {
         super(tgi);
         this.inputFiles = inputFiles;
@@ -54,7 +54,7 @@ public abstract class RULEntry extends DBPFEntry {
         this.calculateLastModified();
         this.executor = executor;
     }
-    
+
     /**
      * finds the date of latest modification of input files.
      */
@@ -65,21 +65,21 @@ public abstract class RULEntry extends DBPFEntry {
                 lastModified = file.lastModified();
         }
     }
-    
+
     /**
      * prints a timestamp.
-     * @throws IOException 
+     * @throws IOException
      */
     void printHeader() throws IOException {
         writer.write(String.format(";### Date created: %s ###%s",
                 dateFormat.format(new Date(lastModified)),
                 newline));
     }
-    
+
     /**
      * prints name and timestamp of subfile.
      * @param inputFile
-     * @throws IOException 
+     * @throws IOException
      */
     void printSubFileHeader(File inputFile) throws IOException {
         writer.write(String.format(";### next file: %s ###%s;### last modified: %s ###%s",
@@ -95,7 +95,7 @@ public abstract class RULEntry extends DBPFEntry {
      * @throws IOException
      */
     abstract void provideData() throws IOException;
-    
+
     public Future<Void> getExecutionResult() {
         return this.result;
     }
@@ -105,7 +105,7 @@ public abstract class RULEntry extends DBPFEntry {
         try {
             PipedInputStream pis = new PipedInputStream();
             sink = new PipedOutputStream(pis);
-            
+
             Callable<Void> callable = new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -144,16 +144,16 @@ public abstract class RULEntry extends DBPFEntry {
             throw new RuntimeException("IOException while creating data channel for RUL entry", e1);
         }
     }
-    
+
 //    /**
 //     * @return whether file has to be skipped because of s/e-series.
 //     */
 //    static boolean fileMatchesSeries(File file, boolean eSeriesFlag) {
 //        String filename = file.getName().substring(0, file.getName().length() - 4).toLowerCase();
 //        return !(filename.endsWith("_e-series") && !eSeriesFlag
-//                || filename.endsWith("_s-series") && eSeriesFlag);                    
+//                || filename.endsWith("_s-series") && eSeriesFlag);
 //    }
-    
+
     public long getLastModified() {
         return this.lastModified;
     }

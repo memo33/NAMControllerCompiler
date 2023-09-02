@@ -21,16 +21,16 @@ public class PatternNode extends AbstractNode {
     private final CompileMode mode;
     private final String name;
     private final Queue<PatternAttribute> patterns = new ArrayDeque<PatternAttribute>();;
-    
+
 //    private ViewType viewType = ViewType.VISIBLE;
     private boolean selected;
     private boolean disabled;
 //    private boolean hidden;
-    
+
     public PatternNode(CompileMode mode, String name, boolean selected, boolean disabled, /*boolean hidden,*/ PatternNode parent) {
         this(mode, name, selected || parent.selected, disabled || parent.disabled/*, hidden || parent.hidden*/);
     }
-    
+
     public PatternNode(CompileMode mode, String name, boolean selected, boolean disabled/*, boolean hidden*/) {
         this.mode = mode;
         this.name = name;
@@ -38,7 +38,7 @@ public class PatternNode extends AbstractNode {
         this.disabled = disabled;
 //        this.hidden = hidden;
     }
-    
+
     @Override
     public String toString() {
         if (this.mode.isDetailed()) {
@@ -54,7 +54,7 @@ public class PatternNode extends AbstractNode {
             return this.name;
         }
     }
-    
+
 //    @Override
 //    public BilateralNode getVisibleView() {
 //        this.viewType = ViewType.VISIBLE;
@@ -66,7 +66,7 @@ public class PatternNode extends AbstractNode {
 //        this.viewType = ViewType.TOTAL;
 //        return this;
 //    }
-    
+
     @Override
     protected List<PatternNode> getActiveChildren() {
         return /*viewType == ViewType.VISIBLE ? */this.visibleChildren/* : this.totalChildren*/;
@@ -75,11 +75,11 @@ public class PatternNode extends AbstractNode {
     public boolean isSelected() {
         return this.getSelectionType() == SelectionType.SELECTED;
     }
-    
+
     public boolean isPartiallySelected() {
         return this.getSelectionType() == SelectionType.PARTIAL;
     }
-    
+
     private SelectionType getSelectionType() {
         if (this.isLeaf()) {
             return this.selected ? SelectionType.SELECTED : SelectionType.UNSELECTED;
@@ -102,7 +102,7 @@ public class PatternNode extends AbstractNode {
             }
         }
     }
-    
+
     public boolean isDisabled() {
         /*if (this.mode.isDetailed()) {
             return false;
@@ -117,7 +117,7 @@ public class PatternNode extends AbstractNode {
             return true;
         }
     }
-    
+
 //    public boolean isHidden() {
 //        if (this.mode.isDetailed()) {
 //            return false;
@@ -129,15 +129,15 @@ public class PatternNode extends AbstractNode {
 //        }
 //        return false;
 //    }
-    
+
     public void addRegex(String regex, String... requiredSiblingNodes) {
         patterns.add(new PatternAttribute(regex, requiredSiblingNodes));
     }
-    
+
     public boolean hasPatterns() {
         return !patterns.isEmpty();
     }
-    
+
     public void setSelected(boolean selected) {
         if (/*this.isHidden() || */ !this.mode.isDetailed() && this.isDisabled()) {
             throw new UnsupportedOperationException(/*"Hidden or*/ "Disabled nodes must not change selection type");
@@ -162,12 +162,12 @@ public class PatternNode extends AbstractNode {
         sb.insert(0, "[");
         return sb.toString();
     }
-    
+
     @Override
     public PatternNode getParent() {
         return this.parent;
     }
-    
+
     @Override
     public void add(PatternNode child) {
 //        this.totalChildren.add(child);
@@ -176,12 +176,12 @@ public class PatternNode extends AbstractNode {
 //        }
         child.parent = this;
     }
-    
+
     public void resetAttributes() {
         this.selected = false;
         this.disabled = false;
     }
-    
+
     private static boolean requirementsFulfilled(PatternNode node, PatternAttribute pa) throws SAXException {
         for (int i = 0; i < pa.requiredSiblingNodes.length; i++) {
             String requiredNodeName = pa.requiredSiblingNodes[i];
@@ -206,7 +206,7 @@ public class PatternNode extends AbstractNode {
         }
         return true;
     }
-    
+
     private static void collectSelectedPatterns(Collection<Pattern> c, PatternNode node, StringBuilder sb) throws SAXException {
 //        BilateralNode totalNode = node.getTotalView();
         if (node.isSelected() && node.hasPatterns()) {
@@ -223,7 +223,7 @@ public class PatternNode extends AbstractNode {
             }
         }
     }
-    
+
     private static final String newline = System.getProperty("line.separator");
 
     @Override
@@ -234,21 +234,21 @@ public class PatternNode extends AbstractNode {
         LOGGER.config(sb.toString());
         return patterns;
     }
-    
+
     public String getName() {
         return this.name;
     }
-    
+
     public Queue<PatternAttribute> getPatternAttributes() {
         return this.patterns;
     }
-    
+
     private enum SelectionType {
         SELECTED,
         UNSELECTED,
         PARTIAL;
     }
-    
+
 //    private enum ViewType {
 //        VISIBLE,
 //        TOTAL;

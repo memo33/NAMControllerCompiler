@@ -22,26 +22,26 @@ import controller.CommandLineArguments.ArgumentID;
  */
 @RunWith(Parameterized.class)
 public class ControllerTest {
-    
+
     @Rule
     public final TemporaryFolder tempFolder = new TemporaryFolder();
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
-    
+
     private final File resourcesTestDir = new File(NAMControllerCompilerMain.RESOURCE_DIR, "test");
     private final File inputDir = new File(resourcesTestDir, "Controller");
     private final boolean isLHD;
-    
+
     @Parameters
     public static Collection<Object[]> data() {
         Object[][] data = {{false}, {true}};
         return Arrays.asList(data);
     }
-    
+
     public ControllerTest(boolean isLHDParameter) {
         this.isLHD = isLHDParameter;
     }
-    
+
     @Test
     public void xmlSyntaxTest() throws IOException {
         File outputDir = tempFolder.newFolder();
@@ -53,7 +53,7 @@ public class ControllerTest {
         assertTrue(compiler.checkXMLExists());
         assertTrue(compiler.readXML());
     }
-    
+
     @Test
     public void test() throws SecurityException, NoSuchFieldException, Exception {
         File outputDir = tempFolder.newFolder();
@@ -66,7 +66,7 @@ public class ControllerTest {
         assertTrue(compiler.checkXMLExists());
         assertTrue(compiler.checkInputFilesExist());
         assertTrue(compiler.readXML());
-        
+
         assertTrue(compiler.collectPatterns());
         assertTrue(compiler.collectRULInputFiles());
         assertTrue(compiler.checkOutputFilesExist());

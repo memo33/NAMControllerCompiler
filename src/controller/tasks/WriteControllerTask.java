@@ -37,14 +37,14 @@ import model.RULEntry;
 import view.View;
 
 public abstract class WriteControllerTask implements ExecutableTask {
-   
+
     private final DBPFTGI[] RUL_TGIS = {
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000000L),
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000001L),
             DBPFTGI.RUL.modifyTGI(-1L, -1L, 0x10000002L),
             DBPFTGI.valueOf(0x00000000L, 0x8a5971c5L, 0x8a5993b9L)};  // Network INI
     private final DBPFTGI LTEXT_TGI = DBPFTGI.valueOf(0x2026960bL, 0x123006aaL, 0x6a47ffffL);
-    
+
     private final CollectRULsTask collectRULsTask;
     private final boolean isLHD;
     private final Queue<Pattern> patterns;
@@ -54,7 +54,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
     private final RULEntry[] rulEntries = new RULEntry[4];
 
     private long starttime;
-    
+
     public static ExecutableTask getInstance(CompileMode mode, CollectRULsTask collectRULsTask,
             boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
         if (mode.isInteractive()) {
@@ -75,7 +75,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         this.outputFile = outputFile;
         this.view = view;
     }
-    
+
     private Boolean mainProcess(final Publisher publisher) throws FileNotFoundException, IOException, InterruptedException, ExecutionException {
         starttime = System.currentTimeMillis();
         Queue<File>[] rulInputFiles = WriteControllerTask.this.collectRULsTask.get();
@@ -83,7 +83,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         for (int i = 0; i < rulInputFiles.length; i++) {
             max += rulInputFiles[i].size();
         }
-        
+
         WriteControllerTask.this.view.initProgress("Processing file...", 0, max + 1);
         ChangeListener changeListener = new ChangeListener() {
             @Override
@@ -93,15 +93,15 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 publisher.publish(file.getName());
             }
         };
-        
+
         Queue<DBPFEntry> writeList = new ArrayDeque<DBPFEntry>();
         {
             long lastModf = 0;
-            
+
             // all the parsing and source file reading happens on the following executor thread,
             // while the writing of DBPF file happens on the current thread
             ExecutorService parsingExecutor = Executors.newSingleThreadExecutor();
-            
+
             // RUL files
             {
                 int i = 0;
@@ -129,7 +129,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
         // write to file
         return DBPFFile.Writer.write(WriteControllerTask.this.outputFile, writeList);
     }
-    
+
     private void determineResult() {
       boolean successful = false;
       try {
@@ -177,15 +177,15 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 isLHD ? "LHD" : "RHD",
                 dateFormat.format(new Date(date)));
     }
-    
+
     private long getTimeConsumed() {
         return System.currentTimeMillis() - starttime;
     }
 
     private static class GUITask extends WriteControllerTask {
-        
+
         private final SwingWorker<Boolean, String> worker;
-        
+
         private GUITask(CollectRULsTask collectRULsTask,
                 boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
             super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
@@ -223,12 +223,12 @@ public abstract class WriteControllerTask implements ExecutableTask {
             }
         };
     }
-    
+
     private static class CommandLineTask extends WriteControllerTask implements Publisher {
 
         private boolean result;
         private Exception executionExceptionCause = null;
-        
+
         private CommandLineTask(CollectRULsTask collectRULsTask,
                 boolean isLHD, Queue<Pattern> patterns, URI inputURI, File outputFile, View view) {
             super(collectRULsTask, isLHD, patterns, inputURI, outputFile, view);
@@ -252,7 +252,7 @@ public abstract class WriteControllerTask implements ExecutableTask {
                 return this.result;
             }
         }
-        
+
         @Override
         public void publish(String message) {
             super.view.publishProgressIncrement(1, message);

@@ -1,7 +1,7 @@
 package view;
 
 public class ConsoleView extends DefaultView {
-    
+
     private int min;
     private int max;
     private int progress;
@@ -34,7 +34,7 @@ public class ConsoleView extends DefaultView {
             }
         }
     }
-    
+
     private int scale(int prog) {
         return (int) ((progress - min) * WIDTH / (max - min));
     }

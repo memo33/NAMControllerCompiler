@@ -11,22 +11,22 @@ import javax.swing.tree.TreeNode;
 import org.xml.sax.SAXException;
 
 public abstract class AbstractNode implements TreeNode {
-    
+
     protected abstract List<PatternNode> getActiveChildren();
-    
+
 //    public abstract BilateralNode getVisibleView();
-//    
+//
 //    public abstract BilateralNode getTotalView();
-    
+
     public abstract void add(PatternNode child);
 
     @Override
     public abstract AbstractNode getParent();
-    
+
     public abstract Queue<Pattern> getAllSelectedPatterns() throws SAXException;
 
     public abstract String getPathString();
-    
+
     @Override
     public Enumeration<? extends AbstractNode> children() {
         return Collections.enumeration(this.getActiveChildren());
@@ -52,7 +52,7 @@ public abstract class AbstractNode implements TreeNode {
         int i = 0;
         for (AbstractNode n : this.getActiveChildren()) {
             if (n == node) {
-                return i; 
+                return i;
             }
             i++;
         }

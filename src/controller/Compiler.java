@@ -37,7 +37,7 @@ import controller.xml.XMLParsing;
 
 public abstract class Compiler extends AbstractCompiler {
 
-//    static final String RESOURCE_DIR = "resources"; 
+//    static final String RESOURCE_DIR = "resources";
 
     private final File RESOURCE_DIR, XML_DIR, XML_FILE, XML_FILE_TEMP;
     private final File[] DATA_FILES;
@@ -46,7 +46,7 @@ public abstract class Compiler extends AbstractCompiler {
     private File inputDir, outputDir;
     private File[] rulDirs;
     private boolean isLHD;
-    
+
     private boolean firstXMLisActive;
 
     private PatternNode rootNode;
@@ -54,13 +54,13 @@ public abstract class Compiler extends AbstractCompiler {
 //    private MyCheckTreeManager checkTreeManager;
     private Queue<Pattern> patterns;
     private CollectRULsTask collectRULsTask;
-    
+
     private File outputFile;
-    
+
     public static Compiler getCommandLineCompiler(File resourceDir, CommandLineArguments args) {
         return new CommandLineCompiler(resourceDir, args);
     }
-    
+
     public static Compiler getInteractiveCompiler(File resourceDir, CompileMode mode) {
         if (!mode.isInteractive()) {
             throw new IllegalArgumentException("GUICompiler must be executed in interactive mode.");
@@ -79,7 +79,7 @@ public abstract class Compiler extends AbstractCompiler {
         }
         return new GUICompiler(resourceDir, mode);
     }
-    
+
     private Compiler(File resourceDir, CompileMode mode, View view, CommandLineArguments args) {
         super(mode, view);
         this.RESOURCE_DIR = resourceDir;
@@ -205,7 +205,7 @@ public abstract class Compiler extends AbstractCompiler {
             return false;
         }
     }
-    
+
     @Override
     public boolean collectRULInputFiles() {
         collectRULsTask = CollectRULsTask.getInstance(mode, rulDirs, isLHD);
@@ -224,7 +224,7 @@ public abstract class Compiler extends AbstractCompiler {
                 LOGGER.info("Created output directory: " + outputDir);
             }
         }
-        
+
 //        outputFile = new File(outputDir, String.format(
 //                "NetworkAddonMod_Controller_%s_HAND_VERSION.dat", isLHD ? "LEFT" : "RIGHT"));
         outputFile = new File(outputDir, "NetworkAddonMod_Controller.dat");
@@ -274,27 +274,27 @@ public abstract class Compiler extends AbstractCompiler {
         }
         return false;
     }
-    
+
     @Override
     public void writeControllerFile() {
         ExecutableTask writeTask = WriteControllerTask.getInstance(mode, collectRULsTask, isLHD, patterns, inputDir.toURI(), outputFile, view);
         writeTask.execute();
         // result will be handled by determineResult in writeTask
     }
-    
+
     private static class GUICompiler extends Compiler {
-        
+
         private GUICompiler(File resourceDir, CompileMode mode) {
             super(resourceDir, mode, new GUIView(), CommandLineArguments.getInstance());
             assert mode.isInteractive() : mode;
             Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-				@Override
-				public void uncaughtException(Thread t, Throwable e) {
-					GUICompiler.super.view.publishException(e.getLocalizedMessage(), e);
-				}
-			});
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    GUICompiler.super.view.publishException(e.getLocalizedMessage(), e);
+                }
+            });
         }
-        
+
         @Override
         public boolean readSettings() {
             // TODO
@@ -317,13 +317,13 @@ public abstract class Compiler extends AbstractCompiler {
                 return true;
             }
         }
-        
+
         @Override
         public void execute() {
             runBefore.run();
             showGUI();
         }
-        
+
         private void showGUI() {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -351,7 +351,7 @@ public abstract class Compiler extends AbstractCompiler {
                 }
             });
         }
-        
+
         @Override
         public boolean readXML() {
             boolean success = super.readXML();
@@ -363,27 +363,27 @@ public abstract class Compiler extends AbstractCompiler {
             return success;
         }
     }
-    
+
     private static class CommandLineCompiler extends Compiler {
-        
+
         private CommandLineCompiler(File resourceDir, CommandLineArguments args) {
             super(resourceDir, CompileMode.COMMAND_LINE, new ConsoleView(), args);
             super.inputDir = new File(super.settingsManager.getInput());
             super.outputDir = new File(super.settingsManager.getOutput());
             super.isLHD = super.settingsManager.getLhdFlag();
         }
-        
+
         @Override
         public boolean readSettings() {
             return true;
         }
-        
+
         @Override
         public void execute() {
             runBefore.run();
             runAfter.run();
         }
-        
+
         @Override
         public boolean writeSettings() {
             // this method does not write the XML file, in contrast to the super method

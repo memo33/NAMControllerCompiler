@@ -9,10 +9,10 @@ import javax.swing.JProgressBar;
 
 @SuppressWarnings("serial")
 public class ProgressPanel extends JPanel {
-        
+
     private JLabel noteLabel;
     private JProgressBar progressBar;
-    
+
     public ProgressPanel(String message, String initialNote, int min, int max) {
         super(new GridLayout(3, 1));
         this.add(new JLabel(message));
@@ -23,11 +23,11 @@ public class ProgressPanel extends JPanel {
         this.add(this.progressBar);
         this.setPreferredSize(new Dimension(400, 0));
     }
-    
+
     public void setNote(String note) {
         this.noteLabel.setText(note);
     }
-    
+
     public void incrementProgress(int delta) {
         this.progressBar.setValue(this.progressBar.getValue() + delta);
     }

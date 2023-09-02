@@ -5,21 +5,21 @@ package view.checkboxtree;
  * http://www.javaspecialists.co.za/archive/Issue145.html
  */
 public enum TristateState {
-	SELECTED {
-		public TristateState next() {
-			return INDETERMINATE;
-		}
-	},
-	INDETERMINATE {
-		public TristateState next() {
-			return DESELECTED;
-		}
-	},
-	DESELECTED {
-		public TristateState next() {
-			return SELECTED;
-		}
-	};
+    SELECTED {
+        public TristateState next() {
+            return INDETERMINATE;
+        }
+    },
+    INDETERMINATE {
+        public TristateState next() {
+            return DESELECTED;
+        }
+    },
+    DESELECTED {
+        public TristateState next() {
+            return SELECTED;
+        }
+    };
 
-	public abstract TristateState next();
+    public abstract TristateState next();
 }

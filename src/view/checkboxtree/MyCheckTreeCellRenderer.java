@@ -21,41 +21,41 @@ import javax.swing.tree.TreePath;
 import controller.xml.PatternNode;
 
 /**
- * @author Santhosh Kumar T - santhosh@in.fiorano.com 
+ * @author Santhosh Kumar T - santhosh@in.fiorano.com
  * http://www.jroller.com/santhosh/date/20050610
- * 
+ *
  * modified by memo
  */
 @SuppressWarnings("serial")
 public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
-    
+
     private final Map<Icon, Icon> disabledIconsMap = new HashMap<Icon, Icon>();
 
-    private MyCheckTreeSelectionModel selectionModel; 
-    private TreeCellRenderer delegate; 
+    private MyCheckTreeSelectionModel selectionModel;
+    private TreeCellRenderer delegate;
     private TristateCheckBox checkBox = new TristateCheckBox(null);
     private JRadioButton radioButton = new JRadioButton();
     private boolean enabledDisabledButtons;
- 
-    public MyCheckTreeCellRenderer(TreeCellRenderer delegate, MyCheckTreeSelectionModel selectionModel, boolean enableDisabledButtons){ 
-        this.delegate = delegate; 
+
+    public MyCheckTreeCellRenderer(TreeCellRenderer delegate, MyCheckTreeSelectionModel selectionModel, boolean enableDisabledButtons){
+        this.delegate = delegate;
         this.selectionModel = selectionModel;
         this.enabledDisabledButtons = enableDisabledButtons;
-        setLayout(new BorderLayout()); 
-        setOpaque(false); 
+        setLayout(new BorderLayout());
+        setOpaque(false);
         checkBox.setOpaque(false);
         radioButton.setSelected(true);
         radioButton.setOpaque(false);
-    } 
- 
+    }
+
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus){
         Component renderer = delegate.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         PatternNode visibleNode = ((PatternNode) value);
- 
+
         AbstractButton button = checkBox;
-        TreePath path = tree.getPathForRow(row); 
+        TreePath path = tree.getPathForRow(row);
         if(path!=null) {
-        	TristateButtonModel tristateModel = checkBox.getTristateModel();
+            TristateButtonModel tristateModel = checkBox.getTristateModel();
             /*
              * Important! Only the GUI reverses the selection logic, which means
              * that a visible selected check box actually represents an
@@ -65,18 +65,18 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
              * the future.
              */
             if(selectionModel.isPathSelected(path)) {
-//            	tristateModel.setSelected(true);
-            	tristateModel.setSelected(false);
+//                tristateModel.setSelected(true);
+                tristateModel.setSelected(false);
             } else if (selectionModel.isPartiallySelected(path)) {
-            	tristateModel.setIndeterminate();
-            	button = radioButton;
+                tristateModel.setIndeterminate();
+                button = radioButton;
             } else {
-//                tristateModel.setSelected(false); 
-                tristateModel.setSelected(true); 
+//                tristateModel.setSelected(false);
+                tristateModel.setSelected(true);
             }
-        } 
+        }
         removeAll();
-        
+
         button.setEnabled(enabledDisabledButtons || !visibleNode.isDisabled());
         renderer.setEnabled(enabledDisabledButtons || !visibleNode.isDisabled());
         if (visibleNode.isDisabled()) {
@@ -98,6 +98,6 @@ public class MyCheckTreeCellRenderer extends JPanel implements TreeCellRenderer{
         }
         add(button, BorderLayout.WEST);
         add(renderer, BorderLayout.CENTER);
-        return this; 
-    } 
-} 
+        return this;
+    }
+}

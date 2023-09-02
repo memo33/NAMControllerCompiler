@@ -17,17 +17,17 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 public class GUIView extends DefaultView {
-    
+
     private static final int WIDTH = 400;
 
     private JFrame frame;
     private ProgressPanel progressPanel;
     private JDialog dialog;
-    
+
     public void setFrame(JFrame frame) {
         this.frame = frame;
     }
-    
+
     @Override
     public void initProgress(String message, int min, int max) {
         super.initProgress(message, min, max);
@@ -48,7 +48,7 @@ public class GUIView extends DefaultView {
             }
         });
     }
-    
+
     @Override
     public void dispose() {
         super.dispose();
@@ -61,7 +61,7 @@ public class GUIView extends DefaultView {
             frame.dispose();
         }
     }
-    
+
     @Override
     public void publishProgressIncrement(int increment, String note) {
         super.publishProgressIncrement(increment, note);
@@ -93,7 +93,7 @@ public class GUIView extends DefaultView {
         super.publishIssue(formatMessage, args);
         JOptionPane.showMessageDialog(frame, getWrappedLabelText(WIDTH, formatMessage, args), "Issue", JOptionPane.ERROR_MESSAGE);
     }
-    
+
     @Override
     public void publishInfoMessage(String formatMessage, Object... args) {
         super.publishInfoMessage(formatMessage, args);
@@ -106,10 +106,10 @@ public class GUIView extends DefaultView {
                 && (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(
                         frame, getWrappedLabelText(WIDTH, formatMessage, args), null, JOptionPane.YES_NO_OPTION));
     }
-    
+
     private String getWrappedLabelText(int width, String formatMessage, Object... args) {
         String s = args.length == 0 ? formatMessage : MessageFormat.format(formatMessage, args);
-        return "<html><body><p style='width: " + width + "px;'>" + 
+        return "<html><body><p style='width: " + width + "px;'>" +
                 s + "</body></html>";
     }
 }

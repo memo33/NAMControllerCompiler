@@ -11,19 +11,19 @@ import java.util.logging.Level;
 import controller.CommandLineArguments.ArgumentID;
 
 public class CompilerSettingsManager {
-    
+
 //    private String input = "", output = "";
 //    private boolean lhdFlag = false;
     private final File dataFile, tempFile1, tempFile2;
     private final CommandLineArguments arguments;
-    
+
     public CompilerSettingsManager(File[] dataFiles, CommandLineArguments arguments) {
         this.dataFile = dataFiles[0];
         this.tempFile1 = dataFiles[1];
         this.tempFile2 = dataFiles[2];
         this.arguments = arguments;
     }
-    
+
     public void readSettings() throws FileNotFoundException {
         File fileToRead = dataFile.exists() ? dataFile : (tempFile1.exists() ? tempFile1 : tempFile2);
         Scanner scanner = new Scanner(fileToRead);
@@ -37,7 +37,7 @@ public class CompilerSettingsManager {
         }
         scanner.close();
     }
-    
+
     /**
      * Writes the settings into the dataFile.
      */
@@ -45,13 +45,13 @@ public class CompilerSettingsManager {
         arguments.setArgument(ArgumentID.INPUT_DIR, inputDir.getAbsolutePath());
         arguments.setArgument(ArgumentID.OUTPUT_DIR, outputDir.getAbsolutePath());
         arguments.setArgument(ArgumentID.RHD_FLAG, isLHD ? "0" : "1");
-        
+
         PrintWriter printer = new PrintWriter(tempFile1);
         for (String arg : arguments) {
             printer.println(arg);
         }
         printer.close();
-        
+
         if (dataFile.exists()) {
             if (tempFile2.exists()) {
                 tempFile2.delete();

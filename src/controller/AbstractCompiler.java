@@ -4,12 +4,12 @@ import controller.tasks.ExecutableTask;
 import view.View;
 
 public abstract class AbstractCompiler implements ExecutableTask {
-    
+
     final Runnable runBefore;
     final Runnable runAfter;
     final View view;
     final CompileMode mode;
-    
+
     public AbstractCompiler(CompileMode mode, View view) {
         this.mode = mode;
         this.view = view;
@@ -59,7 +59,7 @@ public abstract class AbstractCompiler implements ExecutableTask {
     public abstract boolean checkOutputFilesExist();
     public abstract boolean writeSettings();
     public abstract void writeControllerFile();
-    
+
     @Override
     public abstract void execute();
 }

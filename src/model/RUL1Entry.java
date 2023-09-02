@@ -18,7 +18,7 @@ import controller.NAMControllerCompilerMain;
  * Used for RUL1 and the Network INI.
  */
 public class RUL1Entry extends RULEntry {
-    
+
 //    private final boolean isESeries;
     private final boolean isLHD;
     private final boolean isINI;
@@ -46,7 +46,7 @@ public class RUL1Entry extends RULEntry {
                 br = new BufferedReader(isr);
                 printSubFileHeader(file);
 //                super.writer.flush();
-                
+
                 // potentially inefficient because file is read line by line, but RUL1 is small,
                 // so this is secondary
                 for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -70,11 +70,11 @@ public class RUL1Entry extends RULEntry {
         }
         writer.flush();
     }
-    
+
     /**
      * checks for LHD/RHD specific code.
      * @param line
-     * @throws IOException 
+     * @throws IOException
      */
     private void printLineChecked(String line) throws IOException {
         if (!isLHD && line.startsWith(";###RHD###")) {

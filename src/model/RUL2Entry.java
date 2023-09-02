@@ -20,21 +20,21 @@ import controller.NAMControllerCompilerMain;
 import jdpbfx.DBPFTGI;
 
 public class RUL2Entry extends RULEntry {
-    
+
 //    private final boolean isESeries;
     private final boolean isLHD;
     private final Deque<Pattern> patterns;
-    
+
     public RUL2Entry(DBPFTGI tgi, Queue<File> inputFiles, boolean isLHD, Collection<Pattern> patternsForExclusion, ChangeListener changeListener, ExecutorService executor) {
         super(tgi, inputFiles, changeListener, executor);
         this.isLHD = isLHD;
         this.patterns = new LinkedList<Pattern>(patternsForExclusion);
 //        this.isESeries = isESeries;
     }
-    
+
     /*
      * parses files line by line, tests if pattern matches and excludes these lines as well as empty lines and comments;
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
     public void provideData() throws IOException {
@@ -51,7 +51,7 @@ public class RUL2Entry extends RULEntry {
                 fReader = new FileReader(file);
                 buffer = new BufferedReader(fReader);
                 super.printSubFileHeader(file);
-                
+
                 for (String line = buffer.readLine(); line != null; line = buffer.readLine()) {
                     // special treatment for RUL2 header
                     if (!headerFound && line.trim().equalsIgnoreCase("[ruleoverrides]")) {
@@ -75,10 +75,10 @@ public class RUL2Entry extends RULEntry {
                     if (line.isEmpty()) {
                         continue;
                     }
-                    
+
                     boolean matchFound = false;
                     Iterator<Pattern> iter = patterns.iterator();
-                    
+
                     if (iidsStrings.length != 12) {
                         NAMControllerCompilerMain.LOGGER.warning("Invalid RUL override format for line: " + line);
                         matchFound = true;
@@ -96,7 +96,7 @@ public class RUL2Entry extends RULEntry {
                             }
                         }
                     }
-                    
+
                     if (!matchFound) {
                         writer.write(line + newline);
                     }
